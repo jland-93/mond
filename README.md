@@ -1,7 +1,7 @@
 # 🌙 Mond
 
 <div align="center">
-  <img src="docs/images/mond-logo.png" alt="Mond Logo" width="300"/>
+  <img src="docs/assets/images/mond-logo.png" alt="Mond Logo" width="300"/>
 </div>
 
 > AI-Powered DevSecOps Platform - Illuminating Security in the Cloud
@@ -211,19 +211,19 @@ Cost Management:
 ## 📱 Screenshots
 
 ### 🌙 Mond Dashboard
-![Mond Dashboard](docs/images/mond-dashboard.png)
+![Mond Dashboard](docs/assets/images/mond-dashboard.png)
 *Main security overview with moonlight-themed UI*
 
 ### 🏷️ AI Tag Recommendations
-![Tag Recommendations](docs/images/tag-recommendations.png)
+![Tag Recommendations](docs/assets/images/tag-recommendations.png)
 *Intelligent tag suggestions powered by ML*
 
 ### 🔐 Self-Service Portal
-![Self Service Portal](docs/images/self-service-portal.png)
+![Self Service Portal](docs/assets/images/self-service-portal.png)
 *Developer-friendly security request workflows*
 
 ### 📊 Analytics & Insights
-![Analytics Dashboard](docs/images/analytics-dashboard.png)
+![Analytics Dashboard](docs/assets/images/analytics-dashboard.png)
 *Tag-based cost analysis and compliance reporting*
 
 ## 🔧 Configuration
@@ -239,7 +239,7 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/devsecops
 REDIS_URL=redis://localhost:6379
 
 # Security
-SECRET_KEY=your-secret-key
+SECRET_KEY=your-secret-key-here
 JWT_ALGORITHM=HS256
 
 # Tag Recommendation Engine
