@@ -1,0 +1,126 @@
+# 🌙 Mond - Docker Compose Configuration
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: mond-postgres
+    environment:
+      POSTGRES_DB: mond
+      POSTGRES_USER: mond
+      POSTGRES_PASSWORD: mond_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - mond-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: mond-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - mond-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mond-backend
+    environment:
+      - DATABASE_URL=postgresql://mond:mond_password@postgres:5432/mond
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=your-secret-key-change-in-production
+      - ENVIRONMENT=development
+      - AWS_REGION=us-east-1
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - /app/venv
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - mond-network
+    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mond-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - mond-network
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+  # Celery Worker (for background tasks)
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mond-celery-worker
+    environment:
+      - DATABASE_URL=postgresql://mond:mond_password@postgres:5432/mond
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=your-secret-key-change-in-production
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - mond-network
+    restart: unless-stopped
+    command: celery -A app.core.celery worker --loglevel=info
+
+  # Celery Beat (for scheduled tasks)
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mond-celery-beat
+    environment:
+      - DATABASE_URL=postgresql://mond:mond_password@postgres:5432/mond
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=your-secret-key-change-in-production
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - mond-network
+    restart: unless-stopped
+    command: celery -A app.core.celery beat --loglevel=info
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  mond-network:
+    driver: bridge
