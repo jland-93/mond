@@ -82,7 +82,7 @@ export default function Regulations() {
           <Select
             style={{ width: "100%", maxWidth: 600 }}
             placeholder={t.regulations.selectScenario}
-            options={(scenarios ?? []).map((s) => ({
+            options={(scenarios ?? []).map((s: ScenarioLite) => ({
               value: s.id,
               label: `${s.name} — ${s.description}`,
             }))}
@@ -116,7 +116,7 @@ export default function Regulations() {
           </Title>
           {scenario.regulations.length === 0 && <Empty />}
           <Space direction="vertical" style={{ width: "100%" }} size="middle">
-            {scenario.regulations.map((r) => (
+            {scenario.regulations.map((r: RegulationFull) => (
               <Card key={r.code} title={`${r.code} · ${r.name}`}>
                 <Space style={{ marginBottom: 12 }}>
                   <Tag color={JURIS_COLOR[r.jurisdiction] ?? "default"}>{r.jurisdiction}</Tag>
@@ -125,14 +125,14 @@ export default function Regulations() {
 
                 <strong>{t.regulations.timings}</strong>
                 <ul>
-                  {r.timings_detail.map((t2) => (
+                  {r.timings_detail.map((t2: { key: string; label: string }) => (
                     <li key={t2.key}>{t2.label}</li>
                   ))}
                 </ul>
 
                 <strong>{t.regulations.obligations}</strong>
                 <ul>
-                  {r.obligations.map((o, i) => (
+                  {r.obligations.map((o: string, i: number) => (
                     <li key={i}>{o}</li>
                   ))}
                 </ul>
@@ -141,7 +141,7 @@ export default function Regulations() {
                   <>
                     <strong>{t.regulations.references}</strong>
                     <ul>
-                      {r.references.map((ref) => (
+                      {r.references.map((ref: string) => (
                         <li key={ref}>
                           <a href={ref} target="_blank" rel="noreferrer">
                             {ref}

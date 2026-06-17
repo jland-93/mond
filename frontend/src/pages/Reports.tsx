@@ -56,7 +56,7 @@ export default function Reports() {
                 onChange={setAssetId}
                 showSearch
                 optionFilterProp="label"
-                options={(assets ?? []).map((a) => ({
+                options={(assets ?? []).map((a: Asset) => ({
                   value: a.id,
                   label: `${a.name} (${a.asset_type})`,
                 }))}
@@ -86,7 +86,7 @@ export default function Reports() {
                 onChange={setScenarioId}
                 showSearch
                 optionFilterProp="label"
-                options={(scenarios ?? []).map((s) => ({ value: s.id, label: s.name }))}
+                options={(scenarios ?? []).map((s: ScenarioLite) => ({ value: s.id, label: s.name }))}
               />
               <Space style={{ width: "100%" }}>
                 <Button

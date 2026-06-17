@@ -148,7 +148,7 @@ export default function Findings() {
               <div>
                 <Text strong>References</Text>
                 <ul>
-                  {selected.references.map((r) => (
+                  {selected.references.map((r: string) => (
                     <li key={r}>
                       <a href={r} target="_blank" rel="noreferrer">
                         {r}
@@ -202,7 +202,7 @@ export default function Findings() {
                   <>
                     <Text strong>Remediation</Text>
                     <ol>
-                      {i.remediation.steps.map((s, idx) => (
+                      {i.remediation.steps.map((s: string, idx: number) => (
                         <li key={idx}>{s}</li>
                       ))}
                     </ol>

@@ -38,15 +38,15 @@ export default function Dashboard() {
     refetchInterval: 15_000,
   });
 
-  const severityData =
+  const severityData: { name: string; value: number; color: string }[] | undefined =
     data &&
-    (Object.entries(data.open_findings_by_severity)
+    (Object.entries(data.open_findings_by_severity) as [Severity, number][])
       .filter(([, v]) => v > 0)
       .map(([k, v]) => ({
         name: k.toUpperCase(),
         value: v,
-        color: SEVERITY_COLOR[k as Severity],
-      })));
+        color: SEVERITY_COLOR[k],
+      }));
 
   return (
     <div>

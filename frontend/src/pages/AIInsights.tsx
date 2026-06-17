@@ -30,9 +30,11 @@ export default function AIInsights() {
   const [query, setQuery] = useState("");
   const { data: status } = useQuery({ queryKey: ["ai-status"], queryFn: fetchStatus });
 
-  const analyze = useMutation({
-    mutationFn: (q: string) =>
-      api.post<AnalyzeResponse>("/ai/analyze", { query: q }).then((r) => r.data),
+  const analyze = useMutation<AnalyzeResponse, Error, string>({
+    mutationFn: async (q: string) => {
+      const { data } = await api.post<AnalyzeResponse>("/ai/analyze", { query: q });
+      return data;
+    },
   });
 
   return (

@@ -15,6 +15,10 @@ concurrency:
 permissions:
   contents: read
 
+# GitHub Actions의 JS 액션을 Node 24로 강제 (Node 20 deprecation 회피)
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   backend:
     name: Backend (Python 3.12)
@@ -23,9 +27,9 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -42,21 +46,21 @@ jobs:
       - name: Compile all
         run: python -m compileall -q app main.py mcp_server.py
 
-      - name: Pytest (no tests yet → exit 0 ok)
-        run: pytest -q || [ $? -eq 5 ]
+      - name: Pytest
+        run: pytest -q
 
   frontend:
-    name: Frontend (Node 20)
+    name: Frontend (Node 24)
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "24"
           cache: npm
           cache-dependency-path: frontend/package.json
 
