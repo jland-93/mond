@@ -20,7 +20,19 @@ const STATUS_COLOR: Record<AccessRequestStatus, string> = {
   human_denied: "red",
   granted: "green",
   grant_failed: "red",
+  expired_revoked: "default",
+  revoke_failed: "magenta",
 };
+
+function formatRemaining(expiresAt?: string | null, locale: "ko" | "en" = "ko"): string | null {
+  if (!expiresAt) return null;
+  const ms = new Date(expiresAt).getTime() - Date.now();
+  if (ms <= 0) return locale === "ko" ? "만료됨" : "expired";
+  const h = Math.floor(ms / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
 
 const RISK_COLOR: Record<string, string> = {
   critical: "red",
@@ -30,7 +42,7 @@ const RISK_COLOR: Record<string, string> = {
 };
 
 export default function AccessCenter() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const qc = useQueryClient();
   const [form] = Form.useForm();
 
@@ -96,7 +108,7 @@ export default function AccessCenter() {
               }))}
             />
           </Form.Item>
-          <Form.Item label={t.iam.fields.duration} name="duration_hours">
+          <Form.Item label={t.iam.fields.duration} name="duration_hours" extra={t.iam.durationHint}>
             <InputNumber min={1} max={720} style={{ width: "100%" }} placeholder="8" />
           </Form.Item>
           <Form.Item label={t.iam.fields.reason} name="reason" rules={[{ required: true, min: 5 }]}>
@@ -173,6 +185,15 @@ export default function AccessCenter() {
                 <Tag color={STATUS_COLOR[s]}>{t.iam.statuses[s]}</Tag>
               ),
               width: 160,
+            },
+            {
+              title: t.iam.expiresIn,
+              render: (_: unknown, r: AccessRequest) => {
+                if (r.revoked_at) return <Tag>{t.iam.expired}</Tag>;
+                const rem = formatRemaining(r.expires_at, locale);
+                return rem ? <Tag color="gold">{rem}</Tag> : "—";
+              },
+              width: 130,
             },
           ]}
         />

@@ -9,8 +9,10 @@ from app.models.asset import Asset, AssetType
 from app.models.base import Base
 from app.models.finding import Finding, FindingStatus, Severity
 from app.models.iam import (
+    AccessAuditLog,
     AccessRequest,
     AccessRequestStatus,
+    AuditEvent,
     IAMIdentity,
     IAMSource,
     IAMSourceKind,
@@ -42,6 +44,8 @@ __all__ = [
     "Permission",
     "AccessRequest",
     "AccessRequestStatus",
+    "AccessAuditLog",
+    "AuditEvent",
     "KnowledgeCard",
     "KnowledgeCategory",
     "KnowledgeSource",

@@ -6,10 +6,12 @@ FastAPI 엔트리포인트.
 
 from __future__ import annotations
 
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.api.v1.api import api_router
 from app.core.config import settings
@@ -17,6 +19,7 @@ from app.core.database import AsyncSessionLocal, engine
 from app.core.logging import configure_logging, get_logger
 from app.db_seed import seed_if_empty
 from app.models import Base
+from app.services.iam import expiry_sweep_loop
 
 configure_logging()
 logger = get_logger(__name__)
@@ -29,13 +32,26 @@ async def lifespan(app: FastAPI):
     # 개발/데모 편의: 스키마 자동 생성. 운영은 alembic을 권장.
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # 기존 access_requests 테이블에 신규 컬럼이 없으면 추가 (alembic 대체)
+        for ddl in (
+            "ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP WITH TIME ZONE",
+            "ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS revoked_at TIMESTAMP WITH TIME ZONE",
+            "ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS revoke_result JSON DEFAULT '{}'::json NOT NULL",
+        ):
+            await conn.execute(text(ddl))
 
     if settings.SEED_ON_STARTUP:
         async with AsyncSessionLocal() as session:
             await seed_if_empty(session)
 
-    yield
-    logger.info("mond_shutdown")
+    # 만료 자동 회수 백그라운드 sweep (5분 주기)
+    sweep_task = asyncio.create_task(expiry_sweep_loop(interval_seconds=300))
+
+    try:
+        yield
+    finally:
+        sweep_task.cancel()
+        logger.info("mond_shutdown")
 
 
 app = FastAPI(

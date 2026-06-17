@@ -2,6 +2,8 @@
 🌙 IAM 셀프서비스 스키마
 """
 
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 from app.models.iam import AccessRequestStatus, IAMSourceKind, IdentityType
@@ -71,3 +73,18 @@ class AccessRequestRead(Timestamped):
     ai_decision: dict
     human_decision: dict
     grant_result: dict
+    expires_at: datetime | None = None
+    revoked_at: datetime | None = None
+    revoke_result: dict = Field(default_factory=dict)
+
+
+class AuditLogRead(Timestamped):
+    id: int
+    request_id: int
+    event: str
+    actor: str
+    detail: dict
+
+
+class RevokeRequest(BaseModel):
+    actor: str

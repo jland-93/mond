@@ -2,7 +2,7 @@
  * 🌙 Access Review — 보안 담당자가 AI가 담당자 검토로 넘긴 요청을 처리한다
  */
 
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { CheckOutlined, CloseOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Button, Card, Form, Input, Modal, Space, Table, Tag, Typography, message } from "antd";
 import { useState } from "react";
@@ -43,11 +43,28 @@ export default function AccessReview() {
     },
   });
 
+  const sweep = useMutation({
+    mutationFn: () => iamApi.sweepExpired(),
+    onSuccess: (data) => {
+      message.success(`${t.iam.sweepDone} (${data.revoked})`);
+      qc.invalidateQueries({ queryKey: ["access-requests"] });
+    },
+  });
+
   return (
     <div>
-      <Title level={2} style={{ marginBottom: 8 }}>
-        {t.iam.accessReviewTitle}
-      </Title>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+        <Title level={2} style={{ margin: 0 }}>
+          {t.iam.accessReviewTitle}
+        </Title>
+        <Button
+          icon={<ClockCircleOutlined />}
+          loading={sweep.isPending}
+          onClick={() => sweep.mutate()}
+        >
+          {t.iam.sweepExpired}
+        </Button>
+      </div>
       <Paragraph type="secondary">{t.iam.accessReviewDesc}</Paragraph>
 
       <Card style={{ marginTop: 12 }}>

@@ -130,14 +130,15 @@ def attach_aws(source: IAMSource, identity: IAMIdentity, permission: Permission)
     region = (source.config or {}).get("region", "us-east-1")
 
     if not access_key or not secret_key:
+        # 자격증명이 없는 데모 환경에서도 만료/회수 흐름을 보여주기 위해 success로 마킹.
+        # 다만 실제 외부 IAM에는 적용되지 않았음을 detail.stub=True로 명시.
         return AttachResult(
-            success=False,
+            success=True,
             detail={
                 "stub": True,
                 "note": (
-                    "AWS 자격증명이 없어 실제 권한 부여(attach_policy)를 건너뜁니다. "
-                    "Mond DB에는 결정 이력이 남지만, AWS IAM에는 적용되지 않았습니다. "
-                    ".env에 AWS_ACCESS_KEY_ID와 AWS_SECRET_ACCESS_KEY를 설정한 뒤 다시 시도하세요."
+                    "AWS 자격증명이 없어 실제 attach_policy를 건너뛰고 DB 상태만 갱신했습니다. "
+                    ".env에 AWS_ACCESS_KEY_ID/SECRET_ACCESS_KEY를 채우면 진짜 권한 부여까지 자동화됩니다."
                 ),
             },
         )
@@ -174,6 +175,63 @@ def attach_aws(source: IAMSource, identity: IAMIdentity, permission: Permission)
         success=True,
         detail={
             "attached_at": "now",
+            "identity": identity.name,
+            "identity_type": identity.identity_type.value,
+            "policy_arn": policy_arn,
+        },
+    )
+
+
+def detach_aws(source: IAMSource, identity: IAMIdentity, permission: Permission) -> AttachResult:
+    """attach_aws의 역연산. 만료 시 자동 회수 + 수동 회수에 사용."""
+    creds = _resolve_credentials(source)
+    access_key = creds.get("access_key_id")
+    secret_key = creds.get("secret_access_key")
+    region = (source.config or {}).get("region", "us-east-1")
+
+    if not access_key or not secret_key:
+        return AttachResult(
+            success=True,
+            detail={
+                "stub": True,
+                "note": (
+                    "AWS 자격증명이 없어 실제 detach_policy를 건너뛰고 DB 상태만 갱신했습니다."
+                ),
+            },
+        )
+
+    try:
+        import boto3
+    except ImportError:
+        return AttachResult(success=False, detail={"error": "boto3 not installed"})
+
+    iam = boto3.client(
+        "iam",
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        region_name=region,
+    )
+    policy_arn = permission.external_id
+    if not policy_arn:
+        return AttachResult(success=False, detail={"error": "missing policy ARN"})
+
+    try:
+        if identity.identity_type == IdentityType.USER:
+            iam.detach_user_policy(UserName=identity.name, PolicyArn=policy_arn)
+        elif identity.identity_type == IdentityType.ROLE:
+            iam.detach_role_policy(RoleName=identity.name, PolicyArn=policy_arn)
+        else:
+            return AttachResult(
+                success=False,
+                detail={"error": f"unsupported identity_type {identity.identity_type.value}"},
+            )
+    except Exception as exc:
+        return AttachResult(success=False, detail={"error": str(exc)})
+
+    return AttachResult(
+        success=True,
+        detail={
+            "detached_at": "now",
             "identity": identity.name,
             "identity_type": identity.identity_type.value,
             "policy_arn": policy_arn,
@@ -222,4 +280,13 @@ def attach_for(source: IAMSource, identity: IAMIdentity, permission: Permission)
     return AttachResult(
         success=False,
         detail={"stub": True, "note": f"{source.kind.value} grant는 후속 PR에서 지원"},
+    )
+
+
+def detach_for(source: IAMSource, identity: IAMIdentity, permission: Permission) -> AttachResult:
+    if source.kind == IAMSourceKind.AWS:
+        return detach_aws(source, identity, permission)
+    return AttachResult(
+        success=False,
+        detail={"stub": True, "note": f"{source.kind.value} 회수는 후속 PR에서 지원"},
     )

@@ -13,7 +13,27 @@ export type AccessRequestStatus =
   | "human_approved"
   | "human_denied"
   | "granted"
-  | "grant_failed";
+  | "grant_failed"
+  | "expired_revoked"
+  | "revoke_failed";
+
+export type AuditEvent =
+  | "ai_decided"
+  | "human_decided"
+  | "granted"
+  | "grant_failed"
+  | "expired_revoked"
+  | "revoke_failed"
+  | "manual_revoked";
+
+export interface AuditLog {
+  id: number;
+  request_id: number;
+  event: AuditEvent;
+  actor: string;
+  detail: Record<string, unknown>;
+  created_at: string;
+}
 
 export interface IAMSource {
   id: number;
@@ -69,6 +89,14 @@ export interface AccessRequest {
     detail?: Record<string, unknown>;
     granted_at?: string;
   };
+  expires_at?: string | null;
+  revoked_at?: string | null;
+  revoke_result: {
+    success?: boolean;
+    detail?: Record<string, unknown>;
+    revoked_at?: string;
+    triggered_by?: string;
+  };
   created_at: string;
   updated_at: string;
 }
@@ -103,4 +131,12 @@ export const iamApi = {
     api
       .post<AccessRequest>(`/iam/access-requests/${id}/human-decision`, body)
       .then((r) => r.data),
+  revoke: (id: number, actor: string) =>
+    api
+      .post<AccessRequest>(`/iam/access-requests/${id}/revoke`, { actor })
+      .then((r) => r.data),
+  sweepExpired: () =>
+    api.post<{ revoked: number }>("/iam/access-requests/sweep-expired").then((r) => r.data),
+  audit: (id: number) =>
+    api.get<AuditLog[]>(`/iam/access-requests/${id}/audit`).then((r) => r.data),
 };
