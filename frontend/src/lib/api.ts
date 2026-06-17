@@ -10,6 +10,7 @@ export const api = axios.create({
   baseURL,
   timeout: 30_000,
   headers: { "Content-Type": "application/json" },
+  withCredentials: true, // 세션 cookie 자동 전송
 });
 
 // ── 타입 ───────────────────────────────────────────────

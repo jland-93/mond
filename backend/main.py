@@ -12,8 +12,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.v1.api import api_router
+from app.auth import oidc
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal, engine
 from app.core.logging import configure_logging, get_logger
@@ -62,6 +64,12 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Authlib OIDC가 state/nonce 보관에 starlette session을 사용한다.
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY, same_site="lax")
+
+# OIDC provider 등록 (settings.SSO_PROVIDERS + ENV 기준)
+oidc.init_providers()
 
 app.add_middleware(
     CORSMiddleware,

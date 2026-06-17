@@ -28,6 +28,25 @@ export const ko = {
     badge: "ADMIN",
   },
 
+  auth: {
+    loginTitle: "로그인",
+    ssoLogin: "회사 계정으로 로그인 (SSO)",
+    or: "또는",
+    devModeTitle: "개발자 모드 (Dev Login)",
+    devModeDesc:
+      "현재 IdP가 설정되어 있지 않아 이메일만으로 로그인합니다. 운영에선 SSO_PROVIDERS와 ENV를 설정해 비활성화하세요.",
+    email: "이메일",
+    displayName: "이름 (선택)",
+    devLoginBtn: "이메일로 시작하기",
+    firstUserHint: "첫 가입자는 자동으로 ADMIN 역할을 받습니다. 그 후엔 SSO_ADMIN_EMAILS로 추가 관리자 지정.",
+    welcomeBack: "환영합니다",
+    logout: "로그아웃",
+    roleViewer: "뷰어",
+    roleEmployee: "직원",
+    roleReviewer: "보안 담당자",
+    roleAdmin: "관리자",
+  },
+
   knowledge: {
     title: "지식 허브",
     desc: "DevSecOps와 보안 규제의 핵심을 카드로 빠르게 익히고, 더 깊은 질문은 바로 Mond AI에게 이어 던지세요. 새 주제는 카드를 자동 생성해 확장됩니다.",

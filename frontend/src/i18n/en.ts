@@ -30,6 +30,25 @@ export const en: Dict = {
     badge: "ADMIN",
   },
 
+  auth: {
+    loginTitle: "Sign in",
+    ssoLogin: "Sign in with your company account (SSO)",
+    or: "or",
+    devModeTitle: "Developer mode (Dev Login)",
+    devModeDesc:
+      "No IdP is configured, so we accept email-only sign-in. In production, set SSO_PROVIDERS and ENV to disable this.",
+    email: "Email",
+    displayName: "Display name (optional)",
+    devLoginBtn: "Continue with email",
+    firstUserHint: "The first user becomes ADMIN automatically. After that, set SSO_ADMIN_EMAILS to grant admin.",
+    welcomeBack: "Welcome back",
+    logout: "Sign out",
+    roleViewer: "Viewer",
+    roleEmployee: "Employee",
+    roleReviewer: "Reviewer",
+    roleAdmin: "Admin",
+  },
+
   knowledge: {
     title: "Knowledge Hub",
     desc: "Pick up DevSecOps & security regulation essentials at a glance, then ask Mond AI for the deeper question. New topics get auto-generated as cards.",
