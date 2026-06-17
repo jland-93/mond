@@ -1,0 +1,223 @@
+/**
+ * 🌙 Knowledge Hub — DB 기반 동적 카드 + Claude 자동 생성
+ */
+
+import { LinkOutlined, MessageOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Segmented,
+  Select,
+  Space,
+  Tag,
+  Typography,
+  message,
+} from "antd";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { useI18n } from "@/i18n";
+import {
+  knowledgeApi,
+  type KnowledgeCard,
+  type KnowledgeCategory,
+} from "@/lib/knowledge-api";
+
+const { Title, Paragraph, Text } = Typography;
+const ALL = "__all__";
+
+const CATEGORY_META: Record<KnowledgeCategory, { ko: string; en: string; color: string }> = {
+  devsecops_basics: { ko: "DevSecOps 기초", en: "DevSecOps Basics", color: "geekblue" },
+  owasp: { ko: "OWASP Top 10", en: "OWASP Top 10", color: "magenta" },
+  kr_regulations: { ko: "국내 규제 핵심", en: "Korean Regulations", color: "blue" },
+  global_regulations: { ko: "해외 규제 핵심", en: "Global Regulations", color: "purple" },
+  best_practices: { ko: "베스트 프랙티스", en: "Best Practices", color: "cyan" },
+  incident_response: { ko: "사고 대응", en: "Incident Response", color: "red" },
+};
+
+const SOURCE_COLOR: Record<string, string> = { seed: "default", ai: "purple", manual: "blue" };
+
+export default function KnowledgeHub() {
+  const { t, locale } = useI18n();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [category, setCategory] = useState<KnowledgeCategory | typeof ALL>(ALL);
+  const [query, setQuery] = useState("");
+  const [genOpen, setGenOpen] = useState(false);
+  const [form] = Form.useForm();
+
+  const { data: cards, isLoading } = useQuery({
+    queryKey: ["knowledge-cards", category],
+    queryFn: () => knowledgeApi.list(category === ALL ? undefined : category),
+  });
+
+  const generate = useMutation({
+    mutationFn: (body: { category: KnowledgeCategory; topic_hint?: string; count: number }) =>
+      knowledgeApi.generate(body),
+    onSuccess: (created) => {
+      message.success(`${created.length}${locale === "ko" ? "건 생성됨" : " card(s) generated"}`);
+      qc.invalidateQueries({ queryKey: ["knowledge-cards"] });
+      setGenOpen(false);
+      form.resetFields();
+    },
+    onError: (err: Error & { response?: { data?: { detail?: string } } }) =>
+      message.error(err.response?.data?.detail ?? err.message),
+  });
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return (cards ?? []).filter((c) => {
+      if (!q) return true;
+      const hay = (locale === "ko"
+        ? `${c.title_ko} ${c.summary_ko}`
+        : `${c.title_en} ${c.summary_en}`
+      ).toLowerCase();
+      return hay.includes(q);
+    });
+  }, [cards, query, locale]);
+
+  const t_ = (c: KnowledgeCard, k: "title" | "summary" | "ask") =>
+    locale === "ko" ? c[`${k}_ko` as const] : c[`${k}_en` as const];
+
+  const askInChat = (card: KnowledgeCard) => {
+    navigate(`/ai-insights?q=${encodeURIComponent(t_(card, "ask"))}`);
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+        <Title level={2} style={{ margin: 0 }}>
+          {t.knowledge.title}
+        </Title>
+        <Button
+          type="primary"
+          icon={<ThunderboltOutlined />}
+          onClick={() => setGenOpen(true)}
+        >
+          {t.knowledge.aiGenerate}
+        </Button>
+      </div>
+      <Paragraph type="secondary">{t.knowledge.desc}</Paragraph>
+
+      <Card style={{ marginBottom: 16 }}>
+        <Space direction="vertical" style={{ width: "100%" }} size="middle">
+          <Segmented
+            value={category}
+            onChange={(v) => setCategory(v as KnowledgeCategory | typeof ALL)}
+            options={[
+              { value: ALL, label: t.knowledge.all },
+              ...(Object.keys(CATEGORY_META) as KnowledgeCategory[]).map((k) => ({
+                value: k,
+                label: CATEGORY_META[k][locale],
+              })),
+            ]}
+          />
+          <Input.Search
+            placeholder={t.knowledge.searchPlaceholder}
+            allowClear
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </Space>
+      </Card>
+
+      <Row gutter={[16, 16]}>
+        {filtered.map((card) => (
+          <Col xs={24} md={12} xl={8} key={card.id}>
+            <Card
+              loading={isLoading}
+              hoverable
+              style={{ height: "100%" }}
+              title={
+                <Space size="small" wrap>
+                  <Tag color={CATEGORY_META[card.category].color}>
+                    {CATEGORY_META[card.category][locale]}
+                  </Tag>
+                  <Tag color={SOURCE_COLOR[card.source]}>{card.source.toUpperCase()}</Tag>
+                </Space>
+              }
+              actions={[
+                <Button key="ask" type="text" icon={<MessageOutlined />} onClick={() => askInChat(card)}>
+                  {t.knowledge.askAi}
+                </Button>,
+                ...(card.refs.length > 0
+                  ? [
+                      <a
+                        key="ref"
+                        href={card.refs[0]}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: "var(--mond-text-dim)" }}
+                      >
+                        <LinkOutlined /> {t.knowledge.openRef}
+                      </a>,
+                    ]
+                  : []),
+              ]}
+            >
+              <Text strong style={{ display: "block", marginBottom: 8 }}>
+                {t_(card, "title")}
+              </Text>
+              <Paragraph style={{ marginBottom: 0 }}>{t_(card, "summary")}</Paragraph>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      {!isLoading && filtered.length === 0 && (
+        <Card style={{ marginTop: 16 }}>
+          <Text type="secondary">{t.knowledge.empty}</Text>
+        </Card>
+      )}
+
+      <Modal
+        title={t.knowledge.aiGenerate}
+        open={genOpen}
+        onCancel={() => setGenOpen(false)}
+        onOk={() => form.submit()}
+        confirmLoading={generate.isPending}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{ count: 2, category: "devsecops_basics" }}
+          onFinish={(v) =>
+            generate.mutate({
+              category: v.category,
+              topic_hint: v.topic_hint || undefined,
+              count: v.count,
+            })
+          }
+        >
+          <Form.Item label={t.knowledge.aiCategory} name="category" rules={[{ required: true }]}>
+            <Select
+              options={(Object.keys(CATEGORY_META) as KnowledgeCategory[]).map((k) => ({
+                value: k,
+                label: CATEGORY_META[k][locale],
+              }))}
+            />
+          </Form.Item>
+          <Form.Item label={t.knowledge.aiTopic} name="topic_hint">
+            <Input.TextArea
+              rows={3}
+              placeholder={locale === "ko"
+                ? "예: 최근 발생한 OWASP A04 관련 사례를 한국 기업이 어떻게 대응했는지"
+                : "e.g. recent OWASP A04 cases and how Korean companies handled them"}
+            />
+          </Form.Item>
+          <Form.Item label={t.knowledge.aiCount} name="count" rules={[{ required: true }]}>
+            <Select
+              options={[1, 2, 3, 5].map((n) => ({ value: n, label: `${n}` }))}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
+}

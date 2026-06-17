@@ -13,6 +13,7 @@ export const ko = {
     policies: "정책",
     policySim: "정책 시뮬레이션",
     aiInsights: "AI 인사이트",
+    knowledge: "지식 허브",
     regulations: "규제 가이드",
     reports: "리포트",
     integrations: "통합",
@@ -25,6 +26,20 @@ export const ko = {
     enter: "관리자",
     accessReview: "권한 검토",
     badge: "ADMIN",
+  },
+
+  knowledge: {
+    title: "지식 허브",
+    desc: "DevSecOps와 보안 규제의 핵심을 카드로 빠르게 익히고, 더 깊은 질문은 바로 Mond AI에게 이어 던지세요. 새 주제는 카드를 자동 생성해 확장됩니다.",
+    all: "전체",
+    searchPlaceholder: "검색 — 예: SBOM, GDPR, 시크릿",
+    askAi: "AI에 더 묻기",
+    openRef: "참고 자료",
+    empty: "조건에 맞는 카드가 없습니다. 카테고리 필터나 검색어를 바꿔보세요.",
+    aiGenerate: "AI로 새 카드 생성",
+    aiCategory: "카테고리",
+    aiTopic: "주제 힌트 (선택)",
+    aiCount: "생성할 카드 수",
   },
 
   common: {

@@ -5,7 +5,8 @@
 import { SendOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Alert, Button, Card, Input, Space, Tag, Typography } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { useI18n } from "@/i18n";
 import { api } from "@/lib/api";
@@ -27,7 +28,8 @@ async function fetchStatus(): Promise<{ enabled: boolean }> {
 
 export default function AIInsights() {
   const { t } = useI18n();
-  const [query, setQuery] = useState("");
+  const [params, setParams] = useSearchParams();
+  const [query, setQuery] = useState(params.get("q") ?? "");
   const { data: status } = useQuery({ queryKey: ["ai-status"], queryFn: fetchStatus });
 
   const analyze = useMutation<AnalyzeResponse, Error, string>({
@@ -36,6 +38,16 @@ export default function AIInsights() {
       return data;
     },
   });
+
+  // Knowledge Hub 등 외부에서 ?q=...로 진입했을 때 자동 분석 + 쿼리스트링 정리
+  useEffect(() => {
+    const seed = params.get("q");
+    if (seed && seed.trim()) {
+      analyze.mutate(seed);
+      setParams({}, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div>

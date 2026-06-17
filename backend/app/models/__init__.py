@@ -17,6 +17,7 @@ from app.models.iam import (
     IdentityType,
     Permission,
 )
+from app.models.knowledge import KnowledgeCard, KnowledgeCategory, KnowledgeSource
 from app.models.policy import Policy, PolicyType
 from app.models.scan import Scan, ScanStatus, ScanTrigger
 
@@ -41,4 +42,7 @@ __all__ = [
     "Permission",
     "AccessRequest",
     "AccessRequestStatus",
+    "KnowledgeCard",
+    "KnowledgeCategory",
+    "KnowledgeSource",
 ]

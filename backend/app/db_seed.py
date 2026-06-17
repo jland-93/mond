@@ -11,9 +11,11 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import get_logger
+from app.data.knowledge_seed import SEED as KNOWLEDGE_SEED
 from app.iam import providers as iam_providers
 from app.models.asset import Asset, AssetType
 from app.models.iam import IAMIdentity, IAMSource, IAMSourceKind, Permission
+from app.models.knowledge import KnowledgeCard, KnowledgeSource
 from app.models.policy import Policy, PolicyType
 
 logger = get_logger(__name__)
@@ -135,4 +137,12 @@ async def seed_if_empty(db: AsyncSession) -> None:
                 )
             )
         logger.info("seed_iam", stub=result.stub, identities=len(result.identities), permissions=len(result.permissions))
+        await db.commit()
+
+    # Knowledge Hub 초기 시드
+    knowledge_count = (await db.execute(select(func.count(KnowledgeCard.id)))).scalar_one()
+    if knowledge_count == 0:
+        for payload in KNOWLEDGE_SEED:
+            db.add(KnowledgeCard(**payload, source=KnowledgeSource.SEED, published=True))
+        logger.info("seed_knowledge", count=len(KNOWLEDGE_SEED))
         await db.commit()
