@@ -47,9 +47,6 @@ jobs:
         run: python -m compileall -q app main.py mcp_server.py
 
       - name: Pytest
-        # TODO: GitHub-hosted runner에서 sys.path 인식 이슈 — 다음 작업에서 정리.
-        # 로컬 docker (python:3.12-slim) 환경에서는 18 tests pass 확인.
-        continue-on-error: true
         env:
           PYTHONPATH: ${{ github.workspace }}/backend
         run: python -m pytest -q
