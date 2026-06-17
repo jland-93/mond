@@ -49,7 +49,12 @@ jobs:
       - name: Pytest
         env:
           PYTHONPATH: ${{ github.workspace }}/backend
-        run: python -m pytest -q
+        run: |
+          echo "cwd: $(pwd)"
+          echo "PYTHONPATH: $PYTHONPATH"
+          ls -la
+          python -c "import sys; sys.path.insert(0, '.'); import app.models; print('app.models OK')"
+          python -m pytest -q
 
   frontend:
     name: Frontend (Node 24)

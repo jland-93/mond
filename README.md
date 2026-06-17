@@ -4,7 +4,7 @@
   <img src="docs/assets/images/mond-logo.png" alt="Mond Logo" width="280"/>
 </div>
 
-> **AI-Powered Open-Source DevSecOps Platform** — 자산 인벤토리부터 스캔, 트리아지까지 한 곳에서.
+> **AI-Powered Self-Service DevSecOps Platform** — 자산 인벤토리부터 스캔, 트리아지까지 한 곳에서.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
@@ -15,7 +15,7 @@
 
 ## 📋 Overview
 
-**Mond** (독일어로 "달")은 어떤 클라우드든 어떤 스캐너든 상관없이 동작하는, **AI 기반의 셀프서비스 오픈소스 DevSecOps 플랫폼**입니다. 자산 / 스캔 / 발견사항 / 정책을 단일 모델로 다루고, Claude를 활용해 발견된 이슈를 **자동 트리아지** 하고 **수정 가이드**까지 제시합니다.
+**Mond** (독일어로 "달")은 어떤 클라우드든 어떤 스캐너든 상관없이 동작하는, **AI 기반 셀프서비스 DevSecOps 플랫폼**입니다. 자산 / 스캔 / 발견사항 / 정책을 단일 모델로 다루고, Claude를 활용해 발견된 이슈를 **자동 트리아지** 하고 **수정 가이드**까지 제시합니다.
 
 ### 🎯 Why Mond?
 

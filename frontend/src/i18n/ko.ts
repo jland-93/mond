@@ -2,7 +2,7 @@
  * 🌙 Mond — 한국어 사전 (기본)
  */
 export const ko = {
-  appTagline: "AI 기반 오픈소스 DevSecOps 플랫폼",
+  appTagline: "AI 기반 셀프서비스 DevSecOps 플랫폼",
   language: { ko: "한국어", en: "English" },
 
   menu: {

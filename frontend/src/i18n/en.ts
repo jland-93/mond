@@ -4,7 +4,7 @@
 import type { Dict } from "./ko";
 
 export const en: Dict = {
-  appTagline: "AI-Powered Open-Source DevSecOps Platform",
+  appTagline: "AI-Powered Self-Service DevSecOps Platform",
   language: { ko: "한국어", en: "English" },
 
   menu: {

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "🌙 Mond — AI-Powered Open-Source DevSecOps Platform (frontend)",
+  "description": "🌙 Mond — AI-Powered Self-Service DevSecOps Platform (frontend)",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 3000",
     "build": "tsc -b && vite build",
