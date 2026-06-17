@@ -222,6 +222,9 @@ datasets/
 # 백엔드 정적 시드(규제 카탈로그 등)는 코드의 일부 — 커밋 유지
 !backend/app/data/
 !backend/app/data/**
+# 단, 빌드 산출물(__pycache__)은 negation 대상 X
+backend/app/data/**/__pycache__/
+backend/app/data/**/*.pyc
 
 # Security
 *.pem

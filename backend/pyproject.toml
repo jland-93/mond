@@ -1,0 +1,11 @@
+# 🌙 Mond backend — pytest 및 ruff 설정
+
+[tool.pytest.ini_options]
+# backend/를 sys.path에 추가해 `app.models` 같은 절대 import가 동작하도록.
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
