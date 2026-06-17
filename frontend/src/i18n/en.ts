@@ -18,7 +18,15 @@ export const en: Dict = {
     regulations: "Regulations",
     reports: "Reports",
     integrations: "Integrations",
+    iamExplorer: "IAM Explorer",
+    accessCenter: "Access Center",
     settings: "Settings",
+  },
+
+  admin: {
+    enter: "Admin",
+    accessReview: "Access Review",
+    badge: "ADMIN",
   },
 
   common: {
@@ -31,7 +39,7 @@ export const en: Dict = {
     refresh: "Refresh",
     download: "Download",
     runScan: "Run scan",
-    runTriage: "Run AI Triage",
+    runTriage: "Run AI analysis",
     severity: "Severity",
     status: "Status",
     title: "Title",
@@ -83,16 +91,16 @@ export const en: Dict = {
 
   findings: {
     title: "Findings",
-    drawerNoInsight: "No AI analysis yet. Click 'Run AI Triage' to start.",
+    drawerNoInsight: "No AI analysis yet. Click 'Run AI analysis' to start.",
     references: "References",
-    remediation: "Remediation",
+    remediation: "Recommended fix",
   },
 
   policies: {
     title: "Policies",
     threshold: "Threshold",
     compliance: "Compliance",
-    desc: "Policies applied to scanner results. Each is SAST / SCA / IaC / DAST / Container / Secrets / Compliance and gates the pipeline when severity exceeds the threshold.",
+    desc: "Policies applied to scanner results. Each is SAST / SCA / IaC / DAST / Container / Secrets / Compliance and blocks the deployment pipeline when severity exceeds the threshold.",
   },
 
   policySim: {
@@ -111,8 +119,8 @@ export const en: Dict = {
     askPlaceholder: "Ask Mond anything",
     askExample: 'e.g. "scan our nginx image", "any critical findings this week?"',
     enabled: "Claude analysis enabled",
-    disabled: "ANTHROPIC_API_KEY not set — heuristic mode",
-    disabledHint: "Set ANTHROPIC_API_KEY in .env and restart the backend to enable Claude analysis.",
+    disabled: "ANTHROPIC_API_KEY not set — rule-based fallback mode",
+    disabledHint: "Set ANTHROPIC_API_KEY in .env and restart the backend to enable Claude-powered analysis.",
     analyze: "Analyze",
   },
 
@@ -153,6 +161,58 @@ export const en: Dict = {
     webhookGithubDesc: "POST push events to /api/v1/webhooks/github — Mond will auto-scan matching repos.",
   },
 
+  iam: {
+    accessCenterTitle: "Access Center",
+    accessCenterDesc:
+      "Request an IAM permission. Claude evaluates risk first; if needed, a security reviewer approves.",
+    iamExplorerTitle: "IAM Explorer",
+    iamExplorerDesc: "Browse imported IAM identities and the permissions you can request.",
+    accessReviewTitle: "Access Review",
+    accessReviewDesc: "Approve / deny requests that the AI escalated for manual review.",
+    fields: {
+      requester: "Requester",
+      reason: "Reason",
+      duration: "Duration (hours)",
+      identity: "Target (user / role)",
+      permission: "Permission",
+      source: "Connection",
+      type: "Type",
+      externalId: "External ID",
+      risk: "Risk",
+      status: "Status",
+      decision: "Decision",
+      reviewer: "Reviewer",
+      note: "Note",
+    },
+    submit: "Submit request",
+    approve: "Approve",
+    deny: "Deny",
+    sync: "Sync",
+    syncSource: "Sync connection",
+    addSource: "Add connection",
+    aiDecision: "AI review (stage 1)",
+    humanDecision: "Reviewer decision (stage 2)",
+    grantResult: "Grant result",
+    decisionApplied: "Decision saved",
+    sourceCreated: "Connection added",
+    statuses: {
+      pending_ai_review: "Pending AI review",
+      ai_auto_approved: "AI auto-approved",
+      needs_human_review: "Needs manual review",
+      human_approved: "Manually approved",
+      human_denied: "Manually denied",
+      granted: "Granted",
+      grant_failed: "Grant failed",
+    },
+    decisions: {
+      auto_approve: "Auto-approve",
+      needs_human: "Needs manual review",
+      deny: "Deny",
+    },
+    riskLevels: { critical: "Critical", high: "High", medium: "Medium", low: "Low" },
+    identityTypes: { user: "User", role: "Role", service_account: "Service account", group: "Group" },
+  },
+
   settings: {
     title: "Settings",
     serviceStatus: "Service status",
@@ -161,6 +221,6 @@ export const en: Dict = {
     environment: "Environment",
     ai: "AI",
     locale: "Language",
-    note: "Mond OSS is self-hostable. Manage env vars in .env, runtime settings in docker-compose.yml.",
+    note: "Mond OSS is meant to be self-hosted. Manage env vars in .env and runtime settings in docker-compose.yml.",
   },
 };

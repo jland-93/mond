@@ -1,5 +1,5 @@
 /**
- * 🌙 Findings — 발견된 보안 이슈 + 상태 변경 + AI Triage
+ * 🌙 Findings — 발견된 보안 이슈 + 상태 변경 + AI 분석
  */
 
 import { BulbOutlined } from "@ant-design/icons";
@@ -73,10 +73,10 @@ export default function Findings() {
   const triage = useMutation({
     mutationFn: (findingId: number) => api.post<AIInsight>(`/ai/findings/${findingId}/triage`),
     onSuccess: () => {
-      message.success("AI Triage 완료");
+      message.success("AI 분석 완료");
       refetchInsights();
     },
-    onError: (err) => message.error(`Triage 실패: ${err.message}`),
+    onError: (err) => message.error(`분석 실패: ${err.message}`),
   });
 
   const updateStatus = useMutation({
@@ -146,7 +146,7 @@ export default function Findings() {
             {selected.description && <Paragraph>{selected.description}</Paragraph>}
             {selected.references.length > 0 && (
               <div>
-                <Text strong>References</Text>
+                <Text strong>{t.findings.references}</Text>
                 <ul>
                   {selected.references.map((r: string) => (
                     <li key={r}>
@@ -160,7 +160,7 @@ export default function Findings() {
             )}
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <Text strong>AI Insights</Text>
+              <Text strong>{t.menu.aiInsights}</Text>
               <Button
                 type="primary"
                 size="small"
@@ -200,7 +200,7 @@ export default function Findings() {
                 <Paragraph style={{ marginTop: 12 }}>{i.summary}</Paragraph>
                 {i.remediation?.steps && i.remediation.steps.length > 0 && (
                   <>
-                    <Text strong>Remediation</Text>
+                    <Text strong>{t.findings.remediation}</Text>
                     <ol>
                       {i.remediation.steps.map((s: string, idx: number) => (
                         <li key={idx}>{s}</li>

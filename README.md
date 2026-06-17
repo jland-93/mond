@@ -34,7 +34,7 @@
 | **Dashboard** | 보안 점수, 자산/발견 통계, 최근 스캔 |
 | **Assets** | 자산 인벤토리 (repo / image / host / URL / cloud / app) |
 | **Scans** | 스캔 트리거 + 어댑터별 실행 이력 |
-| **Findings** | 발견사항 조회/상태 변경 + AI Triage 드로어 |
+| **Findings** | 발견사항 조회/상태 변경 + AI 분석 드로어 |
 | **Policies** | SAST / SCA / IaC / DAST / Container / Secrets / Compliance 룰셋 |
 | **Policy Simulation** | "이번 PR에 이 finding이 들어가면 어떤 정책이 깨질까" 미리보기 |
 | **AI Insights** | 자연어 쿼리, intent 분류, Claude 답변 |
@@ -91,7 +91,7 @@ graph LR
 ### 사전 요구사항
 
 - Docker & Docker Compose
-- (선택) `ANTHROPIC_API_KEY` — 없어도 휴리스틱 모드로 모든 화면이 동작합니다.
+- (선택) `ANTHROPIC_API_KEY` — 없어도 기본 규칙 모드로 모든 화면이 동작합니다.
 
 ### 실행
 
@@ -128,11 +128,11 @@ npm run dev
 
 ## 🤖 AI 동작 방식
 
-API 키가 없으면 **휴리스틱 fallback**이 동작하므로 OSS 사용자가 처음부터 UI를 둘러볼 수 있습니다. 키를 설정하면:
+API 키가 없으면 **기본 규칙 fallback**이 동작하므로 OSS 사용자가 처음부터 UI를 둘러볼 수 있습니다. 키를 설정하면:
 
 | 동작 | 모델 | 트리거 |
 |---|---|---|
-| **Finding 트리아지** | `claude-haiku-4-5-20251001` (기본) | UI에서 "Run AI Triage" 클릭 |
+| **Finding 분석** | `claude-haiku-4-5-20251001` (기본) | UI에서 "Run AI analysis" 클릭 |
 | **심층 분석** | `claude-sonnet-4-6` | `?deep=true` 쿼리 |
 | **자연어 쿼리** | `claude-haiku-4-5-20251001` | `/ai/analyze` 호출 |
 

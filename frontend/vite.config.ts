@@ -11,5 +11,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 3000,
+    // mac/docker volume mount에서 fs event가 안 와 hot reload가 멈춤 — polling으로 보강
+    watch: { usePolling: true, interval: 300 },
   },
 });

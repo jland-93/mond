@@ -39,7 +39,7 @@ npm install
 4. **Environment Configuration**
 ```bash
 cp .env.example .env
-# Optional: ANTHROPIC_API_KEY=...  (없으면 휴리스틱 모드)
+# Optional: ANTHROPIC_API_KEY=...  (없으면 기본 규칙 모드)
 ```
 
 5. **Run with Docker (recommended)**
