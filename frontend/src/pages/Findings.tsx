@@ -26,6 +26,8 @@ import {
   type Severity,
 } from "@/lib/api";
 
+import { useI18n } from "@/i18n";
+
 const { Title, Text, Paragraph } = Typography;
 
 const SEVERITY_COLOR: Record<Severity, string> = {
@@ -56,6 +58,7 @@ async function fetchInsights(findingId: number): Promise<AIInsight[]> {
 }
 
 export default function Findings() {
+  const { t } = useI18n();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<Finding | null>(null);
 
@@ -85,7 +88,7 @@ export default function Findings() {
   return (
     <div>
       <Title level={2} style={{ marginBottom: 16 }}>
-        Findings
+        {t.findings.title}
       </Title>
 
       <Table
@@ -165,16 +168,12 @@ export default function Findings() {
                 loading={triage.isPending}
                 onClick={() => triage.mutate(selected.id)}
               >
-                Run AI Triage
+                {t.common.runTriage}
               </Button>
             </div>
 
             {(insights ?? []).length === 0 && (
-              <Alert
-                type="info"
-                showIcon
-                message="아직 AI 분석 결과가 없습니다. Run AI Triage를 눌러 분석을 시작하세요."
-              />
+              <Alert type="info" showIcon message={t.findings.drawerNoInsight} />
             )}
             {(insights ?? []).map((i) => (
               <div

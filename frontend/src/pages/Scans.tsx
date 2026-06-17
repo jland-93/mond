@@ -16,6 +16,7 @@ import {
 } from "antd";
 import { useState } from "react";
 
+import { useI18n } from "@/i18n";
 import { api, type Asset, type Page, type Scan } from "@/lib/api";
 
 const { Title } = Typography;
@@ -33,6 +34,7 @@ async function fetchAssetsLite(): Promise<Asset[]> {
 }
 
 export default function Scans() {
+  const { t } = useI18n();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
@@ -69,10 +71,10 @@ export default function Scans() {
         }}
       >
         <Title level={2} style={{ margin: 0 }}>
-          Scans
+          {t.scans.title}
         </Title>
         <Button type="primary" icon={<ThunderboltOutlined />} onClick={() => setOpen(true)}>
-          Trigger Scan
+          {t.scans.trigger}
         </Button>
       </div>
 

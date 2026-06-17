@@ -5,6 +5,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, Empty, Switch, Table, Tag, Typography } from "antd";
 
+import { useI18n } from "@/i18n";
 import { api, type Policy } from "@/lib/api";
 
 const { Title, Paragraph } = Typography;
@@ -15,17 +16,15 @@ async function fetchPolicies(): Promise<Policy[]> {
 }
 
 export default function Policies() {
+  const { t } = useI18n();
   const { data, isLoading } = useQuery({ queryKey: ["policies"], queryFn: fetchPolicies });
 
   return (
     <div>
       <Title level={2} style={{ marginBottom: 16 }}>
-        Policies
+        {t.policies.title}
       </Title>
-      <Paragraph type="secondary">
-        스캐너 결과에 적용되는 정책입니다. 각 정책은 SAST / SCA / IaC / DAST / Container /
-        Secrets / Compliance 유형 중 하나에 속하며, 임계치를 넘기는 발견사항은 파이프라인 게이트를 차단합니다.
-      </Paragraph>
+      <Paragraph type="secondary">{t.policies.desc}</Paragraph>
 
       <Card>
         <Table

@@ -7,6 +7,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Alert, Button, Card, Input, Space, Tag, Typography } from "antd";
 import { useState } from "react";
 
+import { useI18n } from "@/i18n";
 import { api } from "@/lib/api";
 
 const { Title, Paragraph } = Typography;
@@ -25,6 +26,7 @@ async function fetchStatus(): Promise<{ enabled: boolean }> {
 }
 
 export default function AIInsights() {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const { data: status } = useQuery({ queryKey: ["ai-status"], queryFn: fetchStatus });
 
@@ -36,7 +38,7 @@ export default function AIInsights() {
   return (
     <div>
       <Title level={2} style={{ marginBottom: 16 }}>
-        🌙 AI Insights
+        🌙 {t.ai.title}
       </Title>
 
       {!status?.enabled && (
@@ -44,21 +46,18 @@ export default function AIInsights() {
           type="warning"
           showIcon
           style={{ marginBottom: 16 }}
-          message="ANTHROPIC_API_KEY가 설정되지 않았습니다 — 휴리스틱 모드"
-          description="실제 Claude 분석을 사용하려면 .env에 ANTHROPIC_API_KEY를 설정하고 백엔드를 재시작하세요."
+          message={t.ai.disabled}
+          description={t.ai.disabledHint}
         />
       )}
 
-      <Card title="자연어로 묻기">
-        <Paragraph type="secondary">
-          예시: <em>"우리 nginx 이미지 스캔해줘"</em>, <em>"이번 주 critical 이슈 뭐 있어?"</em>,{" "}
-          <em>"이 SSRF 취약점 왜 위험한지 설명해"</em>
-        </Paragraph>
+      <Card title={t.ai.title}>
+        <Paragraph type="secondary">{t.ai.askExample}</Paragraph>
         <Space.Compact style={{ width: "100%" }}>
           <TextArea
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Mond에게 무엇이든 물어보세요"
+            placeholder={t.ai.askPlaceholder}
             autoSize={{ minRows: 2, maxRows: 6 }}
           />
           <Button
@@ -69,7 +68,7 @@ export default function AIInsights() {
             disabled={!query.trim()}
             style={{ height: "auto" }}
           >
-            분석
+            {t.ai.analyze}
           </Button>
         </Space.Compact>
 

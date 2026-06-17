@@ -36,9 +36,25 @@
 | **Scans** | 스캔 트리거 + 어댑터별 실행 이력 |
 | **Findings** | 발견사항 조회/상태 변경 + AI Triage 드로어 |
 | **Policies** | SAST / SCA / IaC / DAST / Container / Secrets / Compliance 룰셋 |
+| **Policy Simulation** | "이번 PR에 이 finding이 들어가면 어떤 정책이 깨질까" 미리보기 |
 | **AI Insights** | 자연어 쿼리, intent 분류, Claude 답변 |
-| **Integrations** | 사용 가능한 스캐너 어댑터 / AI 모델 상태 |
-| **Settings** | 헬스 / 버전 / 환경 정보 |
+| **Regulations Guide** | 사업 시나리오 → 적용 규제(K-PIPA·GDPR·HIPAA·PCI-DSS·…) + 시점·의무 |
+| **Reports** | 자산별 SBOM(CycloneDX-lite) + 시나리오별 컴플라이언스 리포트 (JSON / Markdown) |
+| **Integrations** | 스캐너 / AI / **MCP (stdio+HTTP)** / 알림 채널 / GitHub Webhook 안내 |
+| **Settings** | 헬스 / 버전 / 환경 / 언어 |
+
+### 한국어 기본 · 영어 보조 (i18n)
+
+UI는 한국어를 기본으로 표시하며, 우측 상단 토글로 영어로 전환할 수 있습니다.
+`DEFAULT_LOCALE=ko|en`로 초기값을 바꿀 수 있고, 선택은 브라우저 localStorage에 지속됩니다.
+
+### 셀프서비스 자동화
+
+| 기능 | 방식 |
+|---|---|
+| **자동 스캔 (GitHub push)** | `POST /api/v1/webhooks/github` → 매칭 레포 자산 자동 trivy 스캔 |
+| **Slack/Generic 알림** | 임계치 이상 finding을 ENV의 Webhook URL로 자동 전송 |
+| **MCP — Claude Desktop/Code** | stdio: `python -m mcp_server`. HTTP+SSE: `/mcp` 마운트 |
 
 ---
 
@@ -151,11 +167,16 @@ class MyAdapter(ScannerAdapter):
 
 - [x] 5도메인 + AI 트리아지 MVP
 - [x] Trivy / Semgrep / Nuclei stub 어댑터
+- [x] 한국어/영어 i18n (ko 기본 · en 보조)
+- [x] Regulations Guide (K-PIPA · ISMS-P · K-EFSA · CSAP · GDPR · HIPAA · PCI-DSS · SOC2 · ISO-27001 · COPPA · EU AI Act)
+- [x] Policy Simulation (PR diff 미리보기)
+- [x] SBOM / Compliance 리포트 (JSON · Markdown)
+- [x] GitHub Webhook 자동 스캔
+- [x] Slack / Generic Webhook 알림
+- [x] MCP 서버 (stdio + HTTP/SSE)
 - [ ] OPA Rego 정책 평가
-- [ ] CI 통합 (GitHub Actions / GitLab CI 액션 패키지)
-- [ ] 멀티유저 + RBAC
-- [ ] 알림 (Slack / Email / Webhook)
-- [ ] Compliance 리포트 (CIS / NIST / OWASP)
+- [ ] CI 통합 패키지 (GitHub Actions / GitLab CI)
+- [ ] 멀티유저 + RBAC + SSO
 
 ---
 

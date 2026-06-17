@@ -1,0 +1,166 @@
+/**
+ * 🌙 Mond — English dictionary
+ */
+import type { Dict } from "./ko";
+
+export const en: Dict = {
+  appTagline: "AI-Powered Open-Source DevSecOps Platform",
+  language: { ko: "한국어", en: "English" },
+
+  menu: {
+    dashboard: "Dashboard",
+    assets: "Assets",
+    scans: "Scans",
+    findings: "Findings",
+    policies: "Policies",
+    policySim: "Policy Simulation",
+    aiInsights: "AI Insights",
+    regulations: "Regulations",
+    reports: "Reports",
+    integrations: "Integrations",
+    settings: "Settings",
+  },
+
+  common: {
+    add: "Add",
+    cancel: "Cancel",
+    confirm: "Confirm",
+    save: "Save",
+    delete: "Delete",
+    edit: "Edit",
+    refresh: "Refresh",
+    download: "Download",
+    runScan: "Run scan",
+    runTriage: "Run AI Triage",
+    severity: "Severity",
+    status: "Status",
+    title: "Title",
+    name: "Name",
+    type: "Type",
+    when: "When",
+    scanner: "Scanner",
+    asset: "Asset",
+    description: "Description",
+    enabled: "Enabled",
+    disabled: "Disabled",
+    none: "None",
+    yes: "Yes",
+    no: "No",
+  },
+
+  dashboard: {
+    title: "Dashboard",
+    securityScore: "Security Score",
+    assets: "Assets",
+    assetsHint: "Total protected",
+    openFindings: "Open Findings",
+    openFindingsHint: "Awaiting action",
+    scans7d: "Scans (7d)",
+    scans7dHint: "Last 7 days",
+    severityChart: "Open Findings by Severity",
+    recentFindings: "Recent Findings",
+    recentScans: "Recent Scans",
+  },
+
+  assets: {
+    title: "Assets",
+    add: "Add Asset",
+    uri: "URI",
+    env: "Env",
+    owner: "Owner",
+    openFindings: "Open findings",
+    placeholderUri: "https://github.com/org/repo or docker://image:tag",
+    placeholderOwner: "team-name",
+  },
+
+  scans: {
+    title: "Scans",
+    trigger: "Trigger scan",
+    triggerSelectAsset: "Select asset",
+    findingsCount: "Findings",
+    duration: "Duration",
+  },
+
+  findings: {
+    title: "Findings",
+    drawerNoInsight: "No AI analysis yet. Click 'Run AI Triage' to start.",
+    references: "References",
+    remediation: "Remediation",
+  },
+
+  policies: {
+    title: "Policies",
+    threshold: "Threshold",
+    compliance: "Compliance",
+    desc: "Policies applied to scanner results. Each is SAST / SCA / IaC / DAST / Container / Secrets / Compliance and gates the pipeline when severity exceeds the threshold.",
+  },
+
+  policySim: {
+    title: "Policy Simulation",
+    desc: "Add hypothetical findings to see which policy gates would block the PR.",
+    add: "Add finding",
+    ruleId: "Rule ID",
+    simulate: "Run simulation",
+    result: "Result",
+    blocked: "Blocked",
+    passed: "Passed",
+  },
+
+  ai: {
+    title: "AI Insights",
+    askPlaceholder: "Ask Mond anything",
+    askExample: 'e.g. "scan our nginx image", "any critical findings this week?"',
+    enabled: "Claude analysis enabled",
+    disabled: "ANTHROPIC_API_KEY not set — heuristic mode",
+    disabledHint: "Set ANTHROPIC_API_KEY in .env and restart the backend to enable Claude analysis.",
+    analyze: "Analyze",
+  },
+
+  regulations: {
+    title: "Security Regulations Guide",
+    desc: "Pick a business scenario to see applicable regulations, obligations, and timing in one place.",
+    selectScenario: "Select a business scenario",
+    applicable: "Applicable Regulations",
+    obligations: "Obligations",
+    timings: "Timing",
+    references: "References",
+    downloadMd: "Download markdown report",
+  },
+
+  reports: {
+    title: "Reports",
+    sbom: "SBOM download",
+    sbomDesc: "Get findings of the selected asset as CycloneDX-lite JSON.",
+    compliance: "Compliance report",
+    complianceDesc: "Get the obligations + current state for a business scenario as markdown.",
+    pickAsset: "Pick asset",
+    pickScenario: "Pick scenario",
+    downloadJson: "Download JSON",
+    downloadMarkdown: "Download markdown",
+  },
+
+  integrations: {
+    title: "Integrations",
+    scanners: "Scanners",
+    ai: "AI",
+    mcp: "MCP",
+    mcpDesc: "Use Mond as a tool from Claude Desktop / Claude Code.",
+    mcpStdio: "stdio (local)",
+    mcpHttp: "HTTP+SSE (remote)",
+    notifications: "Notification channels",
+    notificationsDesc: "Set Slack/Generic Webhook URLs in .env to auto-forward Critical/High findings.",
+    webhookGithub: "GitHub Webhook",
+    webhookGithubDesc: "POST push events to /api/v1/webhooks/github — Mond will auto-scan matching repos.",
+  },
+
+  settings: {
+    title: "Settings",
+    serviceStatus: "Service status",
+    db: "Database",
+    version: "Version",
+    environment: "Environment",
+    ai: "AI",
+    locale: "Language",
+    note: "Mond OSS is self-hostable. Manage env vars in .env, runtime settings in docker-compose.yml.",
+  },
+};
