@@ -12,6 +12,7 @@ from app.api.v1.endpoints import (
     health,
     iam,
     integrations,
+    knowledge,
     policies,
     policy_sim,
     regulations,
@@ -35,3 +36,4 @@ api_router.include_router(ai.router, prefix="/ai", tags=["AI"])
 api_router.include_router(integrations.router, prefix="/integrations", tags=["Integrations"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 api_router.include_router(iam.router, prefix="/iam", tags=["IAM Self-Service"])
+api_router.include_router(knowledge.router, prefix="/knowledge", tags=["Knowledge Hub"])

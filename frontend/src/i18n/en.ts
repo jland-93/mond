@@ -15,6 +15,7 @@ export const en: Dict = {
     policies: "Policies",
     policySim: "Policy Simulation",
     aiInsights: "AI Insights",
+    knowledge: "Knowledge Hub",
     regulations: "Regulations",
     reports: "Reports",
     integrations: "Integrations",
@@ -27,6 +28,20 @@ export const en: Dict = {
     enter: "Admin",
     accessReview: "Access Review",
     badge: "ADMIN",
+  },
+
+  knowledge: {
+    title: "Knowledge Hub",
+    desc: "Pick up DevSecOps & security regulation essentials at a glance, then ask Mond AI for the deeper question. New topics get auto-generated as cards.",
+    all: "All",
+    searchPlaceholder: "Search — e.g. SBOM, GDPR, secrets",
+    askAi: "Ask AI",
+    openRef: "Reference",
+    empty: "No cards match. Try a different category or search term.",
+    aiGenerate: "Generate new cards with AI",
+    aiCategory: "Category",
+    aiTopic: "Topic hint (optional)",
+    aiCount: "Cards to generate",
   },
 
   common: {
