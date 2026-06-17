@@ -209,6 +209,12 @@ local/
 *.pb
 models/
 checkpoints/
+# 단, 백엔드 ORM 모델 디렉토리는 코드의 일부 — 커밋 유지
+!backend/app/models/
+!backend/app/models/**
+# 빌드 산출물은 negation 대상 X
+backend/app/models/**/__pycache__/
+backend/app/models/**/*.pyc
 
 # Data files
 data/

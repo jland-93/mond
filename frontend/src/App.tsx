@@ -5,10 +5,13 @@
 import { Route, Routes } from "react-router-dom";
 
 import Layout from "@/components/Layout";
+import AccessCenter from "@/pages/AccessCenter";
+import AccessReview from "@/pages/AccessReview";
 import AIInsights from "@/pages/AIInsights";
 import Assets from "@/pages/Assets";
 import Dashboard from "@/pages/Dashboard";
 import Findings from "@/pages/Findings";
+import IAMExplorer from "@/pages/IAMExplorer";
 import Integrations from "@/pages/Integrations";
 import Policies from "@/pages/Policies";
 import PolicySimulator from "@/pages/PolicySimulator";
@@ -31,6 +34,9 @@ export default function App() {
         <Route path="regulations" element={<Regulations />} />
         <Route path="reports" element={<Reports />} />
         <Route path="integrations" element={<Integrations />} />
+        <Route path="iam-explorer" element={<IAMExplorer />} />
+        <Route path="access-center" element={<AccessCenter />} />
+        <Route path="access-review" element={<AccessReview />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>

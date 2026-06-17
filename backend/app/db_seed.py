@@ -11,7 +11,9 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import get_logger
+from app.iam import providers as iam_providers
 from app.models.asset import Asset, AssetType
+from app.models.iam import IAMIdentity, IAMSource, IAMSourceKind, Permission
 from app.models.policy import Policy, PolicyType
 
 logger = get_logger(__name__)
@@ -94,4 +96,43 @@ async def seed_if_empty(db: AsyncSession) -> None:
         logger.info("seed_policies", count=len(DEMO_POLICIES))
 
     if asset_count == 0 or policy_count == 0:
+        await db.commit()
+
+    # IAM 데모 source — AWS 자격증명이 없으면 stub identities + permissions가 들어간다.
+    iam_count = (await db.execute(select(func.count(IAMSource.id)))).scalar_one()
+    if iam_count == 0:
+        source = IAMSource(
+            name="aws-demo",
+            kind=IAMSourceKind.AWS,
+            config={"region": "us-east-1", "account_id": "000000000000"},
+            credentials_env_ref={
+                "access_key_id": "AWS_ACCESS_KEY_ID",
+                "secret_access_key": "AWS_SECRET_ACCESS_KEY",
+            },
+        )
+        db.add(source)
+        await db.flush()  # source.id 확보
+        result = iam_providers.fetch_for(source)
+        for ident in result.identities:
+            db.add(
+                IAMIdentity(
+                    source_id=source.id,
+                    identity_type=ident.identity_type,
+                    name=ident.name,
+                    external_id=ident.external_id,
+                    attributes=ident.attributes or {},
+                )
+            )
+        for perm in result.permissions:
+            db.add(
+                Permission(
+                    source_id=source.id,
+                    name=perm.name,
+                    external_id=perm.external_id,
+                    description=perm.description,
+                    risk_hint=perm.risk_hint,
+                    attributes=perm.attributes or {},
+                )
+            )
+        logger.info("seed_iam", stub=result.stub, identities=len(result.identities), permissions=len(result.permissions))
         await db.commit()

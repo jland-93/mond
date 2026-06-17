@@ -11,9 +11,12 @@ import {
   ExperimentOutlined,
   FileTextOutlined,
   GlobalOutlined,
+  KeyOutlined,
   SafetyOutlined,
   ScanOutlined,
   SettingOutlined,
+  SolutionOutlined,
+  TeamOutlined,
   ThunderboltOutlined,
 } from "@ant-design/icons";
 import { Button, Dropdown, Layout as AntLayout, Menu, Space } from "antd";
@@ -42,6 +45,9 @@ export default function Layout() {
     { key: "/regulations", icon: <AuditOutlined />, label: t.menu.regulations },
     { key: "/reports", icon: <FileTextOutlined />, label: t.menu.reports },
     { key: "/integrations", icon: <ApiOutlined />, label: t.menu.integrations },
+    { key: "/iam-explorer", icon: <TeamOutlined />, label: t.menu.iamExplorer },
+    { key: "/access-center", icon: <KeyOutlined />, label: t.menu.accessCenter },
+    { key: "/access-review", icon: <SolutionOutlined />, label: t.menu.accessReview },
     { key: "/settings", icon: <SettingOutlined />, label: t.menu.settings },
   ];
 
