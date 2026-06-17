@@ -1,79 +1,32 @@
 /**
- * 🌙 Mond - Main Application Component
+ * 🌙 Mond — 라우팅
  */
 
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ConfigProvider, theme } from 'antd';
-import { Provider } from 'react-redux';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { Route, Routes } from "react-router-dom";
 
-import { store } from '@/store';
-import Layout from '@/components/Layout';
-import Dashboard from '@/pages/Dashboard';
-import TagManagement from '@/pages/TagManagement';
-import Security from '@/pages/Security';
-import Settings from '@/pages/Settings';
+import Layout from "@/components/Layout";
+import AIInsights from "@/pages/AIInsights";
+import Assets from "@/pages/Assets";
+import Dashboard from "@/pages/Dashboard";
+import Findings from "@/pages/Findings";
+import Integrations from "@/pages/Integrations";
+import Policies from "@/pages/Policies";
+import Scans from "@/pages/Scans";
+import Settings from "@/pages/Settings";
 
-import '@/assets/styles/global.css';
-
-// Create a client for React Query
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-});
-
-// Mond theme configuration
-const mondTheme = {
-  algorithm: theme.darkAlgorithm,
-  token: {
-    colorPrimary: '#3f51b5',
-    colorBgBase: '#0d1421',
-    colorBgContainer: '#1e293b',
-    colorText: '#ffffff',
-    colorTextSecondary: '#64748b',
-    borderRadius: 8,
-    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-  },
-  components: {
-    Layout: {
-      bodyBg: '#0d1421',
-      headerBg: '#1e293b',
-      siderBg: '#1e293b',
-    },
-    Card: {
-      colorBgContainer: '#1e293b',
-    },
-    Button: {
-      primaryShadow: '0 2px 8px rgba(63, 81, 181, 0.3)',
-    },
-  },
-};
-
-const App: React.FC = () => {
+export default function App() {
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <ConfigProvider theme={mondTheme}>
-          <Router>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/tags" element={<TagManagement />} />
-                <Route path="/security" element={<Security />} />
-                <Route path="/settings" element={<Settings />} />
-              </Routes>
-            </Layout>
-          </Router>
-        </ConfigProvider>
-      </QueryClientProvider>
-    </Provider>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="assets" element={<Assets />} />
+        <Route path="scans" element={<Scans />} />
+        <Route path="findings" element={<Findings />} />
+        <Route path="policies" element={<Policies />} />
+        <Route path="ai-insights" element={<AIInsights />} />
+        <Route path="integrations" element={<Integrations />} />
+        <Route path="settings" element={<Settings />} />
+      </Route>
+    </Routes>
   );
-};
-
-export default App;
+}

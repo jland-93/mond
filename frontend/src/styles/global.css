@@ -1,0 +1,55 @@
+/* 🌙 Mond 글로벌 스타일 */
+
+:root {
+  --mond-bg: #0d1421;
+  --mond-surface: #141c2f;
+  --mond-border: #293346;
+  --mond-text: #f1f5f9;
+  --mond-text-dim: #94a3b8;
+  --mond-primary: #7c8cff;
+  --mond-glow: 0 0 24px rgba(124, 140, 255, 0.25);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(124, 140, 255, 0.08), transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(124, 140, 255, 0.06), transparent 50%),
+    var(--mond-bg);
+  color: var(--mond-text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--mond-primary);
+  text-decoration: none;
+}
+
+.mond-glow {
+  box-shadow: var(--mond-glow);
+}
+
+.severity-critical {
+  color: #f87171;
+}
+.severity-high {
+  color: #fb923c;
+}
+.severity-medium {
+  color: #facc15;
+}
+.severity-low {
+  color: #4ade80;
+}
+.severity-info {
+  color: #60a5fa;
+}

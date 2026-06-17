@@ -1,79 +1,68 @@
 """
-🌙 Mond - AI-Powered DevSecOps Platform
-Main FastAPI application entry point
+🌙 Mond — AI-Powered Open-Source DevSecOps Platform
+
+FastAPI 엔트리포인트.
 """
 
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import uvicorn
+from __future__ import annotations
+
 from contextlib import asynccontextmanager
 
-from app.core.config import settings
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from app.api.v1.api import api_router
-from app.core.database import engine
+from app.core.config import settings
+from app.core.database import AsyncSessionLocal, engine
+from app.core.logging import configure_logging, get_logger
+from app.db_seed import seed_if_empty
 from app.models import Base
+
+configure_logging()
+logger = get_logger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan events"""
-    # Startup
-    print("🌙 Mond is starting up...")
-    
-    # Create database tables
+    logger.info("mond_startup", version=settings.VERSION, env=settings.ENVIRONMENT)
+
+    # 개발/데모 편의: 스키마 자동 생성. 운영은 alembic을 권장.
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
+    if settings.SEED_ON_STARTUP:
+        async with AsyncSessionLocal() as session:
+            await seed_if_empty(session)
+
     yield
-    
-    # Shutdown
-    print("🌙 Mond is shutting down...")
+    logger.info("mond_shutdown")
 
 
-# Create FastAPI application
 app = FastAPI(
     title="Mond API",
-    description="🌙 AI-Powered DevSecOps Platform - Illuminating Security in the Cloud",
-    version="1.0.0",
+    description="🌙 AI-Powered Open-Source DevSecOps Platform",
+    version=settings.VERSION,
+    lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan
 )
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_HOSTS,
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include API router
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
-async def root():
-    """Root endpoint"""
+async def root() -> dict:
     return {
-        "message": "🌙 Welcome to Mond - Illuminating the path to secure DevOps",
-        "version": "1.0.0",
-        "docs": "/docs"
+        "name": settings.APP_NAME,
+        "version": settings.VERSION,
+        "docs": "/docs",
+        "api": settings.API_V1_PREFIX,
     }
-
-
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy", "service": "mond-api"}
-
-
-if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True if settings.ENVIRONMENT == "development" else False
-    )
