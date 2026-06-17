@@ -130,15 +130,15 @@ export default function Dashboard() {
               pagination={false}
               columns={[
                 {
-                  title: "Severity",
+                  title: t.common.severity,
                   dataIndex: "severity",
                   render: (s: Severity) => (
                     <Tag color={SEVERITY_COLOR[s]}>{s.toUpperCase()}</Tag>
                   ),
                   width: 110,
                 },
-                { title: "Title", dataIndex: "title", ellipsis: true },
-                { title: "Scanner", dataIndex: "scanner", width: 100 },
+                { title: t.common.title, dataIndex: "title", ellipsis: true },
+                { title: t.common.scanner, dataIndex: "scanner", width: 100 },
               ]}
             />
           </Card>
@@ -154,11 +154,11 @@ export default function Dashboard() {
               size="small"
               pagination={false}
               columns={[
-                { title: "Scan #", dataIndex: "id", width: 90 },
-                { title: "Asset", dataIndex: "asset_id", width: 110 },
-                { title: "Scanner", dataIndex: "scanner" },
+                { title: "#", dataIndex: "id", width: 90 },
+                { title: t.common.asset, dataIndex: "asset_id", width: 110 },
+                { title: t.common.scanner, dataIndex: "scanner" },
                 {
-                  title: "Status",
+                  title: t.common.status,
                   dataIndex: "status",
                   render: (s: string) => (
                     <Tag
@@ -175,9 +175,9 @@ export default function Dashboard() {
                   ),
                   width: 120,
                 },
-                { title: "Findings", dataIndex: "findings_count", width: 100 },
+                { title: t.scans.findingsCount, dataIndex: "findings_count", width: 100 },
                 {
-                  title: "When",
+                  title: t.common.when,
                   dataIndex: "created_at",
                   render: (v: string) => new Date(v).toLocaleString(),
                 },

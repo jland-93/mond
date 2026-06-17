@@ -99,18 +99,18 @@ export default function Findings() {
         columns={[
           { title: "ID", dataIndex: "id", width: 70 },
           {
-            title: "Severity",
+            title: t.common.severity,
             dataIndex: "severity",
             render: (s: Severity) => (
               <Tag color={SEVERITY_COLOR[s]}>{s.toUpperCase()}</Tag>
             ),
             width: 110,
           },
-          { title: "Title", dataIndex: "title", ellipsis: true },
-          { title: "Scanner", dataIndex: "scanner", width: 110 },
+          { title: t.common.title, dataIndex: "title", ellipsis: true },
+          { title: t.common.scanner, dataIndex: "scanner", width: 110 },
           { title: "Rule", dataIndex: "rule_id", width: 200, ellipsis: true },
           {
-            title: "Status",
+            title: t.common.status,
             dataIndex: "status",
             width: 160,
             render: (s: FindingStatus, record: Finding) => (

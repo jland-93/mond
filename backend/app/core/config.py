@@ -69,8 +69,8 @@ class Settings(BaseSettings):
     # i18n 기본 언어 (UI 초기 로드 시 사용)
     DEFAULT_LOCALE: str = "ko"
 
-    # MCP 서버 토글 — stdio가 권장. HTTP/SSE는 mcp 패키지 변경 영향이 커서 기본 비활성.
-    MCP_HTTP_ENABLED: bool = False
+    # MCP HTTP 마운트 — Streamable HTTP > SSE 순서로 시도. mcp 패키지가 둘 다 실패해도 backend는 정상.
+    MCP_HTTP_ENABLED: bool = True
 
 
 settings = Settings()
