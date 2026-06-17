@@ -46,33 +46,6 @@ jobs:
       - name: Compile all
         run: python -m compileall -q app main.py mcp_server.py
 
-      - name: Pytest diagnostic
-        continue-on-error: true
-        env:
-          PYTHONPATH: ${{ github.workspace }}/backend
-        run: |
-          python -c "
-          import os, sys
-          print('cwd:', os.getcwd())
-          print('PYTHONPATH env:', os.environ.get('PYTHONPATH'))
-          print('sys.path[:5]:', sys.path[:5])
-          print('app/ exists:', os.path.isdir('app'))
-          print('app/__init__.py exists:', os.path.isfile('app/__init__.py'))
-          print('app/__init__.py size:', os.path.getsize('app/__init__.py') if os.path.isfile('app/__init__.py') else 'N/A')
-          print('app/models/__init__.py exists:', os.path.isfile('app/models/__init__.py'))
-          print('app/ entries:', sorted(os.listdir('app')) if os.path.isdir('app') else 'N/A')
-          try:
-              import app
-              print('import app OK:', app.__file__, app.__path__)
-          except Exception as e:
-              print('import app failed:', repr(e))
-          try:
-              import app.models
-              print('import app.models OK')
-          except Exception as e:
-              print('import app.models failed:', repr(e))
-          "
-
       - name: Pytest
         env:
           PYTHONPATH: ${{ github.workspace }}/backend
