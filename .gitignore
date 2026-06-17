@@ -21,6 +21,9 @@ eggs/
 .eggs/
 lib/
 lib64/
+# 프론트엔드 소스의 lib 디렉토리는 코드 — 커밋 유지
+!frontend/src/lib/
+!frontend/src/lib/**
 parts/
 sdist/
 var/

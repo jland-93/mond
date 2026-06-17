@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.asset import Asset
 from app.models.finding import Finding, FindingStatus, Severity
-from app.models.scan import Scan, ScanStatus
+from app.models.scan import Scan
 
 
 SEVERITY_WEIGHTS = {

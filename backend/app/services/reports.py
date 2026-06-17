@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.data.regulations import REGULATIONS, SCENARIOS, regulation_dict
+from app.data.regulations import SCENARIOS, regulation_dict
 from app.models.asset import Asset
 from app.models.finding import Finding, FindingStatus, Severity
 
