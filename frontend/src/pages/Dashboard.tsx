@@ -1,320 +1,189 @@
 /**
- * 🌙 Mond - Dashboard Page
+ * 🌙 Dashboard — 보안 점수, 자산/발견 현황, 최근 스캔
  */
 
-import React from 'react';
-import { Row, Col, Card, Statistic, Progress, List, Tag, Typography, Space } from 'antd';
+import { useQuery } from "@tanstack/react-query";
+import { Card, Col, Progress, Row, Statistic, Table, Tag, Typography } from "antd";
 import {
-  SecurityScanOutlined,
-  TagsOutlined,
-  AlertOutlined,
-  CheckCircleOutlined,
-  ExclamationCircleOutlined,
-  ClockCircleOutlined,
-} from '@ant-design/icons';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import styled from 'styled-components';
+  Cell,
+  PieChart,
+  Pie,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
+
+import { api, type DashboardOverview, type Severity } from "@/lib/api";
 
 const { Title, Text } = Typography;
 
-const DashboardContainer = styled.div`
-  .dashboard-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    
-    .ant-card-head {
-      border-bottom: 1px solid #334155;
-    }
-  }
-  
-  .metric-card {
-    text-align: center;
-    
-    .ant-statistic-title {
-      color: #94a3b8;
-    }
-    
-    .ant-statistic-content {
-      color: #ffffff;
-    }
-  }
-`;
+const SEVERITY_COLOR: Record<Severity, string> = {
+  critical: "#ef4444",
+  high: "#f97316",
+  medium: "#eab308",
+  low: "#22c55e",
+  info: "#3b82f6",
+};
 
-// Mock data for charts
-const securityTrendData = [
-  { date: '2024-01-01', score: 85 },
-  { date: '2024-01-02', score: 87 },
-  { date: '2024-01-03', score: 89 },
-  { date: '2024-01-04', score: 91 },
-  { date: '2024-01-05', score: 88 },
-  { date: '2024-01-06', score: 92 },
-  { date: '2024-01-07', score: 94 },
-];
+async function fetchOverview(): Promise<DashboardOverview> {
+  const { data } = await api.get<DashboardOverview>("/dashboard/overview");
+  return data;
+}
 
-const tagComplianceData = [
-  { name: 'Compliant', value: 78, color: '#10b981' },
-  { name: 'Missing Tags', value: 15, color: '#f59e0b' },
-  { name: 'Invalid Tags', value: 7, color: '#ef4444' },
-];
+export default function Dashboard() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["dashboard-overview"],
+    queryFn: fetchOverview,
+    refetchInterval: 15_000,
+  });
 
-const recentFindings = [
-  {
-    id: 1,
-    title: 'S3 Bucket Public Read Access',
-    severity: 'HIGH',
-    resource: 'arn:aws:s3:::my-bucket',
-    time: '2 hours ago',
-  },
-  {
-    id: 2,
-    title: 'EC2 Instance Missing Required Tags',
-    severity: 'MEDIUM',
-    resource: 'arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890abcdef0',
-    time: '4 hours ago',
-  },
-  {
-    id: 3,
-    title: 'IAM Policy Overly Permissive',
-    severity: 'HIGH',
-    resource: 'arn:aws:iam::123456789012:policy/MyPolicy',
-    time: '6 hours ago',
-  },
-];
-
-const Dashboard: React.FC = () => {
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'CRITICAL': return '#dc2626';
-      case 'HIGH': return '#ea580c';
-      case 'MEDIUM': return '#d97706';
-      case 'LOW': return '#65a30d';
-      default: return '#6b7280';
-    }
-  };
-
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
-      case 'CRITICAL':
-      case 'HIGH':
-        return <ExclamationCircleOutlined />;
-      case 'MEDIUM':
-        return <AlertOutlined />;
-      case 'LOW':
-        return <CheckCircleOutlined />;
-      default:
-        return <ClockCircleOutlined />;
-    }
-  };
+  const severityData =
+    data &&
+    (Object.entries(data.open_findings_by_severity)
+      .filter(([, v]) => v > 0)
+      .map(([k, v]) => ({
+        name: k.toUpperCase(),
+        value: v,
+        color: SEVERITY_COLOR[k as Severity],
+      })));
 
   return (
-    <DashboardContainer>
-      <Title level={2} style={{ color: '#ffffff', marginBottom: '24px' }}>
-        🌙 Dashboard Overview
+    <div>
+      <Title level={2} style={{ color: "var(--mond-text)", marginBottom: 24 }}>
+        🌙 Dashboard
       </Title>
 
-      {/* Key Metrics Row */}
-      <Row gutter={[24, 24]} style={{ marginBottom: '24px' }}>
+      <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
-          <Card className="dashboard-card metric-card">
+          <Card loading={isLoading}>
             <Statistic
               title="Security Score"
-              value={94}
+              value={data?.security_score ?? 0}
               suffix="/100"
-              prefix={<SecurityScanOutlined />}
-              valueStyle={{ color: '#10b981' }}
+              valueStyle={{ color: "#22c55e" }}
             />
             <Progress
-              percent={94}
+              percent={data?.security_score ?? 0}
               showInfo={false}
-              strokeColor="#10b981"
-              trailColor="#374151"
-              size="small"
-              style={{ marginTop: '8px' }}
+              strokeColor="#22c55e"
             />
           </Card>
         </Col>
-        
         <Col xs={24} sm={12} lg={6}>
-          <Card className="dashboard-card metric-card">
-            <Statistic
-              title="Tag Compliance"
-              value={78}
-              suffix="%"
-              prefix={<TagsOutlined />}
-              valueStyle={{ color: '#3b82f6' }}
-            />
-            <Progress
-              percent={78}
-              showInfo={false}
-              strokeColor="#3b82f6"
-              trailColor="#374151"
-              size="small"
-              style={{ marginTop: '8px' }}
-            />
+          <Card loading={isLoading}>
+            <Statistic title="Assets" value={data?.asset_total ?? 0} />
+            <Text type="secondary">전체 보호 대상</Text>
           </Card>
         </Col>
-        
         <Col xs={24} sm={12} lg={6}>
-          <Card className="dashboard-card metric-card">
+          <Card loading={isLoading}>
             <Statistic
-              title="Active Findings"
-              value={23}
-              prefix={<AlertOutlined />}
-              valueStyle={{ color: '#f59e0b' }}
+              title="Open Findings"
+              value={data?.open_findings_total ?? 0}
+              valueStyle={{ color: "#f97316" }}
             />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              ↓ 15% from last week
-            </Text>
+            <Text type="secondary">처리 대기 중</Text>
           </Card>
         </Col>
-        
         <Col xs={24} sm={12} lg={6}>
-          <Card className="dashboard-card metric-card">
-            <Statistic
-              title="Resources Monitored"
-              value={1247}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#8b5cf6' }}
-            />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
-              Across 3 AWS accounts
-            </Text>
+          <Card loading={isLoading}>
+            <Statistic title="Scans (7d)" value={data?.scans_last_7d ?? 0} />
+            <Text type="secondary">최근 7일</Text>
           </Card>
         </Col>
       </Row>
 
-      {/* Charts Row */}
-      <Row gutter={[24, 24]} style={{ marginBottom: '24px' }}>
-        <Col xs={24} lg={16}>
-          <Card 
-            title="Security Score Trend" 
-            className="dashboard-card"
-            extra={<Text type="secondary">Last 7 days</Text>}
-          >
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={securityTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis 
-                  dataKey="date" 
-                  stroke="#94a3b8"
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis 
-                  stroke="#94a3b8"
-                  tick={{ fontSize: 12 }}
-                  domain={[80, 100]}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1e293b', 
-                    border: '1px solid #334155',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="score" 
-                  stroke="#3f51b5" 
-                  strokeWidth={3}
-                  dot={{ fill: '#3f51b5', strokeWidth: 2, r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </Card>
-        </Col>
-        
-        <Col xs={24} lg={8}>
-          <Card title="Tag Compliance Breakdown" className="dashboard-card">
-            <ResponsiveContainer width="100%" height={300}>
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col xs={24} lg={12}>
+          <Card title="Open Findings by Severity" loading={isLoading}>
+            <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie
-                  data={tagComplianceData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
+                  data={severityData ?? []}
                   dataKey="value"
+                  nameKey="name"
+                  innerRadius={70}
+                  outerRadius={110}
+                  paddingAngle={4}
                 >
-                  {tagComplianceData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  {(severityData ?? []).map((d) => (
+                    <Cell key={d.name} fill={d.color} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1e293b', 
-                    border: '1px solid #334155',
-                    borderRadius: '8px'
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--mond-surface)",
+                    border: "1px solid var(--mond-border)",
                   }}
                 />
               </PieChart>
             </ResponsiveContainer>
-            <Space direction="vertical" style={{ width: '100%', marginTop: '16px' }}>
-              {tagComplianceData.map((item, index) => (
-                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Space>
-                    <div 
-                      style={{ 
-                        width: '12px', 
-                        height: '12px', 
-                        backgroundColor: item.color, 
-                        borderRadius: '2px' 
-                      }} 
-                    />
-                    <Text style={{ color: '#94a3b8' }}>{item.name}</Text>
-                  </Space>
-                  <Text style={{ color: '#ffffff' }}>{item.value}%</Text>
-                </div>
-              ))}
-            </Space>
           </Card>
         </Col>
-      </Row>
-
-      {/* Recent Findings */}
-      <Row gutter={[24, 24]}>
-        <Col xs={24}>
-          <Card title="Recent Security Findings" className="dashboard-card">
-            <List
-              dataSource={recentFindings}
-              renderItem={(item) => (
-                <List.Item
-                  style={{ 
-                    borderBottom: '1px solid #334155',
-                    padding: '16px 0'
-                  }}
-                >
-                  <List.Item.Meta
-                    avatar={
-                      <div style={{ color: getSeverityColor(item.severity), fontSize: '20px' }}>
-                        {getSeverityIcon(item.severity)}
-                      </div>
-                    }
-                    title={
-                      <Space>
-                        <Text style={{ color: '#ffffff' }}>{item.title}</Text>
-                        <Tag color={getSeverityColor(item.severity)}>{item.severity}</Tag>
-                      </Space>
-                    }
-                    description={
-                      <Space direction="vertical" size={4}>
-                        <Text type="secondary" style={{ fontSize: '12px' }}>
-                          {item.resource}
-                        </Text>
-                        <Text type="secondary" style={{ fontSize: '12px' }}>
-                          <ClockCircleOutlined /> {item.time}
-                        </Text>
-                      </Space>
-                    }
-                  />
-                </List.Item>
-              )}
+        <Col xs={24} lg={12}>
+          <Card title="Recent Findings" loading={isLoading}>
+            <Table
+              dataSource={data?.recent_findings ?? []}
+              rowKey="id"
+              size="small"
+              pagination={false}
+              columns={[
+                {
+                  title: "Severity",
+                  dataIndex: "severity",
+                  render: (s: Severity) => (
+                    <Tag color={SEVERITY_COLOR[s]}>{s.toUpperCase()}</Tag>
+                  ),
+                  width: 110,
+                },
+                { title: "Title", dataIndex: "title", ellipsis: true },
+                { title: "Scanner", dataIndex: "scanner", width: 100 },
+              ]}
             />
           </Card>
         </Col>
       </Row>
-    </DashboardContainer>
-  );
-};
 
-export default Dashboard;
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col span={24}>
+          <Card title="Recent Scans" loading={isLoading}>
+            <Table
+              dataSource={data?.recent_scans ?? []}
+              rowKey="id"
+              size="small"
+              pagination={false}
+              columns={[
+                { title: "Scan #", dataIndex: "id", width: 90 },
+                { title: "Asset", dataIndex: "asset_id", width: 110 },
+                { title: "Scanner", dataIndex: "scanner" },
+                {
+                  title: "Status",
+                  dataIndex: "status",
+                  render: (s: string) => (
+                    <Tag
+                      color={
+                        s === "completed"
+                          ? "green"
+                          : s === "failed"
+                            ? "red"
+                            : "blue"
+                      }
+                    >
+                      {s}
+                    </Tag>
+                  ),
+                  width: 120,
+                },
+                { title: "Findings", dataIndex: "findings_count", width: 100 },
+                {
+                  title: "When",
+                  dataIndex: "created_at",
+                  render: (v: string) => new Date(v).toLocaleString(),
+                },
+              ]}
+            />
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+}

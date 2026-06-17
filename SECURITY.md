@@ -6,13 +6,12 @@ Security is at the heart of Mond's mission. As a DevSecOps platform, we take sec
 
 ## 🛡️ Supported Versions
 
-We provide security updates for the following versions:
+Mond is pre-1.0. We currently support security fixes for the latest minor release on `main` only.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.x.x   | ✅ Yes             |
-| 0.9.x   | ✅ Yes (until 2025-06-01) |
-| < 0.9   | ❌ No              |
+| 0.x (main) | ✅ Yes |
+| earlier | ❌ No |
 
 ## 🚨 Reporting Security Vulnerabilities
 
@@ -22,13 +21,12 @@ We provide security updates for the following versions:
 
 Instead, please report security vulnerabilities responsibly through one of these channels:
 
-#### Primary Contact
-- **Email**: security@mond.dev
-- **Subject**: `[SECURITY] Brief description of the issue`
+#### Preferred — GitHub Security Advisory
+- **Open a private advisory**: <https://github.com/jland-93/mond/security/advisories/new>
+- The advisory thread is end-to-end private to maintainers until disclosed.
 
-#### Alternative Contacts
-- **GitHub Security Advisories**: [Create a private security advisory](https://github.com/jland-93/mond/security/advisories/new)
-- **Direct Contact**: jland@mond.dev (for critical issues)
+#### Alternative
+- Open a private GitHub Discussion and mention `@jland-93` if the advisory flow is unavailable.
 
 ### 📋 What to Include
 
@@ -54,9 +52,9 @@ Brief description of the vulnerability
 - User Interaction: [Required/Not Required]
 
 ## Affected Components
-- Component: [e.g., Tag Engine, Auth System]
-- Versions: [e.g., 1.0.0 - 1.2.3]
-- Environment: [e.g., AWS, Docker]
+- Component: [e.g., Scanner adapter, AI engine, Auth]
+- Versions: [e.g., commit hash or release tag]
+- Environment: [e.g., docker-compose, Kubernetes, local]
 
 ## Reproduction Steps
 1. Step one
@@ -117,44 +115,38 @@ While we don't currently offer monetary rewards, we provide:
 - **Testing**: Include security tests in your contributions
 - **Documentation**: Document security considerations
 
-## 🛠️ Security Features
+## 🛠️ Security Posture (MVP)
 
-### Built-in Security
-- **Authentication**: Multi-factor authentication support
-- **Authorization**: Role-based access control (RBAC)
-- **Encryption**: Data encryption at rest and in transit
-- **Audit Logging**: Comprehensive audit trail
-- **Input Validation**: Strict input validation and sanitization
-- **Rate Limiting**: API rate limiting and DDoS protection
+Mond is an OSS DevSecOps platform — we hold ourselves to the standards we recommend. The MVP includes:
 
-### Security Integrations
-- **AWS Security Hub**: Native integration
-- **GuardDuty**: Threat detection integration
-- **Config Rules**: Compliance monitoring
-- **CloudTrail**: Activity logging
-- **KMS**: Key management integration
+- **Input validation** via pydantic at every API boundary
+- **Structured audit logs** via `structlog`
+- **No secrets in repo** — `.env` is gitignored; `.env.example` ships placeholders only
+- **Scanner sandboxing** — adapter subprocess invocations are explicit and non-shell
+
+Planned (see roadmap):
+
+- Multi-user auth + RBAC
+- Rate limiting / abuse protection
+- E2E encryption for AI prompts containing customer code
 
 ## 📚 Security Resources
 
 ### Documentation
-- [Security Configuration Guide](docs/security/configuration.md)
-- [Deployment Security Checklist](docs/security/deployment.md)
-- [API Security Guidelines](docs/security/api.md)
-- [Infrastructure Security](docs/security/infrastructure.md)
+- [Architecture Overview](docs/development/architecture.md)
+- [Contributing Guide](CONTRIBUTING.md)
 
 ### External Resources
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [AWS Security Best Practices](https://aws.amazon.com/security/security-resources/)
 - [NIST Cybersecurity Framework](https://www.nist.gov/cyberframework)
 - [CIS Controls](https://www.cisecurity.org/controls/)
+- [OpenSSF Best Practices](https://www.bestpractices.dev/)
 
 ## 🔄 Security Updates
 
 ### Notification Channels
-- **GitHub Security Advisories**: Automatic notifications
-- **Release Notes**: Security fixes highlighted
-- **Mailing List**: security-announce@mond.dev
-- **Slack**: #security-announcements channel
+- **GitHub Security Advisories**: automatic notifications when published
+- **Release Notes**: security fixes highlighted with `security:` scope
 
 ### Update Process
 1. **Assessment**: Evaluate impact and severity
@@ -166,9 +158,8 @@ While we don't currently offer monetary rewards, we provide:
 ## 🤝 Security Community
 
 ### Collaboration
-We work closely with:
-- Security researchers and white-hat hackers
-- AWS Security team
+We work with:
+- Security researchers reporting through this policy
 - Open source security communities
 - Industry security organizations
 
@@ -181,15 +172,10 @@ Security contributions are welcome:
 
 ## 📞 Contact Information
 
-### Security Team
-- **Lead**: jland (김재곤)
-- **Email**: security@mond.dev
-- **PGP Key**: [Available on request]
-
-### Emergency Contact
-For critical security issues requiring immediate attention:
-- **Email**: critical-security@mond.dev
-- **Response Time**: Within 4 hours
+### Maintainer
+- **Lead**: [@jland-93](https://github.com/jland-93)
+- **GitHub Security Advisory**: <https://github.com/jland-93/mond/security/advisories/new> (preferred)
+- **PGP Key**: available on request
 
 ---
 
