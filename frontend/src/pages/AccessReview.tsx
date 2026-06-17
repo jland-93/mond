@@ -1,5 +1,5 @@
 /**
- * 🌙 Access Review — 보안 담당자가 AI가 인간 검토로 넘긴 요청을 처리한다
+ * 🌙 Access Review — 보안 담당자가 AI가 담당자 검토로 넘긴 요청을 처리한다
  */
 
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
@@ -36,7 +36,7 @@ export default function AccessReview() {
     mutationFn: ({ id, approve, reviewer, note }: { id: number; approve: boolean; reviewer: string; note?: string }) =>
       iamApi.humanDecision(id, { approve, reviewer, note }),
     onSuccess: () => {
-      message.success(t.iam.humanDecision + " 적용됨");
+      message.success(t.iam.decisionApplied);
       qc.invalidateQueries({ queryKey: ["access-requests"] });
       setDecisionFor(null);
       form.resetFields();
@@ -52,7 +52,15 @@ export default function AccessReview() {
 
       <Card style={{ marginTop: 12 }}>
         {(queue ?? []).length === 0 && (
-          <Alert type="success" showIcon message="검토 대기 중인 요청이 없습니다." />
+          <Alert
+            type="success"
+            showIcon
+            message={
+              t.iam.accessReviewTitle === "Access Review"
+                ? "No requests waiting for review."
+                : "검토 대기 중인 요청이 없습니다."
+            }
+          />
         )}
         <Table
           dataSource={queue ?? []}
@@ -135,7 +143,10 @@ export default function AccessReview() {
             <Input placeholder="security-team@example.com" />
           </Form.Item>
           <Form.Item label={t.iam.fields.note} name="note">
-            <Input.TextArea rows={3} placeholder="결정 이유" />
+            <Input.TextArea
+              rows={3}
+              placeholder={t.iam.accessReviewTitle === "Access Review" ? "Reason" : "결정 이유"}
+            />
           </Form.Item>
         </Form>
       </Modal>

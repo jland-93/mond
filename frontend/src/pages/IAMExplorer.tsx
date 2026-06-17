@@ -66,7 +66,7 @@ export default function IAMExplorer() {
     mutationFn: (body: { name: string; kind: IAMSourceKind; config: Record<string, unknown>; credentials_env_ref: Record<string, string> }) =>
       iamApi.createSource(body),
     onSuccess: () => {
-      message.success("Source 생성됨");
+      message.success(t.iam.sourceCreated);
       qc.invalidateQueries({ queryKey: ["iam-sources"] });
       setOpen(false);
       form.resetFields();

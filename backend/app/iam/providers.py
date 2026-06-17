@@ -135,8 +135,9 @@ def attach_aws(source: IAMSource, identity: IAMIdentity, permission: Permission)
             detail={
                 "stub": True,
                 "note": (
-                    "AWS 자격증명이 없어 실제 attach_policy를 수행하지 않았습니다. "
-                    "DB에는 grant 상태로 기록되지만, 외부 IAM에는 적용되지 않았습니다."
+                    "AWS 자격증명이 없어 실제 권한 부여(attach_policy)를 건너뜁니다. "
+                    "Mond DB에는 결정 이력이 남지만, AWS IAM에는 적용되지 않았습니다. "
+                    ".env에 AWS_ACCESS_KEY_ID와 AWS_SECRET_ACCESS_KEY를 설정한 뒤 다시 시도하세요."
                 ),
             },
         )

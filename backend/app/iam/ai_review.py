@@ -3,10 +3,10 @@
 
 Claude가 요청을 평가해 다음 3개 분기로 결정:
   - auto_approve : 위험 낮음, 자동 승인 (사용자에게 즉시 grant 진행)
-  - needs_human  : 인간 검토 필요 (보안 담당자 보드로)
+  - needs_human  : 담당자 검토 필요 (보안 담당자 보드로)
   - deny         : 명백한 거부 사유
 
-API 키 없으면 휴리스틱 fallback (admin/Full = needs_human, read = auto_approve).
+API 키 없으면 기본 규칙 fallback (admin/Full = needs_human, read = auto_approve).
 """
 
 from __future__ import annotations
@@ -108,7 +108,7 @@ async def review(
     return ReviewResult(
         decision=decision,
         risk_level=str(parsed.get("risk_level", "medium")),
-        reason=str(parsed.get("reason", "AI 응답 파싱 실패 — 인간 검토로 안내"))[:1000],
+        reason=str(parsed.get("reason", "AI 응답 파싱 실패 — 담당자 검토로 안내"))[:1000],
         model=settings.AI_MODEL_DEFAULT,
         confidence=float(parsed.get("confidence", 0.0)),
     )
@@ -127,28 +127,28 @@ def _parse(text: str) -> dict | None:
 
 
 def _heuristic(permission: Permission) -> ReviewResult:
-    """API 키 없을 때 — 권한 risk_hint 기반 단순 규칙."""
+    """API 키 없을 때 — 권한 risk_hint 기반 기본 규칙."""
     hint = (permission.risk_hint or "").lower()
     if hint == "read":
         return ReviewResult(
             decision="auto_approve",
             risk_level="low",
-            reason="[휴리스틱] 읽기 전용 권한 — 자동 승인. Claude 분석 활성화 시 더 정확한 판단 가능.",
-            model="heuristic",
+            reason="[기본 규칙] 읽기 전용 권한 — 자동 승인. Claude 분석 활성화 시 더 정확한 판단 가능.",
+            model="rule-based",
             confidence=0.4,
         )
     if hint == "admin":
         return ReviewResult(
             decision="needs_human",
             risk_level="critical",
-            reason="[휴리스틱] 관리자/전권 권한 — 보안 담당자 검토 필요.",
-            model="heuristic",
+            reason="[기본 규칙] 관리자/전권 권한 — 보안 담당자 검토 필요.",
+            model="rule-based",
             confidence=0.7,
         )
     return ReviewResult(
         decision="needs_human",
         risk_level="medium",
-        reason="[휴리스틱] 위험 등급 미상 — 인간 검토 권고.",
-        model="heuristic",
+        reason="[기본 규칙] 위험 등급 미상 — 담당자 검토 권고.",
+        model="rule-based",
         confidence=0.3,
     )

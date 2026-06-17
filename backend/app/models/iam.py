@@ -4,7 +4,7 @@
 - IAMSource    : 외부 IAM 시스템 등록 (AWS / GCP / Azure / k8s / custom)
 - IAMIdentity  : 외부 시스템에서 가져온 user / role / service_account / group
 - Permission   : 부여 가능한 권한 단위 (AWS Managed Policy / k8s ClusterRole / …)
-- AccessRequest: 직원이 신청한 권한 요청 + AI 1차 + 인간 2차 의사결정 + grant 결과
+- AccessRequest: 직원이 신청한 권한 요청 + AI 1차 + 담당자 2차 검토 + grant 결과
 """
 
 import enum
@@ -137,9 +137,9 @@ class AccessRequest(Base, TimestampMixin):
         index=True,
     )
 
-    # AI 1차 판단 (Claude 자율)
+    # AI 1차 검토 (Claude 자율)
     ai_decision: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
-    # 인간 2차 판단 (보안 담당자)
+    # 담당자 2차 검토 (보안 담당자)
     human_decision: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     # 실제 grant 결과 (AWS attach_policy 응답 또는 dry-run 메모)
     grant_result: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)

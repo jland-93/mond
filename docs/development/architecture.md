@@ -75,7 +75,7 @@ Policy (독립, 평가 시점에 적용)
 - `insights.py` — `analyze_finding(finding, deep=False)` / `route_query(text)`
   - 시스템 프롬프트가 짧아 **프롬프트 캐싱은 사용하지 않음** (캐시는 1024+ 토큰일 때만 의미).
   - 모델은 항상 strict JSON으로 응답 → 파서가 코드펜스도 허용.
-  - 실패 시 휴리스틱 fallback (OSS 사용자 보호).
+  - 실패 시 기본 규칙 fallback (OSS 사용자 보호).
 
 ### Triage 흐름
 
@@ -132,7 +132,7 @@ GitHub push → /webhooks/github  → Asset 매칭 → trigger_scan
                                     ↓
                        notify_finding → Slack / Generic webhook
                                     ↓
-                       (사용자가 UI에서 "Run AI Triage")
+                       (사용자가 UI에서 "AI 분석 실행")
                                     ↓
                        Claude → AIInsight 저장
 ```

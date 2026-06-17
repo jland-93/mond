@@ -12,14 +12,14 @@ import {
   FileTextOutlined,
   GlobalOutlined,
   KeyOutlined,
+  SafetyCertificateOutlined,
   SafetyOutlined,
   ScanOutlined,
   SettingOutlined,
-  SolutionOutlined,
   TeamOutlined,
   ThunderboltOutlined,
 } from "@ant-design/icons";
-import { Button, Dropdown, Layout as AntLayout, Menu, Space } from "antd";
+import { Button, Dropdown, Layout as AntLayout, Menu, Space, Tag } from "antd";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -47,12 +47,13 @@ export default function Layout() {
     { key: "/integrations", icon: <ApiOutlined />, label: t.menu.integrations },
     { key: "/iam-explorer", icon: <TeamOutlined />, label: t.menu.iamExplorer },
     { key: "/access-center", icon: <KeyOutlined />, label: t.menu.accessCenter },
-    { key: "/access-review", icon: <SolutionOutlined />, label: t.menu.accessReview },
     { key: "/settings", icon: <SettingOutlined />, label: t.menu.settings },
   ];
 
-  const selectedKey =
-    items.find((i) => i.key !== "/" && location.pathname.startsWith(i.key))?.key ?? "/";
+  const isAdminRoute = location.pathname.startsWith("/access-review");
+  const selectedKey = isAdminRoute
+    ? ""
+    : items.find((i) => i.key !== "/" && location.pathname.startsWith(i.key))?.key ?? "/";
 
   return (
     <AntLayout style={{ minHeight: "100vh" }}>
@@ -84,8 +85,19 @@ export default function Layout() {
             borderBottom: "1px solid var(--mond-border)",
           }}
         >
-          <span style={{ color: "var(--mond-text-dim)" }}>🌙 {t.appTagline}</span>
           <Space>
+            <span style={{ color: "var(--mond-text-dim)" }}>🌙 {t.appTagline}</span>
+            {isAdminRoute && <Tag color="red">{t.admin.badge}</Tag>}
+          </Space>
+          <Space>
+            <Button
+              type={isAdminRoute ? "primary" : "default"}
+              danger={isAdminRoute}
+              icon={<SafetyCertificateOutlined />}
+              onClick={() => navigate(isAdminRoute ? "/" : "/access-review")}
+            >
+              {isAdminRoute ? "←" : t.admin.enter}
+            </Button>
             <Dropdown
               trigger={["click"]}
               menu={{

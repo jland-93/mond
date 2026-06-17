@@ -108,8 +108,13 @@ export default function AccessCenter() {
         </Form>
       </Card>
 
-      <Card title="내 요청 / All requests" style={{ marginTop: 16 }}>
-        {(requests ?? []).length === 0 && <Alert type="info" message="아직 요청이 없습니다." />}
+      <Card title={t.iam.accessCenterTitle === "Access Center" ? "My requests" : "내 요청"} style={{ marginTop: 16 }}>
+        {(requests ?? []).length === 0 && (
+          <Alert
+            type="info"
+            message={t.iam.accessCenterTitle === "Access Center" ? "No requests yet." : "아직 요청이 없습니다."}
+          />
+        )}
         <Table
           dataSource={requests ?? []}
           rowKey="id"

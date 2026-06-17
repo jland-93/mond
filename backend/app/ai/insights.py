@@ -2,7 +2,7 @@
 🌙 AI 인사이트 생성기
 
 Claude를 호출해 Finding을 triage / remediation / explain 한다.
-API 키가 없으면 휴리스틱 fallback이 동작하므로 OSS 사용자가 즉시 UI를 볼 수 있다.
+API 키가 없으면 기본 규칙 fallback이 동작하므로 OSS 사용자가 즉시 UI를 볼 수 있다.
 """
 
 from __future__ import annotations
@@ -79,7 +79,7 @@ async def analyze_finding(finding: Finding, *, deep: bool = False) -> InsightRes
     parsed = _parse_json(text) or {}
 
     return InsightResult(
-        summary=parsed.get("summary", "AI 응답 파싱 실패 — 휴리스틱으로 대체.")[:1000],
+        summary=parsed.get("summary", "AI 응답 파싱 실패 — 기본 규칙으로 대체.")[:1000],
         confidence=float(parsed.get("confidence", 0.0)),
         recommended_severity=_coerce_severity(parsed.get("recommended_severity"), finding.severity),
         remediation=parsed.get("remediation") or {},
@@ -154,12 +154,12 @@ def _coerce_severity(value, fallback: Severity) -> Severity:
 
 
 def _fallback(finding: Finding) -> InsightResult:
-    """LLM 비활성 시: 휴리스틱으로 OSS 사용자에게 '쓸만한' 결과를 준다."""
+    """LLM 비활성 시: 기본 규칙으로 OSS 사용자에게 '쓸만한' 결과를 준다."""
     sev_text = finding.severity.value
     summary = (
-        f"[휴리스틱] {finding.scanner.title()}가 '{finding.rule_id}' 룰을 위반한 "
+        f"[기본 규칙] {finding.scanner.title()}가 '{finding.rule_id}' 룰을 위반한 "
         f"{sev_text} 등급 이슈를 발견했습니다. ANTHROPIC_API_KEY를 설정하면 "
-        f"Claude 기반 상세 분석과 코드 수정 제안을 받을 수 있습니다."
+        f"Claude 기반 상세 분석과 조치 코드 제안을 받을 수 있습니다."
     )
     return InsightResult(
         summary=summary,
@@ -172,7 +172,7 @@ def _fallback(finding: Finding) -> InsightResult:
             ],
             "references": finding.references or [],
         },
-        model="heuristic",
+        model="rule-based",
     )
 
 
@@ -188,6 +188,6 @@ def _heuristic_route(query: str) -> dict:
         intent = "unknown"
     return {
         "intent": intent,
-        "summary": f"휴리스틱 분류: {intent}. ANTHROPIC_API_KEY 설정 시 Claude가 더 정확하게 의도를 해석합니다.",
+        "summary": f"기본 규칙 분류: {intent}. ANTHROPIC_API_KEY 설정 시 Claude가 더 정확하게 의도를 해석합니다.",
         "suggested_actions": [],
     }

@@ -18,8 +18,13 @@ export const ko = {
     integrations: "통합",
     iamExplorer: "IAM 탐색",
     accessCenter: "권한 요청",
-    accessReview: "권한 검토",
     settings: "설정",
+  },
+
+  admin: {
+    enter: "관리자",
+    accessReview: "권한 검토",
+    badge: "ADMIN",
   },
 
   common: {
@@ -32,7 +37,7 @@ export const ko = {
     refresh: "새로고침",
     download: "다운로드",
     runScan: "스캔 실행",
-    runTriage: "AI Triage 실행",
+    runTriage: "AI 분석 실행",
     severity: "심각도",
     status: "상태",
     title: "제목",
@@ -69,9 +74,9 @@ export const ko = {
     uri: "URI",
     env: "환경",
     owner: "담당",
-    openFindings: "열린 발견",
+    openFindings: "미해결 발견사항",
     placeholderUri: "https://github.com/org/repo 또는 docker://image:tag",
-    placeholderOwner: "팀 이름",
+    placeholderOwner: "예: platform, ops",
   },
 
   scans: {
@@ -79,21 +84,21 @@ export const ko = {
     trigger: "스캔 시작",
     triggerSelectAsset: "자산 선택",
     findingsCount: "발견 수",
-    duration: "소요시간",
+    duration: "소요 시간",
   },
 
   findings: {
     title: "발견사항",
-    drawerNoInsight: "아직 AI 분석 결과가 없습니다. 'AI Triage 실행'을 눌러 분석을 시작하세요.",
+    drawerNoInsight: "아직 AI 분석 결과가 없습니다. 'AI 분석 실행'을 눌러 분석을 시작하세요.",
     references: "참고 링크",
-    remediation: "수정 가이드",
+    remediation: "조치 가이드",
   },
 
   policies: {
     title: "정책",
     threshold: "임계치",
     compliance: "컴플라이언스",
-    desc: "스캐너 결과에 적용되는 정책입니다. SAST / SCA / IaC / DAST / Container / Secrets / Compliance 유형 중 하나에 속하며, 임계치를 넘기는 발견사항은 파이프라인 게이트를 차단합니다.",
+    desc: "스캐너 결과에 적용되는 정책입니다. SAST / SCA / IaC / DAST / 컨테이너 / 시크릿 / 컴플라이언스 유형 중 하나에 속하며, 임계치를 넘기는 발견사항은 배포 파이프라인을 차단합니다.",
   },
 
   policySim: {
@@ -112,8 +117,8 @@ export const ko = {
     askPlaceholder: "Mond에게 무엇이든 물어보세요",
     askExample: "예: \"우리 nginx 이미지 스캔해줘\", \"이번 주 critical 이슈 뭐 있어?\"",
     enabled: "Claude 분석 활성",
-    disabled: "ANTHROPIC_API_KEY 미설정 — 휴리스틱 모드",
-    disabledHint: "실제 Claude 분석을 사용하려면 .env에 ANTHROPIC_API_KEY를 설정하고 백엔드를 재시작하세요.",
+    disabled: "ANTHROPIC_API_KEY 미설정 — 기본 규칙 모드",
+    disabledHint: "Claude 기반 상세 분석을 쓰려면 .env에 ANTHROPIC_API_KEY를 설정하고 백엔드를 재시작하세요.",
     analyze: "분석",
   },
 
@@ -155,22 +160,22 @@ export const ko = {
   },
 
   iam: {
-    accessCenterTitle: "권한 요청 (Access Center)",
+    accessCenterTitle: "권한 요청",
     accessCenterDesc:
       "필요한 IAM 권한을 신청하면 Claude가 1차로 위험을 평가하고, 필요 시 보안 담당자가 승인합니다.",
     iamExplorerTitle: "IAM 탐색",
-    iamExplorerDesc: "Import된 IAM 사용자/역할과 부여 가능한 권한을 둘러봅니다.",
-    accessReviewTitle: "권한 검토 (Access Review)",
-    accessReviewDesc: "AI가 인간 검토로 넘긴 요청을 보안 담당자가 승인/거부합니다.",
+    iamExplorerDesc: "가져온 IAM 사용자/역할과 부여 가능한 권한을 둘러봅니다.",
+    accessReviewTitle: "권한 검토",
+    accessReviewDesc: "AI가 담당자 검토로 넘긴 요청을 보안 담당자가 승인/거부합니다.",
     fields: {
       requester: "신청자",
       reason: "사유",
       duration: "유효 기간(시간)",
-      identity: "대상 Identity",
+      identity: "대상 (계정/역할)",
       permission: "요청 권한",
-      source: "Source",
+      source: "연동",
       type: "유형",
-      externalId: "External ID",
+      externalId: "외부 ID",
       risk: "위험도",
       status: "상태",
       decision: "결정",
@@ -181,23 +186,25 @@ export const ko = {
     approve: "승인",
     deny: "거부",
     sync: "동기화",
-    syncSource: "Source 동기화",
-    addSource: "Source 추가",
-    aiDecision: "AI 1차 판단",
-    humanDecision: "인간 2차 판단",
+    syncSource: "연동 동기화",
+    addSource: "연동 추가",
+    aiDecision: "AI 1차 검토",
+    humanDecision: "담당자 2차 검토",
     grantResult: "권한 부여 결과",
+    decisionApplied: "검토 결과가 저장되었습니다",
+    sourceCreated: "연동이 추가되었습니다",
     statuses: {
       pending_ai_review: "AI 검토 대기",
       ai_auto_approved: "AI 자동 승인",
-      needs_human_review: "인간 검토 필요",
-      human_approved: "인간 승인",
-      human_denied: "인간 거부",
+      needs_human_review: "담당자 검토 필요",
+      human_approved: "담당자 승인",
+      human_denied: "담당자 거부",
       granted: "권한 부여됨",
       grant_failed: "부여 실패",
     },
     decisions: {
       auto_approve: "자동 승인",
-      needs_human: "인간 검토 필요",
+      needs_human: "담당자 검토 필요",
       deny: "거부",
     },
     riskLevels: { critical: "치명적", high: "높음", medium: "중간", low: "낮음" },
@@ -212,7 +219,7 @@ export const ko = {
     environment: "환경",
     ai: "AI",
     locale: "언어",
-    note: "Mond OSS는 자율 호스팅을 전제로 합니다. 환경 변수는 .env에서, 운영 설정은 docker-compose.yml에서 관리하세요.",
+    note: "Mond OSS는 자체 호스팅을 전제로 합니다. 환경 변수는 .env에서, 운영 설정은 docker-compose.yml에서 관리하세요.",
   },
 };
 
