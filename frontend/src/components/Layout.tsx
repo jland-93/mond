@@ -1,40 +1,49 @@
 /**
- * 🌙 Mond — 사이드바 + 헤더 레이아웃
+ * 🌙 Mond — 사이드바 + 헤더 레이아웃 + 언어 스위처
  */
 
 import {
   AppstoreOutlined,
   ApiOutlined,
+  AuditOutlined,
   BulbOutlined,
   DashboardOutlined,
   ExperimentOutlined,
+  FileTextOutlined,
+  GlobalOutlined,
   SafetyOutlined,
   ScanOutlined,
   SettingOutlined,
+  ThunderboltOutlined,
 } from "@ant-design/icons";
-import { Layout as AntLayout, Menu } from "antd";
+import { Button, Dropdown, Layout as AntLayout, Menu, Space } from "antd";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Logo from "@/components/Logo";
+import { useI18n, type Locale } from "@/i18n";
 
 const { Header, Sider, Content } = AntLayout;
-
-const items = [
-  { key: "/", icon: <DashboardOutlined />, label: "Dashboard" },
-  { key: "/assets", icon: <AppstoreOutlined />, label: "Assets" },
-  { key: "/scans", icon: <ScanOutlined />, label: "Scans" },
-  { key: "/findings", icon: <SafetyOutlined />, label: "Findings" },
-  { key: "/policies", icon: <ExperimentOutlined />, label: "Policies" },
-  { key: "/ai-insights", icon: <BulbOutlined />, label: "AI Insights" },
-  { key: "/integrations", icon: <ApiOutlined />, label: "Integrations" },
-  { key: "/settings", icon: <SettingOutlined />, label: "Settings" },
-];
 
 export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, locale, setLocale } = useI18n();
+
+  const items = [
+    { key: "/", icon: <DashboardOutlined />, label: t.menu.dashboard },
+    { key: "/assets", icon: <AppstoreOutlined />, label: t.menu.assets },
+    { key: "/scans", icon: <ScanOutlined />, label: t.menu.scans },
+    { key: "/findings", icon: <SafetyOutlined />, label: t.menu.findings },
+    { key: "/policies", icon: <ExperimentOutlined />, label: t.menu.policies },
+    { key: "/policy-sim", icon: <ThunderboltOutlined />, label: t.menu.policySim },
+    { key: "/ai-insights", icon: <BulbOutlined />, label: t.menu.aiInsights },
+    { key: "/regulations", icon: <AuditOutlined />, label: t.menu.regulations },
+    { key: "/reports", icon: <FileTextOutlined />, label: t.menu.reports },
+    { key: "/integrations", icon: <ApiOutlined />, label: t.menu.integrations },
+    { key: "/settings", icon: <SettingOutlined />, label: t.menu.settings },
+  ];
 
   const selectedKey =
     items.find((i) => i.key !== "/" && location.pathname.startsWith(i.key))?.key ?? "/";
@@ -64,13 +73,30 @@ export default function Layout() {
           style={{
             display: "flex",
             alignItems: "center",
+            justifyContent: "space-between",
             padding: "0 24px",
             borderBottom: "1px solid var(--mond-border)",
           }}
         >
-          <span style={{ color: "var(--mond-text-dim)" }}>
-            🌙 AI-Powered Open-Source DevSecOps Platform
-          </span>
+          <span style={{ color: "var(--mond-text-dim)" }}>🌙 {t.appTagline}</span>
+          <Space>
+            <Dropdown
+              trigger={["click"]}
+              menu={{
+                items: [
+                  { key: "ko", label: t.language.ko },
+                  { key: "en", label: t.language.en },
+                ],
+                selectable: true,
+                selectedKeys: [locale],
+                onClick: ({ key }) => setLocale(key as Locale),
+              }}
+            >
+              <Button icon={<GlobalOutlined />} type="text">
+                {locale.toUpperCase()}
+              </Button>
+            </Dropdown>
+          </Space>
         </Header>
         <Content style={{ padding: 24 }}>
           <Outlet />

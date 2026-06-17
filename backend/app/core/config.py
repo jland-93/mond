@@ -58,5 +58,19 @@ class Settings(BaseSettings):
     # 시드 데이터 (개발용)
     SEED_ON_STARTUP: bool = True
 
+    # 알림 채널 (URL 비어 있으면 no-op)
+    SLACK_WEBHOOK_URL: Optional[str] = None
+    GENERIC_WEBHOOK_URL: Optional[str] = None
+    NOTIFY_MIN_SEVERITY: str = "high"  # critical / high / medium / low / info
+
+    # 외부 통합 — GitHub Webhook 검증용 (없으면 검증 생략, 개발 편의)
+    GITHUB_WEBHOOK_SECRET: Optional[str] = None
+
+    # i18n 기본 언어 (UI 초기 로드 시 사용)
+    DEFAULT_LOCALE: str = "ko"
+
+    # MCP 서버 토글 — stdio가 권장. HTTP/SSE는 mcp 패키지 변경 영향이 커서 기본 비활성.
+    MCP_HTTP_ENABLED: bool = False
+
 
 settings = Settings()

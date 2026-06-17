@@ -17,6 +17,7 @@ import {
 } from "antd";
 import { useState } from "react";
 
+import { useI18n } from "@/i18n";
 import { api, type Asset, type AssetType, type Page } from "@/lib/api";
 
 const { Title } = Typography;
@@ -36,6 +37,7 @@ async function fetchAssets(): Promise<Page<Asset>> {
 }
 
 export default function Assets() {
+  const { t } = useI18n();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
@@ -67,10 +69,10 @@ export default function Assets() {
         }}
       >
         <Title level={2} style={{ margin: 0 }}>
-          Assets
+          {t.assets.title}
         </Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => setOpen(true)}>
-          Add Asset
+          {t.assets.add}
         </Button>
       </div>
 

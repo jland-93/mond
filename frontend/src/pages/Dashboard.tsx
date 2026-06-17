@@ -12,6 +12,7 @@ import {
   Tooltip,
 } from "recharts";
 
+import { useI18n } from "@/i18n";
 import { api, type DashboardOverview, type Severity } from "@/lib/api";
 
 const { Title, Text } = Typography;
@@ -30,6 +31,7 @@ async function fetchOverview(): Promise<DashboardOverview> {
 }
 
 export default function Dashboard() {
+  const { t } = useI18n();
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard-overview"],
     queryFn: fetchOverview,
@@ -49,14 +51,14 @@ export default function Dashboard() {
   return (
     <div>
       <Title level={2} style={{ color: "var(--mond-text)", marginBottom: 24 }}>
-        🌙 Dashboard
+        🌙 {t.dashboard.title}
       </Title>
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
           <Card loading={isLoading}>
             <Statistic
-              title="Security Score"
+              title={t.dashboard.securityScore}
               value={data?.security_score ?? 0}
               suffix="/100"
               valueStyle={{ color: "#22c55e" }}
@@ -70,31 +72,31 @@ export default function Dashboard() {
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card loading={isLoading}>
-            <Statistic title="Assets" value={data?.asset_total ?? 0} />
-            <Text type="secondary">전체 보호 대상</Text>
+            <Statistic title={t.dashboard.assets} value={data?.asset_total ?? 0} />
+            <Text type="secondary">{t.dashboard.assetsHint}</Text>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card loading={isLoading}>
             <Statistic
-              title="Open Findings"
+              title={t.dashboard.openFindings}
               value={data?.open_findings_total ?? 0}
               valueStyle={{ color: "#f97316" }}
             />
-            <Text type="secondary">처리 대기 중</Text>
+            <Text type="secondary">{t.dashboard.openFindingsHint}</Text>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card loading={isLoading}>
-            <Statistic title="Scans (7d)" value={data?.scans_last_7d ?? 0} />
-            <Text type="secondary">최근 7일</Text>
+            <Statistic title={t.dashboard.scans7d} value={data?.scans_last_7d ?? 0} />
+            <Text type="secondary">{t.dashboard.scans7dHint}</Text>
           </Card>
         </Col>
       </Row>
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={12}>
-          <Card title="Open Findings by Severity" loading={isLoading}>
+          <Card title={t.dashboard.severityChart} loading={isLoading}>
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie
@@ -120,7 +122,7 @@ export default function Dashboard() {
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Recent Findings" loading={isLoading}>
+          <Card title={t.dashboard.recentFindings} loading={isLoading}>
             <Table
               dataSource={data?.recent_findings ?? []}
               rowKey="id"
@@ -145,7 +147,7 @@ export default function Dashboard() {
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col span={24}>
-          <Card title="Recent Scans" loading={isLoading}>
+          <Card title={t.dashboard.recentScans} loading={isLoading}>
             <Table
               dataSource={data?.recent_scans ?? []}
               rowKey="id"

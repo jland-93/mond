@@ -57,6 +57,17 @@ app.add_middleware(
 
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
+# MCP HTTP/SSE 마운트 — 원격 협업용. stdio 모드는 mcp_server.py로 별도 진입.
+# import는 lazy: mcp 패키지가 없거나 호환되지 않아도 backend는 정상 부팅.
+if settings.MCP_HTTP_ENABLED:
+    try:
+        from mcp_server import mcp as mond_mcp
+
+        app.mount("/mcp", mond_mcp.sse_app())
+        logger.info("mcp_mounted", path="/mcp")
+    except Exception as exc:
+        logger.warning("mcp_mount_failed", error=str(exc))
+
 
 @app.get("/")
 async def root() -> dict:
@@ -65,4 +76,5 @@ async def root() -> dict:
         "version": settings.VERSION,
         "docs": "/docs",
         "api": settings.API_V1_PREFIX,
+        "mcp": "/mcp" if settings.MCP_HTTP_ENABLED else None,
     }

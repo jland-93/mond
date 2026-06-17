@@ -18,6 +18,7 @@ from app.models.scan import Scan, ScanStatus, ScanTrigger
 from app.scanners.registry import get_scanner
 from app.services import asset as asset_service
 from app.services import finding as finding_service
+from app.services import notifications as notify
 
 logger = get_logger(__name__)
 
@@ -106,12 +107,13 @@ async def trigger_scan(
         return scan
 
     saved = 0
+    created_findings = []
     for raw in result.findings:
         try:
             severity = Severity(raw.severity.lower())
         except ValueError:
             severity = Severity.INFO
-        await finding_service.upsert_finding(
+        finding = await finding_service.upsert_finding(
             db,
             asset_id=asset.id,
             scan_id=scan.id,
@@ -124,6 +126,7 @@ async def trigger_scan(
             references=raw.references,
             extra=raw.extra,
         )
+        created_findings.append(finding)
         saved += 1
 
     scan.finished_at = datetime.now(timezone.utc)
@@ -138,5 +141,12 @@ async def trigger_scan(
 
     asset.last_scanned_at_str = scan.finished_at.isoformat() if scan.finished_at else None
     await asset_service.refresh_open_findings_count(db, asset.id)
+
+    # 임계치 이상의 finding을 알림 채널로 전송 (Slack/Generic webhook)
+    for f in created_findings:
+        try:
+            await notify.notify_finding(f)
+        except Exception as exc:
+            logger.warning("notify_failed", finding_id=f.id, error=str(exc))
 
     return scan

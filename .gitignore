@@ -216,6 +216,9 @@ datasets/
 !package.json
 !package-lock.json
 !tsconfig.json
+# 백엔드 정적 시드(규제 카탈로그 등)는 코드의 일부 — 커밋 유지
+!backend/app/data/
+!backend/app/data/**
 
 # Security
 *.pem

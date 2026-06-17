@@ -54,6 +54,12 @@ services:
       SECRET_KEY: ${SECRET_KEY:-development-secret-change-me}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       ALLOWED_ORIGINS: '["http://localhost:3000","http://localhost:5173"]'
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+      GENERIC_WEBHOOK_URL: ${GENERIC_WEBHOOK_URL:-}
+      NOTIFY_MIN_SEVERITY: ${NOTIFY_MIN_SEVERITY:-high}
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET:-}
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-ko}
+      MCP_HTTP_ENABLED: ${MCP_HTTP_ENABLED:-false}
     ports:
       - "8000:8000"
     depends_on:

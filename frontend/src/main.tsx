@@ -3,13 +3,13 @@
  */
 
 import { ConfigProvider, theme } from "antd";
-import koKR from "antd/locale/ko_KR";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import App from "@/App";
+import { I18nProvider, useI18n } from "@/i18n";
 import "@/styles/global.css";
 
 const queryClient = new QueryClient({
@@ -22,11 +22,10 @@ const queryClient = new QueryClient({
   },
 });
 
-// Mond 브랜드 컬러 — docs/assets/brand-guidelines.md 기준
 const mondTheme = {
   algorithm: theme.darkAlgorithm,
   token: {
-    colorPrimary: "#7c8cff", // 달빛 보라
+    colorPrimary: "#7c8cff",
     colorBgBase: "#0d1421",
     colorBgContainer: "#141c2f",
     colorBgElevated: "#1e293b",
@@ -38,24 +37,30 @@ const mondTheme = {
       "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   },
   components: {
-    Layout: {
-      bodyBg: "#0d1421",
-      headerBg: "#141c2f",
-      siderBg: "#0f1626",
-    },
+    Layout: { bodyBg: "#0d1421", headerBg: "#141c2f", siderBg: "#0f1626" },
     Card: { colorBgContainer: "#141c2f" },
     Menu: { darkItemBg: "#0f1626" },
   },
 };
 
+// antd locale은 i18n 컨텍스트에 따라 변경된다.
+function ThemedApp() {
+  const { antdLocale } = useI18n();
+  return (
+    <ConfigProvider theme={mondTheme} locale={antdLocale}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ConfigProvider>
+  );
+}
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ConfigProvider theme={mondTheme} locale={koKR}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </ConfigProvider>
+      <I18nProvider>
+        <ThemedApp />
+      </I18nProvider>
     </QueryClientProvider>
   </React.StrictMode>,
 );

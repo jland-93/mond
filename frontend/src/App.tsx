@@ -11,6 +11,9 @@ import Dashboard from "@/pages/Dashboard";
 import Findings from "@/pages/Findings";
 import Integrations from "@/pages/Integrations";
 import Policies from "@/pages/Policies";
+import PolicySimulator from "@/pages/PolicySimulator";
+import Regulations from "@/pages/Regulations";
+import Reports from "@/pages/Reports";
 import Scans from "@/pages/Scans";
 import Settings from "@/pages/Settings";
 
@@ -23,7 +26,10 @@ export default function App() {
         <Route path="scans" element={<Scans />} />
         <Route path="findings" element={<Findings />} />
         <Route path="policies" element={<Policies />} />
+        <Route path="policy-sim" element={<PolicySimulator />} />
         <Route path="ai-insights" element={<AIInsights />} />
+        <Route path="regulations" element={<Regulations />} />
+        <Route path="reports" element={<Reports />} />
         <Route path="integrations" element={<Integrations />} />
         <Route path="settings" element={<Settings />} />
       </Route>
