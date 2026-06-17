@@ -16,7 +16,7 @@ async function fetchPolicies(): Promise<Policy[]> {
 }
 
 export default function Policies() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { data, isLoading } = useQuery({ queryKey: ["policies"], queryFn: fetchPolicies });
 
   return (
@@ -31,24 +31,26 @@ export default function Policies() {
           loading={isLoading}
           dataSource={data ?? []}
           rowKey="id"
-          locale={{ emptyText: <Empty description="정책이 없습니다" /> }}
+          locale={{
+            emptyText: <Empty description={locale === "ko" ? "정책이 없습니다" : "No policies"} />,
+          }}
           columns={[
-            { title: "Name", dataIndex: "name" },
+            { title: t.common.name, dataIndex: "name" },
             {
-              title: "Type",
+              title: t.common.type,
               dataIndex: "policy_type",
-              render: (t: string) => <Tag color="purple">{t}</Tag>,
+              render: (v: string) => <Tag color="purple">{v}</Tag>,
               width: 130,
             },
-            { title: "Threshold", dataIndex: "severity_threshold", width: 120 },
+            { title: t.policies.threshold, dataIndex: "severity_threshold", width: 120 },
             {
-              title: "Enabled",
+              title: t.common.enabled,
               dataIndex: "enabled",
               render: (v: boolean) => <Switch checked={v} disabled />,
               width: 100,
             },
             {
-              title: "Compliance",
+              title: t.policies.compliance,
               dataIndex: "compliance_refs",
               render: (refs: string[]) => (
                 <>
@@ -58,7 +60,7 @@ export default function Policies() {
                 </>
               ),
             },
-            { title: "Description", dataIndex: "description", ellipsis: true },
+            { title: t.common.description, dataIndex: "description", ellipsis: true },
           ]}
         />
       </Card>

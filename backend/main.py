@@ -73,14 +73,29 @@ app.add_middleware(
 
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
-# MCP HTTP/SSE 마운트 — 원격 협업용. stdio 모드는 mcp_server.py로 별도 진입.
-# import는 lazy: mcp 패키지가 없거나 호환되지 않아도 backend는 정상 부팅.
+# MCP HTTP 마운트 — 원격 클라이언트용. stdio 모드는 mcp_server.py로 별도 진입.
+# Streamable HTTP(MCP 신규 표준) > SSE 순으로 시도, 둘 다 실패해도 backend 정상 부팅.
 if settings.MCP_HTTP_ENABLED:
     try:
         from mcp_server import mcp as mond_mcp
 
-        app.mount("/mcp", mond_mcp.sse_app())
-        logger.info("mcp_mounted", path="/mcp")
+        mcp_app = None
+        for attr in ("streamable_http_app", "sse_app"):
+            factory = getattr(mond_mcp, attr, None)
+            if factory is None:
+                continue
+            try:
+                mcp_app = factory()
+                logger.info("mcp_transport_resolved", transport=attr)
+                break
+            except Exception as exc:
+                logger.warning("mcp_transport_failed", transport=attr, error=str(exc))
+
+        if mcp_app is not None:
+            app.mount("/mcp", mcp_app)
+            logger.info("mcp_mounted", path="/mcp")
+        else:
+            logger.warning("mcp_mount_skipped", reason="no compatible transport")
     except Exception as exc:
         logger.warning("mcp_mount_failed", error=str(exc))
 

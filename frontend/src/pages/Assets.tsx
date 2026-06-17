@@ -82,18 +82,18 @@ export default function Assets() {
         rowKey="id"
         columns={[
           { title: "ID", dataIndex: "id", width: 70 },
-          { title: "Name", dataIndex: "name" },
+          { title: t.common.name, dataIndex: "name" },
           {
-            title: "Type",
+            title: t.common.type,
             dataIndex: "asset_type",
-            render: (t: string) => <Tag>{t}</Tag>,
+            render: (v: string) => <Tag>{v}</Tag>,
             width: 150,
           },
-          { title: "URI", dataIndex: "uri", ellipsis: true },
-          { title: "Env", dataIndex: "environment", width: 90 },
-          { title: "Owner", dataIndex: "owner", width: 120 },
+          { title: t.assets.uri, dataIndex: "uri", ellipsis: true },
+          { title: t.assets.env, dataIndex: "environment", width: 90 },
+          { title: t.assets.owner, dataIndex: "owner", width: 120 },
           {
-            title: "Open Findings",
+            title: t.assets.openFindings,
             dataIndex: "open_findings_count",
             width: 130,
             render: (v: number) => (

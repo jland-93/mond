@@ -84,10 +84,10 @@ export default function Scans() {
         rowKey="id"
         columns={[
           { title: "ID", dataIndex: "id", width: 70 },
-          { title: "Asset", dataIndex: "asset_id", width: 110 },
-          { title: "Scanner", dataIndex: "scanner", width: 140 },
+          { title: t.common.asset, dataIndex: "asset_id", width: 110 },
+          { title: t.common.scanner, dataIndex: "scanner", width: 140 },
           {
-            title: "Status",
+            title: t.common.status,
             dataIndex: "status",
             render: (s: string) => (
               <Tag color={s === "completed" ? "green" : s === "failed" ? "red" : "blue"}>
@@ -97,20 +97,20 @@ export default function Scans() {
             width: 120,
           },
           {
-            title: "Trigger",
+            title: t.scans.trigger,
             dataIndex: "trigger",
-            render: (t: string) => <Tag>{t}</Tag>,
+            render: (v: string) => <Tag>{v}</Tag>,
             width: 110,
           },
-          { title: "Findings", dataIndex: "findings_count", width: 110 },
+          { title: t.scans.findingsCount, dataIndex: "findings_count", width: 110 },
           {
-            title: "Duration",
+            title: t.scans.duration,
             dataIndex: "duration_ms",
             render: (v: number | null) => (v ? `${v} ms` : "—"),
             width: 110,
           },
           {
-            title: "When",
+            title: t.common.when,
             dataIndex: "created_at",
             render: (v: string) => new Date(v).toLocaleString(),
           },
@@ -118,7 +118,7 @@ export default function Scans() {
       />
 
       <Modal
-        title="Trigger Scan"
+        title={t.scans.trigger}
         open={open}
         onCancel={() => setOpen(false)}
         onOk={() => form.submit()}
