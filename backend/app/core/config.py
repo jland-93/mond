@@ -72,5 +72,28 @@ class Settings(BaseSettings):
     # MCP HTTP 마운트 — Streamable HTTP > SSE 순서로 시도. mcp 패키지가 둘 다 실패해도 backend는 정상.
     MCP_HTTP_ENABLED: bool = True
 
+    # ── SSO / RBAC ──────────────────────────────────────────────
+    # 인증 모드: "sso" (실제 IdP) / "dev" (이메일 입력만, OSS 데모용)
+    AUTH_MODE: str = "dev"
+    # 세션 cookie 이름 / 유효 시간 / Secure 플래그
+    SESSION_COOKIE: str = "mond_session"
+    SESSION_DAYS: int = 7
+    SESSION_SECURE: bool = False  # prod는 true(HTTPS)
+    # 콤마로 묶인 활성 OIDC provider 목록 (예: "keycloak,okta,google")
+    SSO_PROVIDERS: str = ""
+    # 각 provider별 설정 — ENV로 주입. provider 이름 prefix.
+    SSO_KEYCLOAK_ISSUER: Optional[str] = None
+    SSO_KEYCLOAK_CLIENT_ID: Optional[str] = None
+    SSO_KEYCLOAK_CLIENT_SECRET: Optional[str] = None
+    SSO_OKTA_ISSUER: Optional[str] = None
+    SSO_OKTA_CLIENT_ID: Optional[str] = None
+    SSO_OKTA_CLIENT_SECRET: Optional[str] = None
+    SSO_GOOGLE_CLIENT_ID: Optional[str] = None
+    SSO_GOOGLE_CLIENT_SECRET: Optional[str] = None
+    # 로그인 후 리다이렉트 base URL (FE)
+    SSO_REDIRECT_BASE: str = "http://localhost:3000"
+    # 첫 가입자 자동 ADMIN 지정 — empty면 모두 EMPLOYEE
+    SSO_ADMIN_EMAILS: str = ""
+
 
 settings = Settings()

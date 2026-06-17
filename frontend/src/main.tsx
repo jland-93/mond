@@ -9,6 +9,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import App from "@/App";
+import { AuthProvider } from "@/auth/AuthContext";
 import { I18nProvider, useI18n } from "@/i18n";
 import "@/styles/global.css";
 
@@ -49,7 +50,9 @@ function ThemedApp() {
   return (
     <ConfigProvider theme={mondTheme} locale={antdLocale}>
       <BrowserRouter>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </BrowserRouter>
     </ConfigProvider>
   );

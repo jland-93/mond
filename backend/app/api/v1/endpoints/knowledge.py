@@ -6,8 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.client import is_enabled as ai_enabled
+from app.auth.deps import require_role
 from app.core.database import get_db
 from app.models.knowledge import KnowledgeCategory
+from app.models.user import Role
 from app.schemas.knowledge import (
     GenerateRequest,
     KnowledgeCardCreate,
@@ -28,13 +30,22 @@ async def list_cards(
     return [KnowledgeCardRead.model_validate(i) for i in items]
 
 
-@router.post("/cards", response_model=KnowledgeCardRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/cards",
+    response_model=KnowledgeCardRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_role(Role.ADMIN))],
+)
 async def create_card(payload: KnowledgeCardCreate, db: AsyncSession = Depends(get_db)) -> KnowledgeCardRead:
     card = await knowledge_service.create_card(db, payload)
     return KnowledgeCardRead.model_validate(card)
 
 
-@router.patch("/cards/{card_id}", response_model=KnowledgeCardRead)
+@router.patch(
+    "/cards/{card_id}",
+    response_model=KnowledgeCardRead,
+    dependencies=[Depends(require_role(Role.ADMIN))],
+)
 async def update_card(
     card_id: int,
     payload: KnowledgeCardUpdate,
@@ -47,7 +58,11 @@ async def update_card(
     return KnowledgeCardRead.model_validate(updated)
 
 
-@router.delete("/cards/{card_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/cards/{card_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_role(Role.ADMIN))],
+)
 async def delete_card(card_id: int, db: AsyncSession = Depends(get_db)) -> None:
     card = await knowledge_service.get_card(db, card_id)
     if not card:
@@ -55,7 +70,11 @@ async def delete_card(card_id: int, db: AsyncSession = Depends(get_db)) -> None:
     await knowledge_service.delete_card(db, card)
 
 
-@router.post("/cards/generate", response_model=list[KnowledgeCardRead])
+@router.post(
+    "/cards/generate",
+    response_model=list[KnowledgeCardRead],
+    dependencies=[Depends(require_role(Role.REVIEWER))],
+)
 async def generate_cards(
     payload: GenerateRequest,
     db: AsyncSession = Depends(get_db),

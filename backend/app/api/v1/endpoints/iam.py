@@ -5,8 +5,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.deps import require_role
 from app.core.database import get_db
 from app.models.iam import AccessRequestStatus
+from app.models.user import Role
 from app.schemas.iam import (
     AccessRequestCreate,
     AccessRequestRead,
@@ -30,13 +32,21 @@ async def list_sources(db: AsyncSession = Depends(get_db)) -> list[IAMSourceRead
     return [IAMSourceRead.model_validate(i) for i in items]
 
 
-@router.post("/sources", response_model=IAMSourceRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/sources",
+    response_model=IAMSourceRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_role(Role.ADMIN))],
+)
 async def create_source(payload: IAMSourceCreate, db: AsyncSession = Depends(get_db)) -> IAMSourceRead:
     source = await iam_service.create_source(db, payload)
     return IAMSourceRead.model_validate(source)
 
 
-@router.post("/sources/{source_id}/sync")
+@router.post(
+    "/sources/{source_id}/sync",
+    dependencies=[Depends(require_role(Role.ADMIN))],
+)
 async def sync_source(source_id: int, db: AsyncSession = Depends(get_db)) -> dict:
     source = await iam_service.get_source(db, source_id)
     if not source:
@@ -85,7 +95,11 @@ async def create_request(
     return AccessRequestRead.model_validate(req)
 
 
-@router.post("/access-requests/{request_id}/human-decision", response_model=AccessRequestRead)
+@router.post(
+    "/access-requests/{request_id}/human-decision",
+    response_model=AccessRequestRead,
+    dependencies=[Depends(require_role(Role.REVIEWER))],
+)
 async def human_decision(
     request_id: int,
     payload: HumanDecisionIn,
@@ -105,7 +119,11 @@ async def human_decision(
     return AccessRequestRead.model_validate(updated)
 
 
-@router.post("/access-requests/{request_id}/revoke", response_model=AccessRequestRead)
+@router.post(
+    "/access-requests/{request_id}/revoke",
+    response_model=AccessRequestRead,
+    dependencies=[Depends(require_role(Role.REVIEWER))],
+)
 async def revoke_request(
     request_id: int,
     payload: RevokeRequest,
@@ -122,7 +140,10 @@ async def revoke_request(
     return AccessRequestRead.model_validate(updated)
 
 
-@router.post("/access-requests/sweep-expired")
+@router.post(
+    "/access-requests/sweep-expired",
+    dependencies=[Depends(require_role(Role.REVIEWER))],
+)
 async def sweep_expired(db: AsyncSession = Depends(get_db)) -> dict:
     """만료된 granted 요청을 즉시 모두 회수. cron 또는 수동 호출용."""
     n = await iam_service.revoke_expired(db)

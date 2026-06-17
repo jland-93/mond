@@ -22,6 +22,7 @@ from app.models.iam import (
 from app.models.knowledge import KnowledgeCard, KnowledgeCategory, KnowledgeSource
 from app.models.policy import Policy, PolicyType
 from app.models.scan import Scan, ScanStatus, ScanTrigger
+from app.models.user import Role, User, UserSession
 
 __all__ = [
     "Base",
@@ -49,4 +50,7 @@ __all__ = [
     "KnowledgeCard",
     "KnowledgeCategory",
     "KnowledgeSource",
+    "User",
+    "UserSession",
+    "Role",
 ]

@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     ai,
     assets,
+    auth,
     dashboard,
     findings,
     health,
@@ -24,6 +25,7 @@ from app.api.v1.endpoints import (
 api_router = APIRouter()
 
 api_router.include_router(health.router, tags=["Health"])
+api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 api_router.include_router(assets.router, prefix="/assets", tags=["Assets"])
 api_router.include_router(scans.router, prefix="/scans", tags=["Scans"])
