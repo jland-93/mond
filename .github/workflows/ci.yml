@@ -47,7 +47,7 @@ jobs:
         run: python -m compileall -q app main.py mcp_server.py
 
       - name: Pytest
-        run: pytest -q
+        run: python -m pytest -q
 
   frontend:
     name: Frontend (Node 24)
