@@ -5,17 +5,20 @@
 from __future__ import annotations
 
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.database import AsyncSessionLocal
 from app.core.logging import get_logger
 from app.iam import ai_review
 from app.iam import providers
 from app.models.iam import (
+    AccessAuditLog,
     AccessRequest,
     AccessRequestStatus,
+    AuditEvent,
     IAMIdentity,
     IAMSource,
     Permission,
@@ -23,6 +26,24 @@ from app.models.iam import (
 from app.schemas.iam import AccessRequestCreate, IAMSourceCreate
 
 logger = get_logger(__name__)
+
+
+async def _log(
+    db: AsyncSession,
+    *,
+    request_id: int,
+    event: AuditEvent,
+    actor: str,
+    detail: dict | None = None,
+) -> None:
+    db.add(
+        AccessAuditLog(
+            request_id=request_id,
+            event=event,
+            actor=actor,
+            detail=detail or {},
+        )
+    )
 
 
 # ── Source ──────────────────────────────────────────────────────
@@ -142,6 +163,7 @@ async def create_request(db: AsyncSession, payload: AccessRequestCreate) -> Acce
         permission=permission,
     )
     req.ai_decision = asdict(review_result)
+    await _log(db, request_id=req.id, event=AuditEvent.AI_DECIDED, actor="ai", detail=req.ai_decision)
 
     if review_result.decision == "auto_approve":
         req.status = AccessRequestStatus.AI_AUTO_APPROVED
@@ -167,6 +189,13 @@ async def apply_human_decision(
     note: str | None = None,
 ) -> AccessRequest:
     req.human_decision = {"approve": approve, "reviewer": reviewer, "note": note or ""}
+    await _log(
+        db,
+        request_id=req.id,
+        event=AuditEvent.HUMAN_DECIDED,
+        actor=reviewer,
+        detail=req.human_decision,
+    )
     if not approve:
         req.status = AccessRequestStatus.HUMAN_DENIED
         await db.commit()
@@ -196,9 +225,118 @@ async def _grant(
         await db.execute(select(IAMSource).where(IAMSource.id == identity.source_id))
     ).scalar_one()
     result = providers.attach_for(source, identity, permission)
+    granted_at = datetime.now(timezone.utc)
     req.grant_result = {
         "success": result.success,
         "detail": result.detail,
-        "granted_at": datetime.now(timezone.utc).isoformat(),
+        "granted_at": granted_at.isoformat(),
     }
-    req.status = AccessRequestStatus.GRANTED if result.success else AccessRequestStatus.GRANT_FAILED
+    if result.success:
+        req.status = AccessRequestStatus.GRANTED
+        # duration_hours가 지정되어 있으면 만료 시각 설정 → 백그라운드 sweep이 자동 회수
+        if req.duration_hours and req.duration_hours > 0:
+            req.expires_at = granted_at + timedelta(hours=req.duration_hours)
+        await _log(
+            db,
+            request_id=req.id,
+            event=AuditEvent.GRANTED,
+            actor="system",
+            detail={"expires_at": req.expires_at.isoformat() if req.expires_at else None},
+        )
+    else:
+        req.status = AccessRequestStatus.GRANT_FAILED
+        await _log(db, request_id=req.id, event=AuditEvent.GRANT_FAILED, actor="system", detail=result.detail)
+
+
+# ── 회수(revoke) ────────────────────────────────────────────────────
+async def _revoke_one(
+    db: AsyncSession,
+    req: AccessRequest,
+    *,
+    triggered_by: str,
+    event: AuditEvent = AuditEvent.EXPIRED_REVOKED,
+) -> None:
+    """granted 상태인 요청을 외부에 detach + DB 마킹 + audit."""
+    identity = (
+        await db.execute(select(IAMIdentity).where(IAMIdentity.id == req.target_identity_id))
+    ).scalar_one()
+    permission = (
+        await db.execute(select(Permission).where(Permission.id == req.permission_id))
+    ).scalar_one()
+    source = (
+        await db.execute(select(IAMSource).where(IAMSource.id == identity.source_id))
+    ).scalar_one()
+
+    result = providers.detach_for(source, identity, permission)
+    now = datetime.now(timezone.utc)
+    req.revoked_at = now
+    req.revoke_result = {
+        "success": result.success,
+        "detail": result.detail,
+        "revoked_at": now.isoformat(),
+        "triggered_by": triggered_by,
+    }
+    if result.success:
+        req.status = AccessRequestStatus.EXPIRED_REVOKED
+        await _log(db, request_id=req.id, event=event, actor=triggered_by, detail=result.detail)
+    else:
+        req.status = AccessRequestStatus.REVOKE_FAILED
+        await _log(
+            db,
+            request_id=req.id,
+            event=AuditEvent.REVOKE_FAILED,
+            actor=triggered_by,
+            detail=result.detail,
+        )
+
+
+async def manual_revoke(db: AsyncSession, req: AccessRequest, actor: str) -> AccessRequest:
+    if req.status != AccessRequestStatus.GRANTED:
+        raise ValueError(f"only granted requests can be revoked; current={req.status.value}")
+    await _revoke_one(db, req, triggered_by=actor, event=AuditEvent.MANUAL_REVOKED)
+    await db.commit()
+    await db.refresh(req)
+    return req
+
+
+async def revoke_expired(db: AsyncSession) -> int:
+    """만료된 granted 요청을 모두 회수한다. 회수 처리한 건수 반환."""
+    now = datetime.now(timezone.utc)
+    stmt = select(AccessRequest).where(
+        AccessRequest.status == AccessRequestStatus.GRANTED,
+        AccessRequest.expires_at.is_not(None),
+        AccessRequest.expires_at <= now,
+    )
+    expired = list((await db.execute(stmt)).scalars().all())
+    for req in expired:
+        try:
+            await _revoke_one(db, req, triggered_by="expiry-sweeper", event=AuditEvent.EXPIRED_REVOKED)
+        except Exception as exc:
+            logger.warning("revoke_failed", request_id=req.id, error=str(exc))
+    if expired:
+        await db.commit()
+    return len(expired)
+
+
+async def expiry_sweep_loop(interval_seconds: int = 300) -> None:
+    """백그라운드: 주기적으로 만료 회수 sweep."""
+    import asyncio
+
+    while True:
+        try:
+            async with AsyncSessionLocal() as session:
+                n = await revoke_expired(session)
+                if n:
+                    logger.info("expiry_sweep", revoked=n)
+        except Exception as exc:
+            logger.warning("expiry_sweep_failed", error=str(exc))
+        await asyncio.sleep(interval_seconds)
+
+
+async def list_audit(db: AsyncSession, request_id: int) -> list[AccessAuditLog]:
+    stmt = (
+        select(AccessAuditLog)
+        .where(AccessAuditLog.request_id == request_id)
+        .order_by(AccessAuditLog.id)
+    )
+    return list((await db.execute(stmt)).scalars().all())

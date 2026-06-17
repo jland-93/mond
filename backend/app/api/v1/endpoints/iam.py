@@ -10,11 +10,13 @@ from app.models.iam import AccessRequestStatus
 from app.schemas.iam import (
     AccessRequestCreate,
     AccessRequestRead,
+    AuditLogRead,
     HumanDecisionIn,
     IAMIdentityRead,
     IAMSourceCreate,
     IAMSourceRead,
     PermissionRead,
+    RevokeRequest,
 )
 from app.services import iam as iam_service
 
@@ -101,3 +103,33 @@ async def human_decision(
         db, req, approve=payload.approve, reviewer=payload.reviewer, note=payload.note
     )
     return AccessRequestRead.model_validate(updated)
+
+
+@router.post("/access-requests/{request_id}/revoke", response_model=AccessRequestRead)
+async def revoke_request(
+    request_id: int,
+    payload: RevokeRequest,
+    db: AsyncSession = Depends(get_db),
+) -> AccessRequestRead:
+    """granted 상태의 요청을 수동 회수. 일반적으론 만료 sweep이 자동 처리."""
+    req = await iam_service.get_request(db, request_id)
+    if not req:
+        raise HTTPException(status_code=404, detail="request not found")
+    try:
+        updated = await iam_service.manual_revoke(db, req, actor=payload.actor)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    return AccessRequestRead.model_validate(updated)
+
+
+@router.post("/access-requests/sweep-expired")
+async def sweep_expired(db: AsyncSession = Depends(get_db)) -> dict:
+    """만료된 granted 요청을 즉시 모두 회수. cron 또는 수동 호출용."""
+    n = await iam_service.revoke_expired(db)
+    return {"revoked": n}
+
+
+@router.get("/access-requests/{request_id}/audit", response_model=list[AuditLogRead])
+async def get_audit(request_id: int, db: AsyncSession = Depends(get_db)) -> list[AuditLogRead]:
+    items = await iam_service.list_audit(db, request_id)
+    return [AuditLogRead.model_validate(i) for i in items]

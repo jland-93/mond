@@ -8,9 +8,10 @@
 """
 
 import enum
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Enum, ForeignKey, String, Text
+from sqlalchemy import JSON, DateTime, Enum, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -111,6 +112,18 @@ class AccessRequestStatus(str, enum.Enum):
     HUMAN_DENIED = "human_denied"
     GRANTED = "granted"
     GRANT_FAILED = "grant_failed"
+    EXPIRED_REVOKED = "expired_revoked"
+    REVOKE_FAILED = "revoke_failed"
+
+
+class AuditEvent(str, enum.Enum):
+    AI_DECIDED = "ai_decided"
+    HUMAN_DECIDED = "human_decided"
+    GRANTED = "granted"
+    GRANT_FAILED = "grant_failed"
+    EXPIRED_REVOKED = "expired_revoked"
+    REVOKE_FAILED = "revoke_failed"
+    MANUAL_REVOKED = "manual_revoked"
 
 
 class AccessRequest(Base, TimestampMixin):
@@ -144,5 +157,31 @@ class AccessRequest(Base, TimestampMixin):
     # 실제 grant 결과 (AWS attach_policy 응답 또는 dry-run 메모)
     grant_result: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
 
+    # 만료 자동 회수
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoke_result: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+
     target_identity: Mapped["IAMIdentity"] = relationship(lazy="joined")
     permission: Mapped["Permission"] = relationship(lazy="joined")
+
+
+# ── Audit log ────────────────────────────────────────────────────────
+class AccessAuditLog(Base, TimestampMixin):
+    """access_request 1건의 모든 상태 변화(AI 결정, 인간 결정, grant, 회수)를 시계열 audit로 보관."""
+
+    __tablename__ = "access_audit_logs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    request_id: Mapped[int] = mapped_column(
+        ForeignKey("access_requests.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    event: Mapped[AuditEvent] = mapped_column(
+        Enum(AuditEvent, name="audit_event", native_enum=False),
+        nullable=False,
+        index=True,
+    )
+    actor: Mapped[str] = mapped_column(String(255), nullable=False)  # ai / 사용자 email / system
+    detail: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
