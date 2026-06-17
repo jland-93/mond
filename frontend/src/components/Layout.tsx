@@ -1,186 +1,107 @@
 /**
- * 🌙 Mond - Main Layout Component
+ * 🌙 Mond — 사이드바 + 헤더 레이아웃 + 언어 스위처
  */
 
-import React, { useState } from 'react';
-import { Layout as AntLayout, Menu, Avatar, Dropdown, Badge, Button } from 'antd';
-import { useNavigate, useLocation } from 'react-router-dom';
 import {
+  AppstoreOutlined,
+  ApiOutlined,
+  AuditOutlined,
+  BulbOutlined,
   DashboardOutlined,
-  TagsOutlined,
-  SecurityScanOutlined,
+  ExperimentOutlined,
+  FileTextOutlined,
+  GlobalOutlined,
+  SafetyOutlined,
+  ScanOutlined,
   SettingOutlined,
-  UserOutlined,
-  LogoutOutlined,
-  BellOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-} from '@ant-design/icons';
-import styled from 'styled-components';
+  ThunderboltOutlined,
+} from "@ant-design/icons";
+import { Button, Dropdown, Layout as AntLayout, Menu, Space } from "antd";
+import { useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+
+import Logo from "@/components/Logo";
+import { useI18n, type Locale } from "@/i18n";
 
 const { Header, Sider, Content } = AntLayout;
 
-const StyledLayout = styled(AntLayout)`
-  min-height: 100vh;
-`;
-
-const StyledHeader = styled(Header)`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-`;
-
-const Logo = styled.div`
-  display: flex;
-  align-items: center;
-  font-size: 20px;
-  font-weight: 600;
-  color: #ffffff;
-  
-  .moon-icon {
-    font-size: 24px;
-    margin-right: 8px;
-  }
-`;
-
-const HeaderActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-`;
-
-const StyledContent = styled(Content)`
-  margin: 24px;
-  padding: 24px;
-  background: #1e293b;
-  border-radius: 8px;
-  min-height: calc(100vh - 112px);
-`;
-
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, locale, setLocale } = useI18n();
 
-  const menuItems = [
-    {
-      key: '/dashboard',
-      icon: <DashboardOutlined />,
-      label: 'Dashboard',
-    },
-    {
-      key: '/tags',
-      icon: <TagsOutlined />,
-      label: 'Tag Management',
-    },
-    {
-      key: '/security',
-      icon: <SecurityScanOutlined />,
-      label: 'Security',
-    },
-    {
-      key: '/settings',
-      icon: <SettingOutlined />,
-      label: 'Settings',
-    },
+  const items = [
+    { key: "/", icon: <DashboardOutlined />, label: t.menu.dashboard },
+    { key: "/assets", icon: <AppstoreOutlined />, label: t.menu.assets },
+    { key: "/scans", icon: <ScanOutlined />, label: t.menu.scans },
+    { key: "/findings", icon: <SafetyOutlined />, label: t.menu.findings },
+    { key: "/policies", icon: <ExperimentOutlined />, label: t.menu.policies },
+    { key: "/policy-sim", icon: <ThunderboltOutlined />, label: t.menu.policySim },
+    { key: "/ai-insights", icon: <BulbOutlined />, label: t.menu.aiInsights },
+    { key: "/regulations", icon: <AuditOutlined />, label: t.menu.regulations },
+    { key: "/reports", icon: <FileTextOutlined />, label: t.menu.reports },
+    { key: "/integrations", icon: <ApiOutlined />, label: t.menu.integrations },
+    { key: "/settings", icon: <SettingOutlined />, label: t.menu.settings },
   ];
 
-  const userMenuItems = [
-    {
-      key: 'profile',
-      icon: <UserOutlined />,
-      label: 'Profile',
-    },
-    {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: 'Logout',
-      danger: true,
-    },
-  ];
-
-  const handleMenuClick = ({ key }: { key: string }) => {
-    navigate(key);
-  };
-
-  const handleUserMenuClick = ({ key }: { key: string }) => {
-    if (key === 'logout') {
-      // Handle logout
-      console.log('Logout clicked');
-    } else if (key === 'profile') {
-      // Handle profile
-      console.log('Profile clicked');
-    }
-  };
+  const selectedKey =
+    items.find((i) => i.key !== "/" && location.pathname.startsWith(i.key))?.key ?? "/";
 
   return (
-    <StyledLayout>
+    <AntLayout style={{ minHeight: "100vh" }}>
       <Sider
-        trigger={null}
         collapsible
         collapsed={collapsed}
+        onCollapse={setCollapsed}
+        width={232}
         theme="dark"
-        width={240}
+        style={{ borderRight: "1px solid var(--mond-border)" }}
       >
-        <Logo style={{ padding: '16px', borderBottom: '1px solid #1f2937' }}>
-          <span className="moon-icon">🌙</span>
-          {!collapsed && 'Mond'}
-        </Logo>
+        <Logo collapsed={collapsed} />
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[location.pathname]}
-          items={menuItems}
-          onClick={handleMenuClick}
-          style={{ marginTop: '16px' }}
+          selectedKeys={[selectedKey]}
+          items={items}
+          onClick={({ key }) => navigate(key)}
+          style={{ background: "transparent", borderRight: 0, marginTop: 12 }}
         />
       </Sider>
-      
       <AntLayout>
-        <StyledHeader>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{ color: '#ffffff' }}
-          />
-          
-          <HeaderActions>
-            <Badge count={3} size="small">
-              <Button
-                type="text"
-                icon={<BellOutlined />}
-                style={{ color: '#ffffff' }}
-              />
-            </Badge>
-            
+        <Header
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 24px",
+            borderBottom: "1px solid var(--mond-border)",
+          }}
+        >
+          <span style={{ color: "var(--mond-text-dim)" }}>🌙 {t.appTagline}</span>
+          <Space>
             <Dropdown
+              trigger={["click"]}
               menu={{
-                items: userMenuItems,
-                onClick: handleUserMenuClick,
+                items: [
+                  { key: "ko", label: t.language.ko },
+                  { key: "en", label: t.language.en },
+                ],
+                selectable: true,
+                selectedKeys: [locale],
+                onClick: ({ key }) => setLocale(key as Locale),
               }}
-              placement="bottomRight"
             >
-              <Avatar
-                style={{ backgroundColor: '#3f51b5', cursor: 'pointer' }}
-                icon={<UserOutlined />}
-              />
+              <Button icon={<GlobalOutlined />} type="text">
+                {locale.toUpperCase()}
+              </Button>
             </Dropdown>
-          </HeaderActions>
-        </StyledHeader>
-        
-        <StyledContent>
-          {children}
-        </StyledContent>
+          </Space>
+        </Header>
+        <Content style={{ padding: 24 }}>
+          <Outlet />
+        </Content>
       </AntLayout>
-    </StyledLayout>
+    </AntLayout>
   );
-};
-
-export default Layout;
+}

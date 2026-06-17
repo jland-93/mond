@@ -1,58 +1,29 @@
-# 📚 Mond Documentation
+# 📚 Mond 문서
 
-Welcome to the Mond documentation! This directory contains comprehensive guides and references for using, deploying, and contributing to Mond.
+Mond 사용/배포/기여에 필요한 자료를 모아둔 디렉토리입니다.
 
-## 📖 Documentation Structure
+## 📖 구성
 
-### 🚀 Getting Started
-- [Installation Guide](deployment/installation.md)
-- [Quick Start Tutorial](deployment/quickstart.md)
-- [Configuration Guide](deployment/configuration.md)
+### 🚀 시작하기
+- 메인 README: [`../README.md`](../README.md) — 설치, Quick Start, 메뉴 소개
 
-### 🔧 Development
-- [Development Setup](development/setup.md)
-- [Architecture Overview](development/architecture.md)
-- [Contributing Guidelines](../CONTRIBUTING.md)
-- [Code Style Guide](development/code-style.md)
+### 🏗️ 개발
+- [Architecture](development/architecture.md) — 5도메인 + 어댑터 + AI 엔진
+- [Contributing](../CONTRIBUTING.md) — 브랜치, 커밋, PR 절차
 
-### 🔒 Security
-- [Security Policy](../SECURITY.md)
-- [Security Configuration](security/configuration.md)
-- [Best Practices](security/best-practices.md)
-- [Vulnerability Management](security/vulnerability-management.md)
+### 🔒 보안
+- [Security Policy](../SECURITY.md) — 취약점 보고 / 응답 시간
 
-### 🌐 API Reference
-- [REST API Documentation](api/rest-api.md)
-- [Authentication](api/authentication.md)
-- [Tag Recommendation API](api/tag-recommendations.md)
-- [Webhooks](api/webhooks.md)
+### 🎨 디자인 자산
+- [Brand Guidelines](assets/brand-guidelines.md) — 컬러 팔레트 / 타이포 / 보이스
+- 로고 PNG: [`assets/images/mond-logo.png`](assets/images/mond-logo.png)
 
-### 🚀 Deployment
-- [Docker Deployment](deployment/docker.md)
-- [Kubernetes Deployment](deployment/kubernetes.md)
-- [AWS EKS Deployment](deployment/eks.md)
-- [Production Checklist](deployment/production.md)
+---
 
-### 🎨 Design & Assets
-- [Brand Guidelines](assets/brand-guidelines.md)
-- [UI Components](assets/ui-components.md)
-- [Images & Logos](assets/images/)
+## 🌐 외부 채널
 
-## 🤝 Contributing to Documentation
-
-We welcome contributions to improve our documentation! Please see our [Contributing Guidelines](../CONTRIBUTING.md) for details on how to contribute.
-
-### Documentation Standards
-- Use clear, concise language
-- Include code examples where applicable
-- Keep screenshots up to date
-- Follow the established structure
-
-## 📞 Need Help?
-
-- [GitHub Issues](https://github.com/jland-93/mond/issues)
-- [GitHub Discussions](https://github.com/jland-93/mond/discussions)
-- [Community Slack](https://slack.mond.dev)
+- GitHub Issues: <https://github.com/jland-93/mond/issues>
+- GitHub Discussions: <https://github.com/jland-93/mond/discussions>
 
 ---
 

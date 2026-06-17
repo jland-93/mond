@@ -1,51 +1,76 @@
 """
-🌙 Mond Configuration Settings
+🌙 Mond 설정
+
+환경 변수는 .env 파일에서 로드한다. 모든 설정은 pydantic-settings로 검증된다.
 """
 
-from pydantic_settings import BaseSettings
 from typing import List, Optional
-import os
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Application settings"""
-    
-    # Application
+    """애플리케이션 설정."""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+        extra="ignore",
+    )
+
+    # 애플리케이션 메타
     APP_NAME: str = "Mond"
-    VERSION: str = "1.0.0"
+    VERSION: str = "0.1.0"
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
-    
+
     # API
-    API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = "your-secret-key-change-in-production"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    
-    # Database
-    DATABASE_URL: str = "postgresql://mond:mond@localhost:5432/mond"
-    
-    # Redis
-    REDIS_URL: str = "redis://localhost:6379"
-    
+    API_V1_PREFIX: str = "/api/v1"
+    SECRET_KEY: str = Field(default="change-me-in-production", min_length=8)
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1일
+
+    # 데이터베이스 — asyncpg URL
+    DATABASE_URL: str = "postgresql+asyncpg://mond:mond@localhost:5432/mond"
+
+    # Redis (Celery broker + 캐시)
+    REDIS_URL: str = "redis://localhost:6379/0"
+
     # CORS
-    ALLOWED_HOSTS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
-    
-    # AWS Configuration
-    AWS_REGION: str = "us-east-1"
-    AWS_ACCESS_KEY_ID: Optional[str] = None
-    AWS_SECRET_ACCESS_KEY: Optional[str] = None
-    
-    # ML Model Configuration
-    ML_MODEL_PATH: str = "./models"
-    TAG_RECOMMENDATION_THRESHOLD: float = 0.8
-    
-    # Monitoring
-    PROMETHEUS_ENABLED: bool = True
+    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173"]
+
+    # LLM (Anthropic Claude)
+    ANTHROPIC_API_KEY: Optional[str] = None
+    AI_MODEL_DEFAULT: str = "claude-haiku-4-5-20251001"
+    AI_MODEL_DEEP: str = "claude-sonnet-4-6"
+    AI_MAX_TOKENS: int = 2048
+
+    # 스캐너 통합 토글 (없으면 stub 모드로 동작)
+    SCANNER_TRIVY_BIN: Optional[str] = "trivy"
+    SCANNER_SEMGREP_BIN: Optional[str] = "semgrep"
+    SCANNER_NUCLEI_BIN: Optional[str] = "nuclei"
+
+    # 관측성
     LOG_LEVEL: str = "INFO"
-    
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    PROMETHEUS_ENABLED: bool = True
+
+    # 시드 데이터 (개발용)
+    SEED_ON_STARTUP: bool = True
+
+    # 알림 채널 (URL 비어 있으면 no-op)
+    SLACK_WEBHOOK_URL: Optional[str] = None
+    GENERIC_WEBHOOK_URL: Optional[str] = None
+    NOTIFY_MIN_SEVERITY: str = "high"  # critical / high / medium / low / info
+
+    # 외부 통합 — GitHub Webhook 검증용 (없으면 검증 생략, 개발 편의)
+    GITHUB_WEBHOOK_SECRET: Optional[str] = None
+
+    # i18n 기본 언어 (UI 초기 로드 시 사용)
+    DEFAULT_LOCALE: str = "ko"
+
+    # MCP 서버 토글 — stdio가 권장. HTTP/SSE는 mcp 패키지 변경 영향이 커서 기본 비활성.
+    MCP_HTTP_ENABLED: bool = False
 
 
 settings = Settings()

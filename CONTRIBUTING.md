@@ -9,10 +9,9 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Python 3.9+
-- Node.js 16+
+- Python 3.12+
+- Node.js 20+
 - Docker & Docker Compose
-- AWS CLI configured
 - Git
 
 ### Development Setup
@@ -26,9 +25,9 @@ cd mond
 2. **Backend Setup**
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements-dev.txt
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
 3. **Frontend Setup**
@@ -40,12 +39,14 @@ npm install
 4. **Environment Configuration**
 ```bash
 cp .env.example .env
-# Edit .env with your configuration
+# Optional: ANTHROPIC_API_KEY=...  (없으면 휴리스틱 모드)
 ```
 
-5. **Start Development Environment**
+5. **Run with Docker (recommended)**
 ```bash
-docker-compose -f docker-compose.dev.yml up -d
+docker compose up -d
+# Backend: http://localhost:8000/docs
+# Frontend: http://localhost:3000
 ```
 
 ## 🛠️ Development Workflow
@@ -79,9 +80,9 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 **Examples:**
 ```
-feat(tag-engine): add ML-based tag recommendations
-fix(auth): resolve JWT token expiration issue
-docs(readme): update installation instructions
+feat(scanners): add Snyk scanner adapter
+fix(ai): handle malformed JSON from model
+docs(readme): clarify ANTHROPIC_API_KEY setup
 ```
 
 ## 🧪 Testing
@@ -90,14 +91,11 @@ docs(readme): update installation instructions
 ```bash
 # Backend tests
 cd backend
-pytest tests/ -v
+pytest -v
 
-# Frontend tests
+# Frontend type check + build
 cd frontend
-npm test
-
-# Integration tests
-docker-compose -f docker-compose.test.yml up --abort-on-container-exit
+npm run build
 ```
 
 ### Test Coverage
@@ -110,32 +108,23 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 
 ### Python (Backend)
 ```bash
-# Format code
-black backend/
-isort backend/
+# Format
+black .
 
-# Lint code
-flake8 backend/
-mypy backend/
-
-# Pre-commit hooks
-pre-commit install
+# Lint (replaces flake8 + isort + much of mypy)
+ruff check .
 ```
 
 ### TypeScript (Frontend)
 ```bash
-# Format and lint
 npm run lint
 npm run format
-
-# Type checking
-npm run type-check
 ```
 
-### Configuration Files
-- **Python**: `pyproject.toml`, `.flake8`
-- **TypeScript**: `eslint.config.js`, `.prettierrc`
-- **Pre-commit**: `.pre-commit-config.yaml`
+### Code conventions
+- **한글 주석** — 도메인 의도를 한국어로. API 텍스트는 영어.
+- **Conventional Commits** — `<type>(<scope>): <subject>`
+- Pure functions in services, side effects only in routes.
 
 ## 🎨 UI/UX Guidelines
 
@@ -161,7 +150,7 @@ npm run type-check
 - Regular dependency updates
 
 ### Reporting Security Issues
-Please report security vulnerabilities privately to: **security@mond.dev**
+See [SECURITY.md](SECURITY.md). Prefer GitHub Security Advisories for private disclosure.
 
 ## 📋 Pull Request Process
 
@@ -247,15 +236,12 @@ Active contributors may be invited to become maintainers based on:
 ## 📚 Resources
 
 ### Documentation
-- [Architecture Overview](docs/architecture.md)
-- [API Documentation](docs/api.md)
-- [Deployment Guide](docs/deployment.md)
-- [Troubleshooting](docs/troubleshooting.md)
+- [Architecture](docs/development/architecture.md)
+- [README](README.md) — Quick start & feature overview
 
 ### Community
+- [GitHub Issues](https://github.com/jland-93/mond/issues)
 - [GitHub Discussions](https://github.com/jland-93/mond/discussions)
-- [Slack Workspace](https://slack.mond.dev)
-- [Development Blog](https://blog.mond.dev)
 
 ## 🤝 Getting Help
 

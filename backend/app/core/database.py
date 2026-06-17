@@ -1,36 +1,35 @@
 """
-🌙 Mond Database Configuration
+🌙 Mond 데이터베이스 세션
+
+비동기 SQLAlchemy 엔진을 한 번만 생성하고, 요청 단위로 세션을 발급한다.
 """
 
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase
+from collections.abc import AsyncIterator
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from app.core.config import settings
 
-
-# Create async engine
 engine = create_async_engine(
-    settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://"),
+    settings.DATABASE_URL,
     echo=settings.DEBUG,
-    future=True
+    pool_pre_ping=True,
+    future=True,
 )
 
-# Create async session factory
 AsyncSessionLocal = async_sessionmaker(
     engine,
     class_=AsyncSession,
-    expire_on_commit=False
+    expire_on_commit=False,
+    autoflush=False,
 )
 
 
-class Base(DeclarativeBase):
-    """Base class for all database models"""
-    pass
-
-
-async def get_db() -> AsyncSession:
-    """Dependency to get database session"""
+async def get_db() -> AsyncIterator[AsyncSession]:
+    """FastAPI 의존성. 요청 단위 트랜잭션 스코프."""
     async with AsyncSessionLocal() as session:
         try:
             yield session
-        finally:
-            await session.close()
+        except Exception:
+            await session.rollback()
+            raise
