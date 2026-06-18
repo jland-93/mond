@@ -25,7 +25,7 @@ OSS 공개 / 마이너 버전 릴리스 전에 점검할 항목들입니다.
 
 - [ ] README의 Quick Start가 깨끗한 환경에서 동작
 - [ ] `.env.example`에 모든 신규 환경 변수 반영
-- [ ] CHANGELOG (있다면) 항목 추가
+- [ ] `CHANGELOG.md` 의 `[Unreleased]` 섹션을 신규 버전 헤더로 굴리기
 
 ## 🧪 기능 검증
 

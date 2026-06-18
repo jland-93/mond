@@ -25,10 +25,12 @@ export default function Login() {
   const onDevLogin = async (values: { email: string; name?: string }) => {
     setBusy(true);
     try {
-      await authApi.devLogin(values.email, values.name);
+      const me = await authApi.devLogin(values.email, values.name);
       await refresh();
       message.success(t.auth.welcomeBack);
-      navigate("/");
+      // MFA 강제 대상이면 검증 단계로
+      if (me.mfa_required && !me.mfa_verified) navigate("/mfa");
+      else navigate("/");
     } catch (err) {
       const e = err as Error & { response?: { data?: { detail?: string } } };
       message.error(e.response?.data?.detail ?? e.message);
@@ -53,10 +55,17 @@ export default function Login() {
       <Card style={{ width: "100%", maxWidth: 480 }} bordered={false}>
         <Space direction="vertical" style={{ width: "100%" }} size="middle">
           <div style={{ textAlign: "center" }}>
-            <span style={{ fontSize: 42, filter: "drop-shadow(0 0 12px rgba(124,140,255,0.6))" }}>
-              🌙
-            </span>
-            <Title level={2} style={{ marginBottom: 4 }}>
+            <img
+              src="/logo.png"
+              alt="Mond"
+              width={72}
+              height={72}
+              style={{
+                borderRadius: 16,
+                filter: "drop-shadow(0 0 18px rgba(124,140,255,0.6))",
+              }}
+            />
+            <Title level={2} style={{ marginBottom: 4, marginTop: 12 }}>
               Mond
             </Title>
             <Paragraph type="secondary">{t.appTagline}</Paragraph>

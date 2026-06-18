@@ -117,8 +117,12 @@ While we don't currently offer monetary rewards, we provide:
 
 ## 🛠️ Security Posture (MVP)
 
-Mond is an OSS DevSecOps platform — we hold ourselves to the standards we recommend. The MVP includes:
+Mond is an OSS DevSecOps platform — we hold ourselves to the standards we recommend. The current release includes:
 
+- **OIDC SSO** (Keycloak / Okta / Google) + server-side sessions (opaque token, instant revoke)
+- **4-tier RBAC** (VIEWER < EMPLOYEE < REVIEWER < ADMIN) enforced per endpoint via `require_role(...)`
+- **MFA** — Passkey (WebAuthn / FIDO2) + TOTP + one-time backup codes, with `MFA_REQUIRED_ROLES` enforcement
+- **Production boot gate** — refuses to start with weak `SECRET_KEY`, `DEBUG=true`, `AUTH_MODE=dev`, or `SESSION_SECURE=false`
 - **Input validation** via pydantic at every API boundary
 - **Structured audit logs** via `structlog`
 - **No secrets in repo** — `.env` is gitignored; `.env.example` ships placeholders only
@@ -126,9 +130,9 @@ Mond is an OSS DevSecOps platform — we hold ourselves to the standards we reco
 
 Planned (see roadmap):
 
-- Multi-user auth + RBAC
 - Rate limiting / abuse protection
 - E2E encryption for AI prompts containing customer code
+- OPA Rego policy evaluation
 
 ## 📚 Security Resources
 
@@ -175,10 +179,7 @@ Security contributions are welcome:
 ### Maintainer
 - **Lead**: [@jland-93](https://github.com/jland-93)
 - **GitHub Security Advisory**: <https://github.com/jland-93/mond/security/advisories/new> (preferred)
-- **PGP Key**: available on request
 
 ---
 
 **Thank you for helping keep Mond and our community safe! 🌙🔒**
-
-*Last updated: November 2025*

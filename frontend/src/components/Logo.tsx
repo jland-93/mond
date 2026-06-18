@@ -1,5 +1,5 @@
 /**
- * 🌙 Mond 로고 컴포넌트 — 텍스트 + 달 이모지 (정식 PNG는 docs/assets에 있음)
+ * 🌙 Mond 로고 컴포넌트 — public/logo.png 사용 (원본: docs/assets/images/mond-logo.png)
  */
 
 interface LogoProps {
@@ -20,9 +20,16 @@ export default function Logo({ collapsed = false }: LogoProps) {
         color: "var(--mond-text)",
       }}
     >
-      <span style={{ fontSize: 24, filter: "drop-shadow(0 0 8px rgba(124,140,255,0.6))" }}>
-        🌙
-      </span>
+      <img
+        src="/logo.png"
+        alt="Mond"
+        width={28}
+        height={28}
+        style={{
+          borderRadius: 6,
+          filter: "drop-shadow(0 0 8px rgba(124,140,255,0.4))",
+        }}
+      />
       {!collapsed && <span>Mond</span>}
     </div>
   );

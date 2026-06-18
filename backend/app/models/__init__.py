@@ -22,7 +22,15 @@ from app.models.iam import (
 from app.models.knowledge import KnowledgeCard, KnowledgeCategory, KnowledgeSource
 from app.models.policy import Policy, PolicyType
 from app.models.scan import Scan, ScanStatus, ScanTrigger
-from app.models.user import Role, User, UserSession
+from app.models.user import (
+    MfaBackupCode,
+    Role,
+    TotpSecret,
+    User,
+    UserSession,
+    WebAuthnChallenge,
+    WebAuthnCredential,
+)
 
 __all__ = [
     "Base",
@@ -53,4 +61,8 @@ __all__ = [
     "User",
     "UserSession",
     "Role",
+    "WebAuthnCredential",
+    "WebAuthnChallenge",
+    "TotpSecret",
+    "MfaBackupCode",
 ]

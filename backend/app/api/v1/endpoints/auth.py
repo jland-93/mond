@@ -10,12 +10,13 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import oidc
-from app.auth.deps import current_user
+from app.auth.deps import current_session
+from app.auth.mfa import mfa_required_for
 from app.auth.session import clear_cookie, create_session, resolve_session, revoke_session, set_cookie
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.logging import get_logger
-from app.models.user import Role, User
+from app.models.user import Role
 from app.services import user as user_service
 
 logger = get_logger(__name__)
@@ -39,16 +40,30 @@ class MeOut(BaseModel):
     name: str | None = None
     picture_url: str | None = None
     role: Role
+    mfa_required: bool = False
+    mfa_verified: bool = False
+    mfa_enrolled: bool = False
 
 
 @router.get("/me", response_model=MeOut)
-async def me(user: User = Depends(current_user)) -> MeOut:
+async def me(
+    sess=Depends(current_session),
+    db: AsyncSession = Depends(get_db),
+) -> MeOut:
+    """MFA 검증 전이어도 본인 정보는 조회 가능 (UI가 다음 단계 결정).
+
+    실제 보호 리소스는 `current_user` 의존성을 통과해야 한다.
+    """
+    user = sess.user
     return MeOut(
         id=user.id,
         email=user.email,
         name=user.name,
         picture_url=user.picture_url,
         role=user.role,
+        mfa_required=mfa_required_for(user),
+        mfa_verified=sess.mfa_verified,
+        mfa_enrolled=user.mfa_enrolled,
     )
 
 
@@ -77,12 +92,16 @@ async def dev_login(
         name=payload.name,
         sso_provider="dev",
     )
-    _, raw = await create_session(
+    sess, raw = await create_session(
         db,
         user,
         user_agent=request.headers.get("user-agent"),
         ip=request.client.host if request.client else None,
     )
+    # MFA 강제 대상이면 pre-MFA 상태로 발급. 그렇지 않으면 즉시 verified.
+    if not mfa_required_for(user):
+        sess.mfa_verified = True
+        await db.commit()
     set_cookie(response, raw)
     return MeOut(
         id=user.id,
@@ -90,6 +109,9 @@ async def dev_login(
         name=user.name,
         picture_url=user.picture_url,
         role=user.role,
+        mfa_required=mfa_required_for(user),
+        mfa_verified=sess.mfa_verified,
+        mfa_enrolled=user.mfa_enrolled,
     )
 
 
@@ -132,14 +154,17 @@ async def callback(
         sso_provider=provider,
         sso_subject=str(info.get("sub")),
     )
-    _, raw = await create_session(
+    sess, raw = await create_session(
         db,
         user,
         user_agent=request.headers.get("user-agent"),
         ip=request.client.host if request.client else None,
     )
+    if not mfa_required_for(user):
+        sess.mfa_verified = True
+        await db.commit()
 
-    # FE로 cookie 심고 리다이렉트
+    # FE로 cookie 심고 리다이렉트 (MFA 필요한 사용자는 FE에서 /mfa로 자동 이동)
     resp = RedirectResponse(url=f"{settings.SSO_REDIRECT_BASE.rstrip('/')}/")
     set_cookie(resp, raw)
     return resp

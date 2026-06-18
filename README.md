@@ -124,6 +124,46 @@ npm install
 npm run dev
 ```
 
+### 운영 배포 — Kubernetes (Helm)
+
+태그가 푸시되면 `ghcr.io`에 `mond-backend`/`mond-frontend` 이미지와 OCI Helm 차트가 자동 배포됩니다.
+
+```bash
+# 1) 시크릿 미리 생성 (External-Secrets/Sealed-Secrets로 대체 가능)
+kubectl create ns mond
+kubectl -n mond create secret generic mond-secrets \
+  --from-literal=SECRET_KEY="$(python -c 'import secrets;print(secrets.token_urlsafe(48))')" \
+  --from-literal=ANTHROPIC_API_KEY="sk-ant-..." \
+  --from-literal=SSO_PROVIDERS="keycloak" \
+  --from-literal=SSO_KEYCLOAK_ISSUER="https://keycloak.your-corp.com/realms/mond" \
+  --from-literal=SSO_KEYCLOAK_CLIENT_ID="mond" \
+  --from-literal=SSO_KEYCLOAK_CLIENT_SECRET="..." \
+  --from-literal=DATABASE_URL="postgresql+asyncpg://user:pwd@rds.../mond" \
+  --from-literal=REDIS_URL="redis://elasticache.../0"
+
+# 2) Helm 설치 (OCI 레지스트리)
+helm install mond oci://ghcr.io/jland-93/charts/mond \
+  --version 0.1.0 \
+  -n mond \
+  -f charts/mond/values-prod.yaml \
+  --set ingress.hosts[0].host=mond.your-corp.com
+```
+
+자세한 옵션: [`charts/mond/values.yaml`](charts/mond/values.yaml) · [`charts/mond/values-prod.yaml`](charts/mond/values-prod.yaml)
+
+#### EKS 가이드
+
+| 항목 | 권장 |
+|---|---|
+| 이미지 | `ghcr.io/jland-93/mond-backend:<ver>` · `…-frontend:<ver>` (multi-arch amd64/arm64) |
+| DB / 캐시 | RDS Postgres 16 + ElastiCache Redis (subchart `postgresql.enabled=false`) |
+| Ingress | AWS Load Balancer Controller (`ingressClassName: alb` + ACM) |
+| 시크릿 | External-Secrets Operator → AWS Secrets Manager / Parameter Store |
+| 컴퓨트 | IRSA로 `serviceAccount.annotations`에 IAM Role ARN 부여 |
+| 관측 | Prometheus 스크레이프 — backend 컨테이너 8000/metrics |
+
+운영 환경(`ENVIRONMENT=production`)에서는 약한 `SECRET_KEY`/`DEBUG=true`/`AUTH_MODE=dev`/`SESSION_SECURE=false` 조합을 **부팅 단계에서 거부**합니다 ([backend/app/core/config.py](backend/app/core/config.py)).
+
 ---
 
 ## 🤖 AI 동작 방식
@@ -174,9 +214,14 @@ class MyAdapter(ScannerAdapter):
 - [x] GitHub Webhook 자동 스캔
 - [x] Slack / Generic Webhook 알림
 - [x] MCP 서버 (stdio + HTTP/SSE)
+- [x] 멀티유저 + RBAC + OIDC SSO (Keycloak · Okta · Google)
+- [x] MFA — 패스키(WebAuthn/FIDO2) + TOTP + 백업 코드
+- [x] IAM 셀프서비스 — AWS · Kubernetes · LDAP/AD · GCP · Azure (5종 어댑터)
+- [x] Helm 차트 (charts/mond) + 운영용 멀티스테이지 Docker 이미지
 - [ ] OPA Rego 정책 평가
 - [ ] CI 통합 패키지 (GitHub Actions / GitLab CI)
-- [ ] 멀티유저 + RBAC + SSO
+- [ ] Rate limiting / abuse protection
+- [ ] AI 프롬프트 E2E 암호화 (고객 코드 포함 시)
 
 ---
 

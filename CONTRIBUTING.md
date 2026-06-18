@@ -98,11 +98,10 @@ cd frontend
 npm run build
 ```
 
-### Test Coverage
-- Maintain minimum 80% test coverage
-- Write unit tests for new features
-- Include integration tests for API endpoints
-- Add E2E tests for critical user flows
+### Tests
+- Test contributions are very welcome — current coverage is intentionally light (MVP).
+- New scanner adapters / AI prompts / policy rules should ship with at least one unit test.
+- Integration tests for API endpoints are encouraged for any endpoint that mutates state.
 
 ## 📝 Code Style
 
@@ -135,10 +134,9 @@ npm run format
 - **Responsiveness**: Mobile-first design
 
 ### Component Standards
-- Use Ant Design components as base
-- Follow atomic design methodology
+- Use Ant Design components as a base
 - Implement proper TypeScript interfaces
-- Include Storybook documentation
+- Co-locate components by domain; share common UI in `components/`
 
 ## 🔒 Security Guidelines
 
@@ -247,14 +245,10 @@ Active contributors may be invited to become maintainers based on:
 
 ### Questions?
 - Check existing [GitHub Issues](https://github.com/jland-93/mond/issues)
-- Join our [Slack community](https://slack.mond.dev)
 - Start a [GitHub Discussion](https://github.com/jland-93/mond/discussions)
 
 ### Mentorship
-New contributors can request mentorship through:
-- GitHub Discussions with `mentorship` label
-- Slack `#newcomers` channel
-- Direct message to maintainers
+New contributors can request mentorship by opening a GitHub Discussion with the `mentorship` label.
 
 ---
 

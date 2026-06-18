@@ -12,6 +12,9 @@ export interface Me {
   name?: string | null;
   picture_url?: string | null;
   role: Role;
+  mfa_required?: boolean;
+  mfa_verified?: boolean;
+  mfa_enrolled?: boolean;
 }
 
 export interface AuthProviderInfo {

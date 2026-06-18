@@ -14,6 +14,7 @@ from app.api.v1.endpoints import (
     iam,
     integrations,
     knowledge,
+    mfa,
     policies,
     policy_sim,
     policy_templates,
@@ -28,6 +29,7 @@ api_router = APIRouter()
 
 api_router.include_router(health.router, tags=["Health"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
+api_router.include_router(mfa.router, prefix="/auth/mfa", tags=["MFA"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 api_router.include_router(assets.router, prefix="/assets", tags=["Assets"])
 api_router.include_router(scans.router, prefix="/scans", tags=["Scans"])

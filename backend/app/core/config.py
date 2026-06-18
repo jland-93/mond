@@ -4,10 +4,24 @@
 환경 변수는 .env 파일에서 로드한다. 모든 설정은 pydantic-settings로 검증된다.
 """
 
+import logging
 from typing import List, Optional
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+logger = logging.getLogger(__name__)
+
+# 운영에서 쓰면 안 되는 기본/약한 SECRET_KEY 패턴.
+# .env.example의 placeholder 풀 문자열도 거부 — 사용자가 그대로 운영에 올리는 사고를 막는다.
+_WEAK_SECRET_KEYS = {
+    "change-me-in-production",
+    "change-me-in-production-use-a-long-random-string",
+    "changeme",
+    "secret",
+    "dev",
+    "mond",
+}
 
 
 class Settings(BaseSettings):
@@ -94,6 +108,41 @@ class Settings(BaseSettings):
     SSO_REDIRECT_BASE: str = "http://localhost:3000"
     # 첫 가입자 자동 ADMIN 지정 — empty면 모두 EMPLOYEE
     SSO_ADMIN_EMAILS: str = ""
+
+    # ── MFA (패스키 + TOTP + 백업 코드) ─────────────────────────
+    # 강제 대상 role 콤마 목록. 비우면 MFA 미강제(권장만).
+    MFA_REQUIRED_ROLES: str = "admin,reviewer"
+    # WebAuthn Relying Party
+    MFA_RP_ID: str = "localhost"               # 운영: 도메인 (예: mond.your-corp.com)
+    MFA_RP_NAME: str = "Mond"
+    MFA_RP_ORIGIN: str = "http://localhost:3000"  # 운영: https://...
+    # MFA challenge TTL(초)
+    MFA_CHALLENGE_TTL: int = 300
+
+    # ── 운영 가드 ───────────────────────────────────────────────
+    @model_validator(mode="after")
+    def _validate_for_production(self) -> "Settings":
+        """ENVIRONMENT=production 일 때 위험한 설정 조합을 거부한다.
+
+        Why: 오픈소스 배포 시 기본값 그대로 운영에 올라가는 사고를 막기 위함.
+        """
+        if self.ENVIRONMENT.lower() != "production":
+            return self
+        problems: list[str] = []
+        if self.SECRET_KEY.strip().lower() in _WEAK_SECRET_KEYS or len(self.SECRET_KEY) < 32:
+            problems.append(
+                "SECRET_KEY가 약하다. 32자 이상 무작위 값 사용. 예) python -c \"import secrets;print(secrets.token_urlsafe(48))\""
+            )
+        if self.DEBUG:
+            problems.append("DEBUG=true는 운영에서 금지")
+        if self.AUTH_MODE == "dev":
+            problems.append("AUTH_MODE=dev는 데모용. 운영에서는 'sso' + SSO_PROVIDERS 설정 필수")
+        if not self.SESSION_SECURE:
+            problems.append("SESSION_SECURE=true 필요 (HTTPS 쿠키 강제)")
+        if problems:
+            joined = "\n  - " + "\n  - ".join(problems)
+            raise ValueError(f"운영(production) 환경에서 다음 설정을 고쳐야 한다:{joined}")
+        return self
 
 
 settings = Settings()

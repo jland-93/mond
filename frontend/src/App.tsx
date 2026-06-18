@@ -16,7 +16,9 @@ import IAMExplorer from "@/pages/IAMExplorer";
 import Integrations from "@/pages/Integrations";
 import KnowledgeHub from "@/pages/KnowledgeHub";
 import Login from "@/pages/Login";
+import MfaChallenge from "@/pages/MfaChallenge";
 import Policies from "@/pages/Policies";
+import SecuritySettings from "@/pages/SecuritySettings";
 import PolicySimulator from "@/pages/PolicySimulator";
 import Regulations from "@/pages/Regulations";
 import Reports from "@/pages/Reports";
@@ -30,6 +32,14 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route
+        path="/mfa"
+        element={
+          <RequireAuth>
+            <MfaChallenge />
+          </RequireAuth>
+        }
+      />
       <Route
         element={
           <RequireAuth>
@@ -80,6 +90,7 @@ export default function App() {
           }
         />
         <Route path="settings" element={<Settings />} />
+        <Route path="security" element={<SecuritySettings />} />
 
         {/* 관리자 영역 */}
         <Route path="admin" element={<Navigate to="/admin/access-review" replace />} />

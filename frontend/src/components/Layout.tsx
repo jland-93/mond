@@ -172,6 +172,13 @@ export default function Layout() {
                     },
                     { type: "divider" },
                     {
+                      key: "security",
+                      icon: <SafetyOutlined />,
+                      label: t.security.menuLabel,
+                      onClick: () => navigate("/security"),
+                    },
+                    { type: "divider" },
+                    {
                       key: "logout",
                       icon: <LogoutOutlined />,
                       label: t.auth.logout,

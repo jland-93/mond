@@ -6,10 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.client import is_enabled as ai_enabled
-from app.auth.deps import require_role
+from app.auth.deps import current_user, require_role
 from app.core.database import get_db
 from app.models.knowledge import KnowledgeCategory
-from app.models.user import Role
+from app.models.user import Role, User
 from app.schemas.knowledge import (
     GenerateRequest,
     KnowledgeCardCreate,
@@ -24,6 +24,7 @@ router = APIRouter()
 @router.get("/cards", response_model=list[KnowledgeCardRead])
 async def list_cards(
     category: KnowledgeCategory | None = Query(None),
+    _user: User = Depends(current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[KnowledgeCardRead]:
     items = await knowledge_service.list_cards(db, category=category)

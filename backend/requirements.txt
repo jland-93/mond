@@ -37,6 +37,25 @@ anthropic==0.42.0
 # AWS IAM 통합 (자격증명 미설정 시 stub 모드로 동작)
 boto3==1.35.71
 
+# Kubernetes RBAC 통합 (kubeconfig 또는 in-cluster ServiceAccount, 없으면 stub)
+kubernetes==31.0.0
+
+# 온프레미스 디렉토리 (Active Directory / OpenLDAP / FreeIPA / Samba AD)
+ldap3==2.9.1
+
+# Google Cloud IAM (프로젝트 IAM policy get/set, predefined/custom roles)
+google-cloud-resource-manager==1.13.1
+google-cloud-iam==2.16.1
+
+# Azure RBAC (subscription 단위 roleAssignments + roleDefinitions)
+azure-identity==1.19.0
+azure-mgmt-authorization==4.0.0
+
+# MFA — 패스키(WebAuthn/FIDO2) + TOTP + 백업 코드
+webauthn==2.5.2
+pyotp==2.9.0
+qrcode[pil]==8.0
+
 # Model Context Protocol — Claude Desktop/Code 통합
 # FastMCP가 정식 포함된 1.2.0+ 사용
 mcp>=1.2.0,<2.0.0

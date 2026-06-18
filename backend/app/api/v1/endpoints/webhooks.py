@@ -3,9 +3,10 @@
 
 지원:
   - GitHub `push` 이벤트 → 해당 레포 자산을 찾아 자동 스캔(기본 trivy)
-  - Generic JSON push → 임의 자산 ID로 스캔 트리거
+  - Generic JSON push → 임의 자산 ID로 스캔 트리거 (EMPLOYEE 이상 인증 필요)
 
-GitHub의 X-Hub-Signature-256은 GITHUB_WEBHOOK_SECRET이 설정되어 있을 때만 검증.
+GitHub의 X-Hub-Signature-256은 GITHUB_WEBHOOK_SECRET이 설정되어 있을 때 검증한다.
+운영 환경(ENVIRONMENT=production)에서 secret이 미설정이면 요청 자체를 거부 (fail-closed).
 """
 
 from __future__ import annotations
@@ -17,11 +18,13 @@ from fastapi import APIRouter, Body, Depends, Header, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.deps import require_role
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.logging import get_logger
 from app.models.asset import Asset, AssetType
 from app.models.scan import ScanTrigger
+from app.models.user import Role
 from app.services import scan as scan_service
 
 router = APIRouter()
@@ -29,9 +32,18 @@ logger = get_logger(__name__)
 
 
 def _verify_github(signature: str | None, body: bytes) -> bool:
+    """GitHub HMAC 검증.
+
+    secret 미설정 + production 환경 → fail-closed (요청 거부).
+    secret 미설정 + 비-production 환경 → 검증 생략 (개발 편의).
+    """
     secret = settings.GITHUB_WEBHOOK_SECRET
     if not secret:
-        return True  # 설정 없으면 검증 생략 (개발 편의)
+        if settings.ENVIRONMENT.lower() == "production":
+            logger.error("github_webhook_secret_required_in_production")
+            return False
+        logger.warning("github_webhook_signature_skip_dev_only")
+        return True
     if not signature or not signature.startswith("sha256="):
         return False
     expected = "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
@@ -85,12 +97,15 @@ async def github_webhook(
     }
 
 
-@router.post("/generic")
+@router.post(
+    "/generic",
+    dependencies=[Depends(require_role(Role.EMPLOYEE))],
+)
 async def generic_webhook(
     payload: dict = Body(...),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """가벼운 통합용 — payload 안에 asset_id + scanner 만 들어 있으면 스캔 시작."""
+    """사내 CI/스크립트 통합용 — 인증된 직원만 호출. asset_id + scanner만 들어 있으면 스캔 시작."""
     asset_id = payload.get("asset_id")
     scanner = payload.get("scanner", "trivy")
     if not isinstance(asset_id, int):

@@ -7,8 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai import insights as ai_insights
 from app.ai.client import is_enabled as ai_enabled
+from app.auth.deps import current_user
 from app.core.database import get_db
 from app.models.ai_insight import InsightKind
+from app.models.user import User
 from app.schemas.ai_insight import AIInsightRead, AnalyzeRequest, AnalyzeResponse
 from app.services import ai as ai_service
 from app.services import finding as finding_service
@@ -25,6 +27,7 @@ async def ai_status() -> dict:
 async def triage_finding(
     finding_id: int,
     deep: bool = Query(False, description="claude-sonnet-4-6 사용 여부"),
+    _user: User = Depends(current_user),
     db: AsyncSession = Depends(get_db),
 ) -> AIInsightRead:
     finding = await finding_service.get_finding(db, finding_id)
@@ -39,6 +42,7 @@ async def triage_finding(
 @router.get("/findings/{finding_id}/insights", response_model=list[AIInsightRead])
 async def list_finding_insights(
     finding_id: int,
+    _user: User = Depends(current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[AIInsightRead]:
     items = await ai_service.list_insights_for_finding(db, finding_id)
@@ -46,7 +50,10 @@ async def list_finding_insights(
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
-async def analyze_query(payload: AnalyzeRequest) -> AnalyzeResponse:
+async def analyze_query(
+    payload: AnalyzeRequest,
+    _user: User = Depends(current_user),
+) -> AnalyzeResponse:
     """자연어 쿼리를 분류한다. 'scan' 의도이면 클라이언트가 후속 호출을 만든다."""
     result = await ai_insights.route_query(payload.query)
     return AnalyzeResponse(

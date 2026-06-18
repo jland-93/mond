@@ -41,11 +41,10 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 ### Reporting
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at:
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement via:
 
-- **Email**: conduct@mond.dev
-- **GitHub**: Create a private issue or contact maintainers directly
-- **Slack**: Direct message to any moderator
+- **GitHub Security Advisory** (private): <https://github.com/jland-93/mond/security/advisories/new> — the preferred channel for any report that should remain confidential.
+- **GitHub Discussions**: <https://github.com/jland-93/mond/discussions> — for non-sensitive concerns.
 
 All complaints will be reviewed and investigated promptly and fairly.
 

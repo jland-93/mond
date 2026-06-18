@@ -5,10 +5,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.deps import require_role
+from app.auth.deps import current_user, require_role
 from app.core.database import get_db
 from app.models.iam import AccessRequestStatus
-from app.models.user import Role
+from app.models.user import Role, User
 from app.schemas.iam import (
     AccessRequestCreate,
     AccessRequestRead,
@@ -20,14 +20,28 @@ from app.schemas.iam import (
     PermissionRead,
     RevokeRequest,
 )
+from app.iam.providers import get_capabilities
 from app.services import iam as iam_service
 
 router = APIRouter()
 
 
+# ── Capabilities ───────────────────────────────────────────────────
+@router.get("/capabilities")
+async def list_capabilities() -> list[dict]:
+    """각 IAM 유형의 실제 동작 가능 여부 (sync/grant/revoke + status)를 정직하게 노출.
+
+    UI dropdown은 이 값을 받아 'Ready'/'Coming soon'/'Demo only' 배지로 표시한다.
+    """
+    return get_capabilities()
+
+
 # ── Sources ────────────────────────────────────────────────────────
 @router.get("/sources", response_model=list[IAMSourceRead])
-async def list_sources(db: AsyncSession = Depends(get_db)) -> list[IAMSourceRead]:
+async def list_sources(
+    _user: User = Depends(current_user),
+    db: AsyncSession = Depends(get_db),
+) -> list[IAMSourceRead]:
     items = await iam_service.list_sources(db)
     return [IAMSourceRead.model_validate(i) for i in items]
 
@@ -58,6 +72,7 @@ async def sync_source(source_id: int, db: AsyncSession = Depends(get_db)) -> dic
 @router.get("/identities", response_model=list[IAMIdentityRead])
 async def list_identities(
     source_id: int | None = Query(None),
+    _user: User = Depends(current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[IAMIdentityRead]:
     items = await iam_service.list_identities(db, source_id)
@@ -67,6 +82,7 @@ async def list_identities(
 @router.get("/permissions", response_model=list[PermissionRead])
 async def list_permissions(
     source_id: int | None = Query(None),
+    _user: User = Depends(current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[PermissionRead]:
     items = await iam_service.list_permissions(db, source_id)
@@ -77,6 +93,7 @@ async def list_permissions(
 @router.get("/access-requests", response_model=list[AccessRequestRead])
 async def list_requests(
     status_filter: AccessRequestStatus | None = Query(None, alias="status"),
+    _user: User = Depends(current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[AccessRequestRead]:
     items = await iam_service.list_requests(db, status_filter)
@@ -86,6 +103,7 @@ async def list_requests(
 @router.post("/access-requests", response_model=AccessRequestRead)
 async def create_request(
     payload: AccessRequestCreate,
+    _user: User = Depends(current_user),
     db: AsyncSession = Depends(get_db),
 ) -> AccessRequestRead:
     try:
@@ -151,6 +169,10 @@ async def sweep_expired(db: AsyncSession = Depends(get_db)) -> dict:
 
 
 @router.get("/access-requests/{request_id}/audit", response_model=list[AuditLogRead])
-async def get_audit(request_id: int, db: AsyncSession = Depends(get_db)) -> list[AuditLogRead]:
+async def get_audit(
+    request_id: int,
+    _user: User = Depends(current_user),
+    db: AsyncSession = Depends(get_db),
+) -> list[AuditLogRead]:
     items = await iam_service.list_audit(db, request_id)
     return [AuditLogRead.model_validate(i) for i in items]

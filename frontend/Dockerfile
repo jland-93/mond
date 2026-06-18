@@ -1,13 +1,43 @@
-# 🌙 Mond Frontend Dockerfile (개발용)
-FROM node:20-alpine
+# 🌙 Mond Frontend — multi-stage 운영용 이미지
+# - vite build → nginx-unprivileged(8080) static serve
+# - 비루트(101) 실행
+# - API base URL은 빌드 시 ARG로 또는 런타임 env 주입(/env.js)으로 변경 가능
+
+ARG NODE_VERSION=20-alpine
+ARG NGINX_VERSION=1.27-alpine
+
+# ── 1) 빌드 스테이지 ───────────────────────────────────────────
+FROM node:${NODE_VERSION} AS build
+
+ENV CI=true
 
 WORKDIR /app
-
-COPY package.json ./
-RUN npm install --no-audit --no-fund
+COPY package.json package-lock.json* ./
+RUN if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; \
+    else npm install --no-audit --no-fund; fi
 
 COPY . .
 
-EXPOSE 3000
+# 빌드 시 정적으로 박힐 backend URL. 운영에선 보통 같은 도메인의 /api로 프록시한다.
+ARG VITE_API_URL=
+ENV VITE_API_URL=${VITE_API_URL}
 
-CMD ["npm", "run", "dev"]
+RUN npm run build
+
+
+# ── 2) 런타임 스테이지 (nginx unprivileged) ────────────────────
+FROM nginxinc/nginx-unprivileged:${NGINX_VERSION} AS runtime
+
+# nginx-unprivileged는 기본 8080 포트 + nginx user
+USER root
+RUN rm -f /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+USER nginx
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=20s --timeout=5s --retries=3 \
+  CMD wget -q -O- http://127.0.0.1:8080/ >/dev/null 2>&1 || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]

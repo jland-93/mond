@@ -13,11 +13,12 @@ Mond represents the gentle guidance of moonlight in the darkness of complex secu
 ## 🎨 Visual Identity
 
 ### Logo Usage
-The Mond logo is available in the following formats:
-- `mond-logo.png` - Primary logo with transparent background
-- `mond-logo-dark.png` - Dark variant for light backgrounds
-- `mond-logo-light.png` - Light variant for dark backgrounds
-- `mond-logo.svg` - Vector format for scalability
+The Mond logo (`docs/assets/images/mond-logo.png`) is shipped in a single PNG. App icons are derived from it and live under `frontend/public/`:
+- `logo.png` — 192×192 inline logo (sidebar, login card)
+- `logo-{32,64,96,180,192,512}.png` — favicon / Apple touch / PWA icons
+- `og-image.png` — 512×512 Open Graph card
+- `favicon.png` — alias for `logo-64.png`
+- `apple-touch-icon.png` — alias for `logo-180.png`
 
 ### Logo Guidelines
 - **Minimum Size**: 120px width for digital, 1 inch for print

@@ -73,11 +73,13 @@ body:
       options:
         - Frontend (React/TypeScript)
         - Backend (FastAPI/Python)
-        - Tag Recommendation Engine
-        - Security Dashboard
-        - Self-Service Portal
-        - Analytics Engine
-        - Infrastructure/Deployment
+        - Scanner Adapters (Trivy / Semgrep / Nuclei)
+        - AI Engine (Claude integration)
+        - Policy & Compliance (templates, simulator, reports)
+        - Auth / RBAC / MFA / SSO
+        - IAM Self-Service (AWS / K8s / LDAP / GCP / Azure)
+        - MCP Server
+        - Helm chart / Docker / Deployment
         - Documentation
         - Other
     validations:
@@ -102,12 +104,11 @@ body:
       label: Environment
       description: Please provide environment details
       placeholder: |
-        - OS: [e.g. macOS 12.0, Ubuntu 20.04, Windows 11]
-        - Browser: [e.g. Chrome 96, Firefox 95, Safari 15]
-        - Mond Version: [e.g. 1.0.0]
-        - AWS Region: [e.g. us-east-1]
-        - Python Version: [e.g. 3.9.7]
-        - Node.js Version: [e.g. 16.14.0]
+        - OS: [e.g. macOS 14, Ubuntu 24.04, Windows 11]
+        - Browser: [e.g. Chrome 130, Firefox 132, Safari 18]
+        - Mond version / commit: [e.g. v0.1.0 or commit sha]
+        - Deployment: [Docker compose / Helm / local dev]
+        - Python: [e.g. 3.12.x]  · Node.js: [e.g. 20.x]
     validations:
       required: true
 

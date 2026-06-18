@@ -2,7 +2,7 @@
  * 🌙 Admin · Policy Management — 정책 enable/disable, threshold 조정, 삭제 + 템플릿 카탈로그
  */
 
-import { AppstoreAddOutlined, DeleteOutlined, SafetyOutlined } from "@ant-design/icons";
+import { AppstoreAddOutlined, DeleteOutlined, PlusOutlined, SafetyOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
@@ -10,6 +10,7 @@ import {
   Card,
   Checkbox,
   Empty,
+  Form,
   Input,
   Modal,
   Popconfirm,
@@ -46,6 +47,7 @@ export default function AdminPolicies() {
   const { t, locale } = useI18n();
   const qc = useQueryClient();
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [framework, setFramework] = useState<string>(ALL);
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -115,15 +117,33 @@ export default function AdminPolicies() {
     },
   });
 
+  const createCustom = useMutation({
+    mutationFn: (payload: Partial<Policy>) =>
+      api.post<Policy>("/policies", payload).then((r) => r.data),
+    onSuccess: (p) => {
+      message.success(locale === "ko" ? `'${p.name}' 추가됨` : `Created '${p.name}'`);
+      qc.invalidateQueries({ queryKey: ["policies"] });
+      setCreateOpen(false);
+    },
+    onError: (e: Error & { response?: { data?: { detail?: string } } }) => {
+      message.error(e.response?.data?.detail ?? e.message);
+    },
+  });
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
         <Title level={2} style={{ margin: 0 }}>
           {t.adminArea.policyMgmtTitle}
         </Title>
-        <Button type="primary" icon={<AppstoreAddOutlined />} onClick={() => setCatalogOpen(true)}>
-          {t.policies.openCatalog}
-        </Button>
+        <Space>
+          <Button icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
+            {t.policies.createCustom}
+          </Button>
+          <Button type="primary" icon={<AppstoreAddOutlined />} onClick={() => setCatalogOpen(true)}>
+            {t.policies.openCatalog}
+          </Button>
+        </Space>
       </div>
       <Paragraph type="secondary">{t.adminArea.policyMgmtDesc}</Paragraph>
 
@@ -321,7 +341,152 @@ export default function AdminPolicies() {
           </div>
         </Space>
       </Modal>
+
+      <CustomPolicyModal
+        open={createOpen}
+        onCancel={() => setCreateOpen(false)}
+        onSubmit={(values) => createCustom.mutate(values)}
+        submitting={createCustom.isPending}
+        locale={locale}
+        t={t}
+      />
     </div>
+  );
+}
+
+function CustomPolicyModal({
+  open,
+  onCancel,
+  onSubmit,
+  submitting,
+  locale,
+  t,
+}: {
+  open: boolean;
+  onCancel: () => void;
+  onSubmit: (values: Partial<Policy>) => void;
+  submitting: boolean;
+  locale: "ko" | "en";
+  t: {
+    policies: {
+      createCustomTitle: string;
+      createCustomDesc: string;
+      fieldName: string;
+      fieldType: string;
+      fieldThreshold: string;
+      fieldDescription: string;
+      fieldComplianceRefs: string;
+      fieldComplianceRefsHint: string;
+      fieldDefinition: string;
+      fieldDefinitionHint: string;
+      invalidJson: string;
+      create: string;
+    };
+  };
+}) {
+  const [form] = Form.useForm();
+  const TYPES = ["sast", "sca", "iac", "dast", "container", "secrets", "compliance", "custom"];
+  return (
+    <Modal
+      title={
+        <Space>
+          <PlusOutlined />
+          <span>{t.policies.createCustomTitle}</span>
+        </Space>
+      }
+      open={open}
+      onCancel={() => {
+        form.resetFields();
+        onCancel();
+      }}
+      width={720}
+      okText={t.policies.create}
+      confirmLoading={submitting}
+      onOk={() => form.submit()}
+    >
+      <Paragraph type="secondary">{t.policies.createCustomDesc}</Paragraph>
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{
+          policy_type: "custom",
+          severity_threshold: "high",
+          enabled: true,
+        }}
+        onFinish={(values: {
+          name: string;
+          policy_type: string;
+          description?: string;
+          severity_threshold: string;
+          compliance_refs?: string[];
+          definition_json?: string;
+        }) => {
+          let definition: Record<string, unknown> = {};
+          if (values.definition_json?.trim()) {
+            try {
+              definition = JSON.parse(values.definition_json);
+            } catch {
+              message.error(t.policies.invalidJson);
+              return;
+            }
+          }
+          onSubmit({
+            name: values.name.trim(),
+            policy_type: values.policy_type as Policy["policy_type"],
+            description: values.description?.trim() || undefined,
+            severity_threshold: values.severity_threshold,
+            compliance_refs: values.compliance_refs ?? [],
+            definition,
+            enabled: true,
+          } as Partial<Policy>);
+          form.resetFields();
+        }}
+      >
+        <Form.Item
+          label={t.policies.fieldName}
+          name="name"
+          rules={[{ required: true, min: 3, max: 120 }]}
+        >
+          <Input placeholder={locale === "ko" ? "예: 사내 — 망분리 강제" : "e.g. Internal — Enforce network segregation"} />
+        </Form.Item>
+
+        <Space style={{ width: "100%" }} size="middle">
+          <Form.Item label={t.policies.fieldType} name="policy_type" style={{ width: 200 }}>
+            <Select options={TYPES.map((v) => ({ value: v, label: v }))} />
+          </Form.Item>
+          <Form.Item label={t.policies.fieldThreshold} name="severity_threshold" style={{ width: 200 }}>
+            <Select options={SEVERITIES.map((v) => ({ value: v, label: v }))} />
+          </Form.Item>
+        </Space>
+
+        <Form.Item label={t.policies.fieldDescription} name="description">
+          <Input.TextArea
+            rows={2}
+            placeholder={locale === "ko" ? "이 통제의 목적과 적용 범위" : "Purpose and scope of this control"}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label={t.policies.fieldComplianceRefs}
+          name="compliance_refs"
+          extra={t.policies.fieldComplianceRefsHint}
+        >
+          <Select
+            mode="tags"
+            tokenSeparators={[",", " "]}
+            placeholder="INTERNAL-SEC-01"
+          />
+        </Form.Item>
+
+        <Form.Item
+          label={t.policies.fieldDefinition}
+          name="definition_json"
+          extra={t.policies.fieldDefinitionHint}
+        >
+          <Input.TextArea rows={4} placeholder='{"min_tls_version":"1.2"}' style={{ fontFamily: "monospace" }} />
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 }
 
@@ -342,10 +507,19 @@ function FrameworkFilter({
     { value: ALL, label: t.policies.allFrameworks },
     ...frameworks.map((f) => ({
       value: f.id,
-      label: locale === "ko" ? f.name_ko.split(" (")[0] : f.name_en.split(" (")[0],
+      label: f.short_name || (locale === "ko" ? f.name_ko.split(" (")[0] : f.name_en.split(" (")[0]),
+      title: locale === "ko" ? f.name_ko : f.name_en,
     })),
   ];
-  return <Segmented block value={value} onChange={(v) => onChange(v as string)} options={options} />;
+  return (
+    <div style={{ overflowX: "auto", paddingBottom: 4 }}>
+      <Segmented
+        value={value}
+        onChange={(v) => onChange(v as string)}
+        options={options}
+      />
+    </div>
+  );
 }
 
 function tagColor(ref: string): string {
