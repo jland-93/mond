@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/auth/AuthContext";
-import MoonJarHero from "@/components/MoonJarHero";
+import AIOrbHero from "@/components/AIOrbHero";
 import { useI18n } from "@/i18n";
 import { authApi } from "@/lib/auth-api";
 
@@ -47,49 +47,92 @@ export default function Login() {
 
   const headline =
     locale === "ko"
-      ? ["달빛 아래,", "신뢰의 한 순간"]
-      : ["A moonlit", "moment of trust"];
+      ? ["보안을", "AI에 맡기고", "잠은 푹"]
+      : ["Hand security", "to your AI.", "Sleep well."];
 
   const sub =
     locale === "ko"
-      ? "Mond — AI 셀프서비스 DevSecOps. 한국 기업의 보안과 컴플라이언스를 가벼이."
-      : "Mond — AI self-service DevSecOps for Korean enterprises.";
+      ? "AI 셀프서비스 DevSecOps — 스캔·분석·승인·기록까지 한 흐름으로. 직원은 신청만, 나머지는 Mond가."
+      : "AI self-service DevSecOps — scan, triage, approve, audit in one flow. Employees just ask; Mond does the rest.";
+
+  const pillars =
+    locale === "ko"
+      ? [
+          { kw: "AI Triage", desc: "발견사항을 Claude가 1차 분석" },
+          { kw: "Self-service", desc: "권한·스캔을 직원이 직접 요청" },
+          { kw: "Auto-audit", desc: "ISMS-P·PCI DSS·GDPR 자동 매핑" },
+        ]
+      : [
+          { kw: "AI Triage", desc: "Claude grades every finding" },
+          { kw: "Self-service", desc: "Employees request access & scans" },
+          { kw: "Auto-audit", desc: "ISMS-P · PCI DSS · GDPR mapped" },
+        ];
 
   return (
     <div className="login-shell">
-      {/* ── 좌측 hero (50%) — 달항아리 + headline ─────────────────── */}
+      {/* ── 좌측 hero (50%) — AI Orb + 제품 가치 카피 ─────────────── */}
       <div className="login-hero">
         <div className="login-hero-inner">
           <div className="login-mark">
-            <img src="/logo.png" alt="Mond" width={32} height={32} />
-            <span style={{ fontWeight: 600, letterSpacing: "-0.01em" }}>Mond</span>
+            <img src="/logo.png" alt="Mond" width={28} height={28} />
+            <span style={{ fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17 }}>
+              Mond
+            </span>
+            <span
+              style={{
+                fontSize: 11,
+                color: "var(--accent)",
+                background: "color-mix(in oklch, var(--accent) 10%, transparent)",
+                border: "1px solid var(--accent-dim)",
+                padding: "2px 8px",
+                borderRadius: 999,
+                marginLeft: 4,
+                letterSpacing: "0.04em",
+              }}
+            >
+              AI · DevSecOps
+            </span>
           </div>
 
-          <MoonJarHero size={240} />
+          <div className="login-orb-wrap">
+            <AIOrbHero size={340} />
+          </div>
 
           <div className="login-headline">
             <Title
               level={1}
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "var(--text-display)",
-                lineHeight: 1.1,
+                fontSize: 56,
+                lineHeight: 1.05,
                 margin: 0,
                 color: "var(--fg-primary)",
-                letterSpacing: "-0.02em",
+                letterSpacing: "-0.025em",
                 fontWeight: 600,
               }}
             >
               {headline[0]}
               <br />
-              {headline[1]}
+              <span
+                style={{
+                  background:
+                    "linear-gradient(120deg, var(--accent) 10%, oklch(72% 0.16 295) 80%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                {headline[1]}
+              </span>
+              <br />
+              {headline[2]}
             </Title>
             <Paragraph
               style={{
                 color: "var(--fg-secondary)",
                 fontSize: 15,
-                marginTop: 16,
-                maxWidth: 360,
+                marginTop: 18,
+                maxWidth: 420,
                 lineHeight: 1.6,
               }}
             >
@@ -97,12 +140,14 @@ export default function Login() {
             </Paragraph>
           </div>
 
-          <div className="login-footnote">
-            <Text style={{ color: "var(--fg-tertiary)", fontSize: 12 }}>
-              {locale === "ko"
-                ? "달항아리 — 조선 백자. 좌우 비대칭에서 오는 절제의 미. Mond의 시그니처."
-                : "Dal-Hangari — Joseon moon jar. Imperfect symmetry, our signature."}
-            </Text>
+          {/* 3 pillars — 제품 가치 명시 */}
+          <div className="login-pillars">
+            {pillars.map((p) => (
+              <div className="login-pillar" key={p.kw}>
+                <div className="login-pillar-kw">{p.kw}</div>
+                <div className="login-pillar-desc">{p.desc}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -243,7 +288,7 @@ export default function Login() {
         .login-shell {
           min-height: 100vh;
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: 1.05fr 1fr;
           background: var(--surface-0);
           color: var(--fg-primary);
         }
@@ -253,10 +298,11 @@ export default function Login() {
         }
         .login-hero {
           position: relative;
-          padding: 56px;
+          padding: 48px 56px 40px;
           background:
-            radial-gradient(ellipse at 30% 20%, oklch(82% 0.06 180 / 0.10), transparent 55%),
-            radial-gradient(ellipse at 90% 90%, oklch(78% 0.05 200 / 0.06), transparent 50%),
+            radial-gradient(ellipse at 20% 0%, oklch(72% 0.10 200 / 0.18), transparent 55%),
+            radial-gradient(ellipse at 100% 30%, oklch(62% 0.14 295 / 0.16), transparent 55%),
+            radial-gradient(ellipse at 50% 100%, oklch(54% 0.08 250 / 0.10), transparent 60%),
             var(--surface-0);
           border-right: 1px solid var(--border);
           overflow: hidden;
@@ -264,7 +310,7 @@ export default function Login() {
         .login-hero::after {
           content: "";
           position: absolute; inset: 0;
-          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.025'/></svg>");
+          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.025'/></svg>");
           pointer-events: none;
         }
         .login-hero-inner {
@@ -272,25 +318,48 @@ export default function Login() {
           height: 100%;
           display: flex;
           flex-direction: column;
-          gap: 32px;
           z-index: 1;
         }
         .login-mark {
           display: flex; align-items: center; gap: 10px;
-          font-size: 18px;
+          font-size: 17px;
         }
-        .login-headline { margin-top: auto; }
-        .login-footnote {
+        .login-orb-wrap {
+          flex: 1;
+          display: flex; align-items: center; justify-content: center;
+          margin: -12px 0 -24px;
+        }
+        .login-headline { margin-top: 8px; }
+        .login-pillars {
           margin-top: 32px;
           padding-top: 24px;
           border-top: 1px solid var(--border);
-          max-width: 420px;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+          max-width: 520px;
+        }
+        .login-pillar-kw {
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: var(--accent);
+        }
+        .login-pillar-desc {
+          font-size: 12px;
+          color: var(--fg-tertiary);
+          margin-top: 6px;
+          line-height: 1.5;
         }
         .login-form {
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 48px;
+          background:
+            radial-gradient(ellipse at 100% 0%, oklch(82% 0.06 180 / 0.04), transparent 50%),
+            var(--surface-0);
         }
         .login-form-inner {
           width: 100%;
