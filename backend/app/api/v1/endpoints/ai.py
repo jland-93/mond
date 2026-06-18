@@ -58,6 +58,7 @@ async def list_finding_insights(
 async def analyze_query(
     payload: AnalyzeRequest,
     _user: User = Depends(current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> AnalyzeResponse:
     """자연어 쿼리를 분류한다. 'scan' 의도이면 클라이언트가 후속 호출을 만든다."""
     result = await ai_insights.route_query(db, payload.query)
@@ -66,4 +67,5 @@ async def analyze_query(
         summary=result.get("summary", ""),
         suggested_actions=result.get("suggested_actions", []) or [],
         model=result.get("model") or await current_model_label(db),
+        citations=result.get("citations") or [],
     )

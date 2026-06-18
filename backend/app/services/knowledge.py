@@ -135,7 +135,7 @@ async def generate_cards(
             ask_en=str(raw.get("ask_en", "")).strip()[:2000],
             refs=[r for r in raw.get("refs", []) if isinstance(r, str)][:5],
             source=KnowledgeSource.AI,
-            model=settings.AI_MODEL_DEFAULT,
+            model=f"{result.provider}:{result.model}",
             published=True,
         )
         db.add(card)

@@ -21,8 +21,10 @@ from app.api.v1.endpoints import (
     policy_templates,
     regulations,
     reports,
+    role_requests,
     scans,
     users,
+    webhook_tokens,
     webhooks,
 )
 
@@ -44,6 +46,8 @@ api_router.include_router(ai.router, prefix="/ai", tags=["AI"])
 api_router.include_router(ai_providers.router, prefix="/admin/ai-providers", tags=["AI Providers (Admin)"])
 api_router.include_router(integrations.router, prefix="/integrations", tags=["Integrations"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
+api_router.include_router(webhook_tokens.router, prefix="/webhook-tokens", tags=["Webhook Tokens"])
 api_router.include_router(iam.router, prefix="/iam", tags=["IAM Self-Service"])
 api_router.include_router(knowledge.router, prefix="/knowledge", tags=["Knowledge Hub"])
 api_router.include_router(users.router, prefix="/users", tags=["Users (Admin)"])
+api_router.include_router(role_requests.router, tags=["Role Requests"])

@@ -50,8 +50,27 @@ export default function Dashboard() {
 
   return (
     <div>
-      <Title level={2} style={{ color: "var(--mond-text)", marginBottom: 24 }}>
-        🌙 {t.dashboard.title}
+      <Title
+        level={2}
+        style={{
+          color: "var(--mond-text)",
+          marginBottom: 24,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
+        <img
+          src="/logo.png"
+          alt=""
+          width={28}
+          height={28}
+          style={{
+            borderRadius: 6,
+            filter: "drop-shadow(0 0 8px oklch(72% 0.16 285 / 0.5))",
+          }}
+        />
+        {t.dashboard.title}
       </Title>
 
       <Row gutter={[16, 16]}>

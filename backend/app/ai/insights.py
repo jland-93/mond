@@ -78,22 +78,56 @@ async def analyze_finding(db: AsyncSession, finding: Finding, *, deep: bool = Fa
 
 
 async def route_query(db: AsyncSession, query: str) -> dict:
-    """자연어 쿼리를 받아 의도(scan/list/explain/unknown)를 분류한다."""
-    if not await is_enabled(db):
-        return _heuristic_route(query)
+    """자연어 쿼리를 받아 RAG로 Mond 데이터를 검색한 뒤 LLM에 context로 주입.
 
+    응답 형식:
+      {
+        "intent": "scan|list_findings|explain|unknown",
+        "summary": "...",
+        "citations": [{n, kind, title, snippet, url}, ...],
+        "suggested_actions": [...],
+        "model": "provider:model"
+      }
+
+    citation 노출: LLM이 답변 중 [1][2] 같은 인용 마커를 사용 → 프론트가 참고 카드로 보여줌.
+    """
+    from app.ai.rag import build_context_block, search
+
+    # 1) Mond DB에서 관련 자료 검색 (RAG retrieve)
+    citations = await search(db, query)
+
+    # 2) AI 비활성 시 — 휴리스틱 + 출처만 노출
+    if not await is_enabled(db):
+        result = _heuristic_route(query)
+        result["citations"] = [c.to_dict() for c in citations]
+        return result
+
+    # 3) LLM에 context 주입
+    context_block = build_context_block(citations)
     system = (
-        "You classify DevSecOps user requests. Return strict JSON: "
+        "You are Mond, an AI-powered self-service DevSecOps assistant. "
+        "Classify the user's intent and answer in 1-3 sentences. "
+        "When you reference a known item, cite it inline as [N] using the numbered sources below. "
+        "Return strict JSON: "
         '{"intent": "scan|list_findings|explain|unknown", '
-        '"summary": "what user wants", "suggested_actions": [{"label": "...", "endpoint": "..."}]}'
+        '"summary": "answer text with [N] citations if relevant", '
+        '"suggested_actions": [{"label": "...", "endpoint": "..."}]}'
     )
-    result = await complete_json(db, system, query, max_tokens=512)
+    if context_block:
+        system = f"{system}\n\n{context_block}"
+
+    result = await complete_json(db, system, query, max_tokens=600)
     if result is None:
-        return _heuristic_route(query)
+        fallback = _heuristic_route(query)
+        fallback["citations"] = [c.to_dict() for c in citations]
+        return fallback
     parsed = _parse_json(result.text)
     if not parsed:
-        return _heuristic_route(query)
+        fallback = _heuristic_route(query)
+        fallback["citations"] = [c.to_dict() for c in citations]
+        return fallback
     parsed["model"] = f"{result.provider}:{result.model}"
+    parsed["citations"] = [c.to_dict() for c in citations]
     return parsed
 
 

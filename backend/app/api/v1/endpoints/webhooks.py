@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Body, Depends, Header, HTTPException, Request
 from sqlalchemy import select
@@ -25,6 +26,7 @@ from app.core.logging import get_logger
 from app.models.asset import Asset, AssetType
 from app.models.scan import ScanTrigger
 from app.models.user import Role
+from app.models.webhook_token import WebhookToken
 from app.services import scan as scan_service
 
 router = APIRouter()
@@ -95,6 +97,51 @@ async def github_webhook(
         "scan_id": scan.id,
         "status": scan.status.value,
     }
+
+
+@router.post("/personal")
+async def personal_webhook(
+    request: Request,
+    payload: dict = Body(...),
+    authorization: str | None = Header(default=None),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """CI/CD에서 Bearer 토큰으로 호출. user 세션 불필요.
+
+    Authorization: Bearer mond_xxx
+    Body: {"asset_id": <int>, "scanner": "trivy"|"semgrep"|"nuclei"}
+    """
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="missing bearer token")
+    raw = authorization[7:].strip()
+    if not raw.startswith("mond_"):
+        raise HTTPException(status_code=401, detail="invalid token format")
+    token_hash = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    row = (
+        await db.execute(
+            select(WebhookToken)
+            .where(WebhookToken.token_hash == token_hash)
+            .where(WebhookToken.revoked_at.is_(None))
+        )
+    ).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=401, detail="token revoked or unknown")
+
+    asset_id = payload.get("asset_id")
+    scanner = payload.get("scanner", "trivy")
+    if not isinstance(asset_id, int):
+        raise HTTPException(status_code=400, detail="asset_id (int) required")
+
+    asset = (await db.execute(select(Asset).where(Asset.id == asset_id))).scalar_one_or_none()
+    if asset is None:
+        raise HTTPException(status_code=404, detail="asset not found")
+
+    row.last_used_at = datetime.now(timezone.utc)
+    scan = await scan_service.trigger_scan(
+        db, asset=asset, scanner_name=scanner, trigger=ScanTrigger.WEBHOOK
+    )
+    await db.commit()
+    return {"scan_id": scan.id, "status": scan.status.value, "token": row.token_prefix + "•••"}
 
 
 @router.post(

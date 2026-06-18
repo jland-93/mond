@@ -123,8 +123,19 @@ export default function Layout() {
             borderBottom: "1px solid var(--mond-border)",
           }}
         >
-          <Space>
-            <span style={{ color: "var(--mond-text-dim)" }}>🌙 {t.appTagline}</span>
+          <Space size={8} align="center">
+            <img
+              src="/logo.png"
+              alt="Mond"
+              width={20}
+              height={20}
+              style={{
+                borderRadius: 4,
+                filter: "drop-shadow(0 0 6px oklch(72% 0.16 285 / 0.5))",
+                verticalAlign: "middle",
+              }}
+            />
+            <span style={{ color: "var(--mond-text-dim)" }}>{t.appTagline}</span>
             {isAdminRoute && <Tag color="red">{t.admin.badge}</Tag>}
           </Space>
           <Space>
