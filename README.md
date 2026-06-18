@@ -1,4 +1,4 @@
-# 🌙 Mond
+# Mond
 
 <div align="center">
   <img src="docs/assets/images/mond-logo.png" alt="Mond Logo" width="280"/>
@@ -11,8 +11,8 @@
   </p>
 
   <p>
-    자산 · 스캔 · 발견 · 승인 · 감사까지 한 흐름에서.<br/>
-    Inventory · scan · triage · approve · audit — in one flow.
+    자산, 스캔, 발견, 승인, 감사까지 한 흐름에서.<br/>
+    Inventory, scan, triage, approve, audit in one flow.
   </p>
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -30,16 +30,16 @@
   </a>
   <p>
     <sub>
-      🛠️ <a href="docs/SETUP.md#part-5-관리자-초기-세팅-체크리스트">관리자 초기 세팅 →</a> ·
-      📖 <a href="docs/ABOUT.md#-무엇을-제공하나요">무엇을 제공? →</a> ·
-      🚦 <a href="docs/SETUP.md#part-0--어느-시나리오인가요">내 시나리오 고르기 →</a>
+      <a href="docs/SETUP.md#part-5-관리자-초기-세팅-체크리스트">관리자 초기 세팅</a> ·
+      <a href="docs/ABOUT.md#무엇을-제공하나요">무엇을 제공?</a> ·
+      <a href="docs/SETUP.md#part-0-어느-시나리오인가요">내 시나리오 고르기</a>
     </sub>
   </p>
 </div>
 
 ---
 
-## 🌒 더 많은 화면 · More previews
+## 더 많은 화면 · More previews
 
 <table>
   <tr>
@@ -47,14 +47,14 @@
       <a href="docs/screenshots/05-login-hero.jpg"><img src="docs/screenshots/05-login-hero.jpg" alt="Login Hero — 3D Moon + AI Triage / Self-service / Auto-audit"/></a>
       <p align="center">
         <strong>Login Hero</strong> · 3D 초승달 · 3 pillars (AI Triage · Self-service · Auto-audit)<br/>
-        <sub>🔐 <a href="docs/SETUP.md#part-4-로그인--dev--sso--mfa">로그인 · SSO · MFA 설정 →</a></sub>
+        <sub><a href="docs/SETUP.md#part-4-로그인--dev--sso--mfa">로그인 · SSO · MFA 설정</a></sub>
       </p>
     </td>
     <td width="50%">
       <a href="docs/screenshots/03-ai-insights.jpg"><img src="docs/screenshots/03-ai-insights.jpg" alt="AI Insights — Claude 자연어 질의"/></a>
       <p align="center">
         <strong>AI 인사이트</strong> · 자연어로 자산·발견·정책 질의. 키 없으면 기본 규칙 모드<br/>
-        <sub>🤖 <a href="docs/SETUP.md#part-3-ai-provider-세팅">AI provider 세팅 (Anthropic / OpenAI / Bedrock / Ollama) →</a></sub>
+        <sub><a href="docs/SETUP.md#part-3-ai-provider-세팅">AI provider 세팅 (Anthropic / OpenAI / Bedrock / Ollama)</a></sub>
       </p>
     </td>
   </tr>
@@ -63,14 +63,14 @@
       <a href="docs/screenshots/02-knowledge-hub.jpg"><img src="docs/screenshots/02-knowledge-hub.jpg" alt="Knowledge Hub — DevSecOps + 규제 카드 + AI 연계"/></a>
       <p align="center">
         <strong>지식 허브</strong> · DevSecOps · OWASP · K-PIPA · ISMS-P · PCI DSS · GDPR — AI에 바로 이어 묻기<br/>
-        <sub>📖 <a href="docs/ABOUT.md#3-한국-규제-매핑-부재--regulations-guide--정책-템플릿">한국 규제 매핑 →</a></sub>
+        <sub><a href="docs/ABOUT.md#3-한국-규제-매핑-부재--regulations-guide와-정책-템플릿">한국 규제 매핑</a></sub>
       </p>
     </td>
     <td width="50%">
       <a href="docs/screenshots/04-iam-explorer.jpg"><img src="docs/screenshots/04-iam-explorer.jpg" alt="IAM Explorer — AWS / GCP / Azure / K8s / LDAP 통합 권한 탐색"/></a>
       <p align="center">
         <strong>IAM 탐색</strong> · AWS · GCP · Azure · Kubernetes · LDAP/AD 멀티 클라우드 권한 + 위험도<br/>
-        <sub>🔗 <a href="docs/SETUP.md#-4-iam-source-연동-admin--connections">IAM Source 연동 →</a></sub>
+        <sub><a href="docs/SETUP.md#4-iam-source-연동-admin--connections">IAM Source 연동</a></sub>
       </p>
     </td>
   </tr>
