@@ -24,6 +24,13 @@ export const en: Dict = {
     security: "Security",
     settings: "Settings",
   },
+  // sidebar category headings
+  menuGroups: {
+    overview: "OVERVIEW",
+    operations: "OPERATIONS",
+    knowledge: "KNOWLEDGE",
+    access: "ACCESS",
+  },
 
   admin: {
     enter: "Admin",

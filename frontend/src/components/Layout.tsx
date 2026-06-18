@@ -47,39 +47,67 @@ export default function Layout() {
 
   const isAdminRoute = location.pathname.startsWith("/admin");
 
-  const userItems = [
+  // 사이드바 정보 위계 — 4그룹으로 미니멀 분할 (OVERVIEW / OPS / KNOWLEDGE / ACCESS).
+  // 평탄 14개를 그룹으로 묶어 시각 노이즈를 낮추고 카테고리 navigation 가능.
+  const overviewItems = [
     { key: "/", icon: <DashboardOutlined />, label: t.menu.dashboard, minRole: "viewer" as const },
+  ].filter((i) => hasRole(user, i.minRole));
+
+  const opsItems = [
     { key: "/assets", icon: <AppstoreOutlined />, label: t.menu.assets, minRole: "viewer" as const },
     { key: "/scans", icon: <ScanOutlined />, label: t.menu.scans, minRole: "employee" as const },
     { key: "/findings", icon: <SafetyOutlined />, label: t.menu.findings, minRole: "viewer" as const },
     { key: "/policies", icon: <ExperimentOutlined />, label: t.menu.policies, minRole: "viewer" as const },
     { key: "/policy-sim", icon: <ThunderboltOutlined />, label: t.menu.policySim, minRole: "employee" as const },
     { key: "/ai-insights", icon: <BulbOutlined />, label: t.menu.aiInsights, minRole: "viewer" as const },
+  ].filter((i) => hasRole(user, i.minRole));
+
+  const knowledgeItems = [
     { key: "/knowledge", icon: <BookOutlined />, label: t.menu.knowledge, minRole: "viewer" as const },
     { key: "/regulations", icon: <AuditOutlined />, label: t.menu.regulations, minRole: "viewer" as const },
     { key: "/reports", icon: <FileTextOutlined />, label: t.menu.reports, minRole: "viewer" as const },
-    // Integrations 메타 페이지는 Admin → Connections로 통합되어 일반 메뉴에서 제외.
-    // (라우트는 유지되어 기존 링크는 살아 있음)
+  ].filter((i) => hasRole(user, i.minRole));
+
+  const accessItems = [
     { key: "/iam-explorer", icon: <TeamOutlined />, label: t.menu.iamExplorer, minRole: "employee" as const },
     { key: "/access-center", icon: <KeyOutlined />, label: t.menu.accessCenter, minRole: "employee" as const },
     { key: "/security", icon: <SafetyCertificateOutlined />, label: t.menu.security, minRole: "viewer" as const },
     { key: "/settings", icon: <SettingOutlined />, label: t.menu.settings, minRole: "viewer" as const },
   ].filter((i) => hasRole(user, i.minRole));
 
-  const adminItems = [
+  // 그룹 정의 — antd Menu의 type:'group' 형식.
+  type GroupEntry = {
+    type: "group";
+    key: string;
+    label: string;
+    children: { key: string; icon: JSX.Element; label: string }[];
+  };
+  const userMenu: GroupEntry[] = [
+    { type: "group" as const, key: "g-overview", label: t.menuGroups.overview, children: overviewItems },
+    { type: "group" as const, key: "g-ops", label: t.menuGroups.operations, children: opsItems },
+    { type: "group" as const, key: "g-knowledge", label: t.menuGroups.knowledge, children: knowledgeItems },
+    { type: "group" as const, key: "g-access", label: t.menuGroups.access, children: accessItems },
+  ].filter((g) => g.children.length > 0);
+
+  const adminFlat = [
     { key: "/admin/access-review", icon: <SolutionOutlined />, label: t.adminArea.menuAccessReview, minRole: "reviewer" as const },
     { key: "/admin/policies", icon: <ExperimentOutlined />, label: t.adminArea.menuPolicies, minRole: "reviewer" as const },
     { key: "/admin/connections", icon: <ApiOutlined />, label: t.adminArea.menuConnections, minRole: "admin" as const },
     { key: "/admin/users", icon: <TeamOutlined />, label: t.adminArea.menuUsers, minRole: "admin" as const },
   ].filter((i) => hasRole(user, i.minRole));
 
-  const items = isAdminRoute ? adminItems : userItems;
+  const items = isAdminRoute ? adminFlat : userMenu;
+  // selectedKey 계산용 — 평탄화된 leaf 목록.
+  const leafItems = isAdminRoute
+    ? adminFlat
+    : [...overviewItems, ...opsItems, ...knowledgeItems, ...accessItems];
+
   // 정확한 일치 우선 — "/"는 모든 경로에 startsWith 매칭되므로 대시보드가 항상 잡히는 버그 방지.
   const selectedKey =
-    items.find((i) => location.pathname === i.key)?.key ??
-    items.find((i) => i.key !== "/" && location.pathname.startsWith(i.key + "/"))?.key ??
-    items.find((i) => i.key !== "/" && location.pathname.startsWith(i.key))?.key ??
-    (location.pathname === "/" ? "/" : items[0]?.key ?? "");
+    leafItems.find((i) => location.pathname === i.key)?.key ??
+    leafItems.find((i) => i.key !== "/" && location.pathname.startsWith(i.key + "/"))?.key ??
+    leafItems.find((i) => i.key !== "/" && location.pathname.startsWith(i.key))?.key ??
+    (location.pathname === "/" ? "/" : leafItems[0]?.key ?? "");
 
   const canEnterAdmin = hasRole(user, "reviewer");
 
@@ -99,7 +127,9 @@ export default function Layout() {
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
-        width={232}
+        breakpoint="lg"
+        collapsedWidth={64}
+        width={224}
         theme="dark"
         className="mond-sider"
         style={{
@@ -147,21 +177,25 @@ export default function Layout() {
           }}
         >
           <Space size={10} align="center">
-            <img
-              src="/logo.png"
-              alt="Mond"
-              width={20}
-              height={20}
-              style={{
-                borderRadius: 4,
-                filter: "drop-shadow(0 0 8px var(--accent) / 0.4)",
-                verticalAlign: "middle",
-              }}
-            />
             <span
               style={{
-                color: "var(--fg-secondary)",
-                fontSize: 13,
+                fontSize: 11,
+                color: "var(--accent)",
+                background: "color-mix(in oklch, var(--accent) 10%, transparent)",
+                border: "1px solid var(--accent-dim)",
+                padding: "3px 10px",
+                borderRadius: 999,
+                letterSpacing: "0.06em",
+                fontWeight: 600,
+              }}
+            >
+              AI · DevSecOps
+            </span>
+            <span
+              className="mond-tagline-long"
+              style={{
+                color: "var(--fg-tertiary)",
+                fontSize: 12,
                 letterSpacing: "-0.005em",
               }}
             >
@@ -175,19 +209,23 @@ export default function Layout() {
                   border: "1px solid var(--severity-critical)",
                   borderRadius: 999,
                   marginLeft: 6,
+                  fontWeight: 600,
+                  letterSpacing: "0.04em",
                 }}
               >
                 {t.admin.badge}
               </Tag>
             )}
           </Space>
-          <Space>
+          <Space size={4}>
             {canEnterAdmin && (
               <Button
-                type={isAdminRoute ? "primary" : "default"}
+                type={isAdminRoute ? "primary" : "text"}
                 danger={isAdminRoute}
+                size="small"
                 icon={isAdminRoute ? <RollbackOutlined /> : <SafetyCertificateOutlined />}
                 onClick={() => withTransition(() => navigate(isAdminRoute ? "/" : "/admin/access-review"))}
+                style={!isAdminRoute ? { color: "var(--fg-tertiary)" } : undefined}
               >
                 {isAdminRoute ? t.adminArea.backToApp : t.admin.enter}
               </Button>
@@ -253,7 +291,7 @@ export default function Layout() {
                     icon={!user.picture_url && <UserOutlined />}
                     style={{ marginRight: 6 }}
                   />
-                  <span>{user.name || user.email}</span>
+                  <span className="mond-user-name">{user.name || user.email}</span>
                 </Button>
               </Dropdown>
             )}

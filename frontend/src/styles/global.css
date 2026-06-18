@@ -121,44 +121,128 @@ a:hover {
   background: transparent !important;
 }
 
-/* ── Mond Sider 시그니처 — 옥색 active rail + hairline ───────── */
+/* antd Card — Dashboard의 mond-tile과 동일한 입체 톤. 평면 카드 제거. */
+.ant-card {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--surface-1) 96%, var(--accent) 4%) 0%,
+    var(--surface-1) 100%
+  ) !important;
+  box-shadow:
+    0 1px 0 oklch(96% 0.005 60 / 0.04) inset,
+    0 1px 2px oklch(0% 0 0 / 0.25),
+    0 8px 24px oklch(0% 0 0 / 0.20) !important;
+  transition:
+    box-shadow var(--motion-normal) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease);
+}
+.ant-card-hoverable:hover,
+.ant-card:hover {
+  border-color: var(--border-strong) !important;
+  box-shadow:
+    0 1px 0 oklch(96% 0.005 60 / 0.06) inset,
+    0 4px 8px oklch(0% 0 0 / 0.30),
+    0 18px 42px oklch(0% 0 0 / 0.32),
+    0 0 0 1px color-mix(in oklch, var(--accent) 14%, transparent) !important;
+}
+/* Card 내부 헤더 — surface-2 톤으로 미세 분리 */
+.ant-card .ant-card-head {
+  background: transparent;
+  border-bottom: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+}
+
+/* Table 행 hover — Mond accent 통일 */
+.ant-table-tbody > tr:hover > td {
+  background: color-mix(in oklch, var(--accent) 6%, transparent) !important;
+}
+.ant-table-tbody > tr.ant-table-row-selected > td {
+  background: color-mix(in oklch, var(--accent) 10%, transparent) !important;
+}
+
+/* ── Mond Sider 시그니처 — 카테고리 그룹 + 옥색 active rail ───── */
+
+/* 그룹 헤딩 — 11px / uppercase / 옅은 톤 */
+.mond-sider .ant-menu-item-group-title {
+  padding: 14px 20px 6px !important;
+  font-size: 10px !important;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary) !important;
+}
+/* 첫 그룹은 위 여백 줄임 */
+.mond-sider .ant-menu-item-group:first-child .ant-menu-item-group-title {
+  padding-top: 8px !important;
+}
+
 .mond-sider .ant-menu-item {
-  margin: 2px 8px !important;
-  width: calc(100% - 16px) !important;
+  margin: 2px 12px !important;
+  width: calc(100% - 24px) !important;
+  height: 36px !important;
+  line-height: 36px !important;
   border-radius: var(--radius-sm);
   position: relative;
   transition:
     background var(--motion-fast) var(--motion-ease),
-    color var(--motion-fast) var(--motion-ease);
+    color var(--motion-fast) var(--motion-ease),
+    transform var(--motion-fast) var(--motion-ease);
 }
 .mond-sider .ant-menu-item:hover {
   background: oklch(82% 0.06 180 / 0.06) !important;
   color: var(--fg-primary) !important;
+  transform: translateX(1px);
 }
-/* 활성 메뉴 — 1px 옥색 left rail + inset 미세 글로우 */
+
+/* 활성 메뉴 — 옥색 left rail + 옅은 배경 + 외부 글로우 + accent 텍스트 */
 .mond-sider .ant-menu-item-selected {
-  background: oklch(82% 0.06 180 / 0.10) !important;
+  background: linear-gradient(
+    90deg,
+    oklch(82% 0.06 180 / 0.16) 0%,
+    oklch(82% 0.06 180 / 0.04) 100%
+  ) !important;
   color: var(--accent) !important;
-  box-shadow: inset 2px 0 0 var(--accent);
+  box-shadow:
+    inset 2px 0 0 var(--accent),
+    0 0 0 1px color-mix(in oklch, var(--accent) 18%, transparent),
+    0 8px 24px -10px oklch(82% 0.06 180 / 0.6);
+  font-weight: 500;
 }
+/* 외곽 rail — 좌측 4px 옥색 광원 */
 .mond-sider .ant-menu-item-selected::before {
   content: "";
   position: absolute;
-  left: -8px; top: 0; bottom: 0;
+  left: -12px; top: 4px; bottom: 4px;
   width: 4px;
   background: var(--accent);
   border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 12px var(--accent);
-  opacity: 0.7;
+  box-shadow: 0 0 16px var(--accent), 0 0 4px var(--accent);
+  opacity: 0.85;
 }
+/* hover 시 옅은 dot 표시 */
+.mond-sider .ant-menu-item:not(.ant-menu-item-selected):hover::before {
+  content: "";
+  position: absolute;
+  left: -8px; top: 50%;
+  width: 3px; height: 3px;
+  margin-top: -1.5px;
+  background: var(--accent-dim);
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
 .mond-sider .ant-menu-item .anticon {
   font-size: 15px;
   color: inherit;
+  margin-right: 12px;
 }
 .mond-sider .ant-layout-sider-trigger {
   background: var(--surface-1);
   border-top: 1px solid var(--border);
   color: var(--fg-tertiary);
+}
+/* 메뉴 자체 — 위 padding 조금만 */
+.mond-sider .ant-menu {
+  padding-top: 4px !important;
 }
 
 /* ── Header — hairline 강화 + 헤어 그라데이션 ────────────────── */
@@ -178,4 +262,9 @@ a:hover {
     transparent 100%
   );
   opacity: 0.5;
+}
+/* 모바일 — 긴 tagline + 헤더 우측 username hide. Avatar/icon만 유지. */
+@media (max-width: 760px) {
+  .mond-tagline-long { display: none !important; }
+  .mond-user-name { display: none !important; }
 }

@@ -12,7 +12,6 @@ type Navigator = () => void;
 
 const supportsViewTransition = (): boolean => {
   if (typeof document === "undefined") return false;
-  // @ts-expect-error — startViewTransition은 아직 모든 TS lib에 없음
   return typeof document.startViewTransition === "function";
 };
 
@@ -32,7 +31,6 @@ export function withTransition(fn: Navigator): void {
     fn();
     return;
   }
-  // @ts-expect-error — startViewTransition은 아직 모든 TS lib에 없음
   document.startViewTransition(() => {
     fn();
   });

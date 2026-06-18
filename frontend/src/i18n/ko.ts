@@ -22,6 +22,13 @@ export const ko = {
     security: "보안 설정",
     settings: "설정",
   },
+  // 사이드바 카테고리 헤딩
+  menuGroups: {
+    overview: "한눈에",
+    operations: "보안 운영",
+    knowledge: "지식·규제",
+    access: "권한·계정",
+  },
 
   admin: {
     enter: "관리자",

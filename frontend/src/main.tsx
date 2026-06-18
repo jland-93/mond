@@ -72,9 +72,14 @@ const mondTheme = {
       darkItemSelectedBg: "color-mix(in oklch, var(--accent) 14%, transparent)",
       darkItemSelectedColor: "var(--accent)",
       darkSubMenuItemBg: "transparent",
+      darkGroupTitleColor: "var(--fg-tertiary)",
       itemSelectedBg: "color-mix(in oklch, var(--accent) 14%, transparent)",
       itemSelectedColor: "var(--accent)",
       itemHoverBg: "color-mix(in oklch, var(--accent) 8%, transparent)",
+      groupTitleColor: "var(--fg-tertiary)",
+      groupTitleFontSize: 10,
+      itemHeight: 38,
+      iconSize: 15,
     },
     Table: {
       cellPaddingBlock: 10,   // 16 → 10 — 행 높이 ↓
