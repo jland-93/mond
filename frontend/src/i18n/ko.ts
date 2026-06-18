@@ -133,6 +133,13 @@ export const ko = {
     threshold: "임계치",
     compliance: "컴플라이언스",
     desc: "스캐너 결과에 적용되는 정책입니다. SAST / SCA / IaC / DAST / 컨테이너 / 시크릿 / 컴플라이언스 유형 중 하나에 속하며, 임계치를 넘기는 발견사항은 배포 파이프라인을 차단합니다.",
+    openCatalog: "규제 템플릿 카탈로그",
+    catalogTitle: "정책 템플릿 카탈로그",
+    catalogDesc:
+      "ISMS-P · 전자금융감독규정 · CSAP · PIPA · ISO 27001 · OWASP · CIS 등 한국·글로벌 규제의 통제 항목에 매핑된 정책을 한 번에 적용합니다.",
+    installSelected: "선택 항목 적용",
+    searchPlaceholder: "검색 — 예: 시크릿, 암호화, ISMS-P-2.7",
+    allFrameworks: "전체",
   },
 
   policySim: {
