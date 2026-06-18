@@ -1,5 +1,5 @@
 """
-🌙 서버 세션 — opaque token + DB 영속화. JWT 미사용 (즉시 revoke 가능).
+서버 세션 — opaque token + DB 영속화. JWT 미사용 (즉시 revoke 가능).
 
 cookie에는 url-safe base64 raw token이, DB에는 SHA-256 해시만 저장된다.
 """

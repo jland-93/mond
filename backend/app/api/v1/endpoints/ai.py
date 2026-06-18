@@ -1,5 +1,5 @@
 """
-🌙 AI 엔드포인트 — Finding triage / 자연어 쿼리
+AI 엔드포인트 — Finding triage / 자연어 쿼리
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query

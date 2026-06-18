@@ -1,5 +1,5 @@
 """
-🌙 Knowledge 엔드포인트 — 카드 CRUD + AI 생성
+Knowledge 엔드포인트 — 카드 CRUD + AI 생성
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status

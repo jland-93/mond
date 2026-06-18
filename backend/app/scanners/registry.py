@@ -1,5 +1,5 @@
 """
-🌙 스캐너 레지스트리 — 이름으로 어댑터를 조회한다.
+스캐너 레지스트리 — 이름으로 어댑터를 조회한다.
 """
 
 from app.scanners.base import ScannerAdapter

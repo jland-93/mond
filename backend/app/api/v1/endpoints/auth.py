@@ -1,5 +1,5 @@
 """
-🌙 Auth 엔드포인트 — SSO login/callback, Dev login, /me, logout, providers
+Auth 엔드포인트 — SSO login/callback, Dev login, /me, logout, providers
 """
 
 from __future__ import annotations

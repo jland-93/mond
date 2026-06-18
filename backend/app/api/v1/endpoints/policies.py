@@ -1,5 +1,5 @@
 """
-🌙 Policy 엔드포인트 — 조회는 모두에게, 변경은 REVIEWER+에게.
+Policy 엔드포인트 — 조회는 모두에게, 변경은 REVIEWER+에게.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status

@@ -1,5 +1,5 @@
 """
-🌙 Reports — SBOM (lightweight) + Compliance 리포트
+Reports — SBOM (lightweight) + Compliance 리포트
 """
 
 from __future__ import annotations
@@ -150,5 +150,5 @@ def compliance_report_markdown(report: dict) -> str:
             for ref in reg["references"]:
                 md.append(f"- {ref}")
             md.append("")
-    md.append(f"_Generated at {report['generated_at']} by 🌙 Mond_")
+    md.append(f"_Generated at {report['generated_at']} by Mond_")
     return "\n".join(md)

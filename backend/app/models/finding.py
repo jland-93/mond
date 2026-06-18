@@ -1,5 +1,5 @@
 """
-🌙 Finding — 스캔이 발견한 보안 이슈
+Finding — 스캔이 발견한 보안 이슈
 """
 
 import enum

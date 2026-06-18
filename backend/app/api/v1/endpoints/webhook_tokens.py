@@ -1,5 +1,5 @@
 """
-🌙 Personal Webhook Tokens — CI/CD에서 사용자 인증 없이 Mond를 호출.
+Personal Webhook Tokens — CI/CD에서 사용자 인증 없이 Mond를 호출.
 
 흐름:
   1) POST /webhook-tokens — 라벨과 함께 발급. raw token은 응답에 1회만 노출.

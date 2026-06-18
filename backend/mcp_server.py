@@ -1,5 +1,5 @@
 """
-🌙 Mond MCP Server
+Mond MCP Server
 
 Claude Desktop / Claude Code에서 Mond를 직접 다룰 수 있게 한다.
 

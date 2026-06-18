@@ -1,5 +1,5 @@
 """
-🌙 Knowledge 서비스 — CRUD + AI 생성
+Knowledge 서비스 — CRUD + AI 생성
 """
 
 from __future__ import annotations

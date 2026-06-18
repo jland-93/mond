@@ -1,5 +1,5 @@
 """
-🌙 Scan 스키마
+Scan 스키마
 """
 
 from datetime import datetime

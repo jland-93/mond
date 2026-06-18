@@ -1,5 +1,5 @@
 """
-🌙 IAM 셀프서비스 스키마
+IAM 셀프서비스 스키마
 """
 
 from datetime import datetime

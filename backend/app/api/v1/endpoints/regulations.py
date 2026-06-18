@@ -1,5 +1,5 @@
 """
-🌙 Regulations — 사업 시나리오 → 적용 규제 + 시점 가이드
+Regulations — 사업 시나리오 → 적용 규제 + 시점 가이드
 """
 
 from fastapi import APIRouter, HTTPException, Query

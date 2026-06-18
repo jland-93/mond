@@ -1,5 +1,5 @@
 """
-🌙 Policy — 룰셋/표준 (SAST / SCA / IaC / DAST / Compliance)
+Policy — 룰셋/표준 (SAST / SCA / IaC / DAST / Compliance)
 """
 
 import enum

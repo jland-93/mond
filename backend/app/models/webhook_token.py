@@ -1,5 +1,5 @@
 """
-🌙 사용자별 Personal Webhook Token
+사용자별 Personal Webhook Token
 
 CI/CD 파이프라인이 사용자 인증 없이 사내 자동화에서 Mond에 finding/scan을
 보낼 수 있게 발급. 같은 사용자는 여러 토큰 발급 가능 (CI별로 분리).

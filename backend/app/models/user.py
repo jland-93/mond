@@ -1,5 +1,5 @@
 """
-🌙 User + UserSession — SSO/OIDC 또는 Dev Login으로 발급된 임직원 계정과 세션
+User + UserSession — SSO/OIDC 또는 Dev Login으로 발급된 임직원 계정과 세션
 
 세션은 stateless JWT 대신 DB에 opaque token으로 저장한다 (즉시 revoke + 로그아웃 확실성).
 """

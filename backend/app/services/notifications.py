@@ -1,5 +1,5 @@
 """
-🌙 Notifications — Slack / Generic Webhook
+Notifications — Slack / Generic Webhook
 
 엔드포인트가 비어 있으면 조용히 no-op. 운영자가 .env에 URL을 채우면 활성화된다.
 """

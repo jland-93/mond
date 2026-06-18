@@ -1,5 +1,5 @@
 """
-🌙 Integrations 엔드포인트 — 사용 가능한 스캐너 어댑터 + AI 활성 상태
+Integrations 엔드포인트 — 사용 가능한 스캐너 어댑터 + AI 활성 상태
 """
 
 from fastapi import APIRouter, Depends

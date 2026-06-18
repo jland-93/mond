@@ -1,5 +1,5 @@
 """
-🌙 Scan 서비스 — 어댑터 호출 + Finding 저장
+Scan 서비스 — 어댑터 호출 + Finding 저장
 """
 
 from __future__ import annotations

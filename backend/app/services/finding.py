@@ -1,5 +1,5 @@
 """
-🌙 Finding 서비스 — fingerprint 기반 dedup + 조회/상태 변경
+Finding 서비스 — fingerprint 기반 dedup + 조회/상태 변경
 """
 
 from __future__ import annotations

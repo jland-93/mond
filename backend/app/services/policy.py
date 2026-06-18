@@ -1,5 +1,5 @@
 """
-🌙 Policy 서비스
+Policy 서비스
 """
 
 from __future__ import annotations

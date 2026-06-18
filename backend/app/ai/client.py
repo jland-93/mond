@@ -1,5 +1,5 @@
 """
-🌙 LLM provider 추상화 — DB 우선 + ENV fallback
+LLM provider 추상화 — DB 우선 + ENV fallback
 
 런타임 동작
 ---------

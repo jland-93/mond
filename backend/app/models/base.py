@@ -1,5 +1,5 @@
 """
-🌙 ORM 베이스 + 공통 믹스인
+ORM 베이스 + 공통 믹스인
 """
 
 from datetime import datetime

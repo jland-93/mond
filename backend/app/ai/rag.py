@@ -1,5 +1,5 @@
 """
-🌙 RAG MVP — Mond 데이터를 검색해 LLM에 context로 주입
+RAG MVP — Mond 데이터를 검색해 LLM에 context로 주입
 
 검색 대상 (모두 사용자가 등록·시드한 자체 데이터):
   - Finding   : 최근 미해결 finding (severity 가중)

@@ -1,5 +1,5 @@
 """
-🌙 Reports 엔드포인트 — SBOM / Compliance
+Reports 엔드포인트 — SBOM / Compliance
 
 권한 모델: 인증된 사용자만 (감사·컴플라이언스 리포트는 외부 공개 금지)
 """

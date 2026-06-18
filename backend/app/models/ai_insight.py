@@ -1,5 +1,5 @@
 """
-🌙 AIInsight — LLM 기반 분석 산출물 (triage / remediation / summary / explain)
+AIInsight — LLM 기반 분석 산출물 (triage / remediation / summary / explain)
 """
 
 import enum

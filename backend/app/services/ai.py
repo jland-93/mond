@@ -1,5 +1,5 @@
 """
-🌙 AI 서비스 — Finding 분석을 DB에 영속화
+AI 서비스 — Finding 분석을 DB에 영속화
 """
 
 from __future__ import annotations

@@ -1,5 +1,5 @@
 """
-🌙 Semgrep 어댑터 — 정적 코드 분석 (SAST)
+Semgrep 어댑터 — 정적 코드 분석 (SAST)
 """
 
 from __future__ import annotations

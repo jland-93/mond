@@ -1,5 +1,5 @@
 """
-🌙 FastAPI 인증/인가 의존성 — current_user, require_role
+FastAPI 인증/인가 의존성 — current_user, require_role
 """
 
 from __future__ import annotations

@@ -1,5 +1,5 @@
 """
-🌙 Mond 로거 — structlog 기반 구조화 로그
+Mond 로거 — structlog 기반 구조화 로그
 """
 
 import logging

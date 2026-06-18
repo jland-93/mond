@@ -1,5 +1,5 @@
 """
-🌙 MFA 모듈 — 패스키(WebAuthn/FIDO2) + TOTP + 백업 코드
+MFA 모듈 — 패스키(WebAuthn/FIDO2) + TOTP + 백업 코드
 
 설계 요지
 ---------
