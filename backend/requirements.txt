@@ -59,7 +59,7 @@ qrcode[pil]==8.0
 
 # Model Context Protocol — Claude Desktop/Code 통합
 # FastMCP가 정식 포함된 1.2.0+ 사용
-mcp>=1.2.0,<2.0.0
+mcp>=1.28.0,<2.0.0
 
 # 관측성
 structlog==24.4.0
