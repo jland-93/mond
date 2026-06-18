@@ -122,28 +122,13 @@ export default function MfaChallenge() {
           </div>
 
           {!enrolled ? (
-            <>
-              <Alert
-                type="warning"
-                showIcon
-                message={t.security.notEnrolled}
-                description={t.security.notEnrolledDesc}
-              />
-              <Button
-                type="primary"
-                icon={<KeyOutlined />}
-                block
-                size="large"
-                loading={busy}
-                onClick={enrollPasskey}
-              >
-                {t.security.enrollPasskeyNow}
-              </Button>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                {t.security.orVisitSettings}
-              </Text>
-              <Button block onClick={() => navigate("/security")}>{t.security.openSettings}</Button>
-            </>
+            <FirstTimeEnroll
+              busy={busy}
+              onPasskey={enrollPasskey}
+              locale={locale}
+              after={after}
+              setBusy={setBusy}
+            />
           ) : (
             <Tabs
               defaultActiveKey={(status?.passkeys.length ?? 0) > 0 ? "passkey" : "totp"}
@@ -234,5 +219,161 @@ export default function MfaChallenge() {
         </Space>
       </Card>
     </div>
+  );
+}
+
+
+// ── 미등록 사용자 — 패스키 + TOTP 양쪽 인라인 등록 ─────────────
+// WebAuthn은 HTTPS / localhost에서만 동작하므로, 사내 IP에서 띄운 경우
+// 패스키가 실패할 수 있다. TOTP는 어디서든 동작 → 안전한 폴백.
+function FirstTimeEnroll({
+  busy, onPasskey, locale, after, setBusy,
+}: {
+  busy: boolean;
+  onPasskey: () => Promise<void>;
+  locale: "ko" | "en";
+  after: () => Promise<void>;
+  setBusy: (b: boolean) => void;
+}) {
+  const [totpData, setTotpData] = useState<{ secret: string; qr: string } | null>(null);
+  const [totpCode, setTotpCode] = useState("");
+
+  const startTotp = async () => {
+    setBusy(true);
+    try {
+      const r = await mfaApi.totpSetup();
+      setTotpData({ secret: r.secret, qr: r.qr_png_base64 });
+    } catch (e) {
+      const err = e as Error & { response?: { data?: { detail?: string } } };
+      message.error(err.response?.data?.detail ?? err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const verifyTotp = async () => {
+    setBusy(true);
+    try {
+      await mfaApi.totpVerify(totpCode);
+      // 등록 직후 즉시 challenge로 통과
+      await mfaApi.totpChallenge(totpCode);
+      message.success(locale === "ko" ? "MFA 등록 + 인증 완료" : "Enrolled and verified");
+      await after();
+    } catch (e) {
+      const err = e as Error & { response?: { data?: { detail?: string } } };
+      message.error(err.response?.data?.detail ?? err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Space direction="vertical" style={{ width: "100%" }} size="middle">
+      <Alert
+        type="warning"
+        showIcon
+        message={
+          locale === "ko"
+            ? "MFA가 강제되지만 아직 등록된 인증 수단이 없습니다."
+            : "MFA is required but no factor is enrolled yet."
+        }
+        description={
+          locale === "ko"
+            ? "패스키 또는 TOTP 중 하나를 지금 등록하세요. (패스키는 HTTPS 또는 localhost에서만 동작 — 안 되면 TOTP를 쓰세요)"
+            : "Enroll a passkey or TOTP now. (Passkey requires HTTPS or localhost — fall back to TOTP otherwise)"
+        }
+      />
+
+      <Tabs
+        defaultActiveKey="passkey"
+        items={[
+          {
+            key: "passkey",
+            label: (
+              <Space>
+                <KeyOutlined />
+                {locale === "ko" ? "패스키" : "Passkey"}
+              </Space>
+            ),
+            children: (
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Paragraph type="secondary" style={{ marginBottom: 4 }}>
+                  {locale === "ko"
+                    ? "디바이스 생체인증(Touch ID · Face ID · Windows Hello) 또는 YubiKey를 사용합니다."
+                    : "Use device biometrics or a security key."}
+                </Paragraph>
+                <Button
+                  type="primary"
+                  icon={<KeyOutlined />}
+                  block
+                  size="large"
+                  loading={busy}
+                  onClick={onPasskey}
+                >
+                  {locale === "ko" ? "지금 패스키 등록" : "Enroll passkey now"}
+                </Button>
+              </Space>
+            ),
+          },
+          {
+            key: "totp",
+            label: (
+              <Space>
+                <MobileOutlined />
+                {locale === "ko" ? "TOTP" : "TOTP"}
+              </Space>
+            ),
+            children: (
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Paragraph type="secondary" style={{ marginBottom: 4 }}>
+                  {locale === "ko"
+                    ? "Google Authenticator · 1Password · Authy 등 어디서나 동작. HTTPS 미설정 환경에서도 안전한 방법입니다."
+                    : "Works anywhere with Google Authenticator / 1Password / Authy. Safe for non-HTTPS setups."}
+                </Paragraph>
+                {!totpData ? (
+                  <Button type="primary" block size="large" loading={busy} onClick={startTotp}>
+                    {locale === "ko" ? "TOTP QR 받기" : "Get TOTP QR"}
+                  </Button>
+                ) : (
+                  <>
+                    <div style={{ textAlign: "center" }}>
+                      <img
+                        src={`data:image/png;base64,${totpData.qr}`}
+                        alt="TOTP QR"
+                        style={{
+                          width: 180, height: 180,
+                          background: "#fff", padding: 8, borderRadius: 8,
+                        }}
+                      />
+                    </div>
+                    <Text type="secondary" copyable={{ text: totpData.secret }} style={{ fontFamily: "monospace", fontSize: 11 }}>
+                      {locale === "ko" ? "수동 입력 키" : "Manual key"}: {totpData.secret}
+                    </Text>
+                    <Input
+                      size="large"
+                      placeholder="123 456"
+                      value={totpCode}
+                      onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ""))}
+                      maxLength={8}
+                      autoFocus
+                    />
+                    <Button
+                      type="primary"
+                      block
+                      size="large"
+                      loading={busy}
+                      disabled={!/^\d{6,8}$/.test(totpCode)}
+                      onClick={verifyTotp}
+                    >
+                      {locale === "ko" ? "확인 + 통과" : "Verify and continue"}
+                    </Button>
+                  </>
+                )}
+              </Space>
+            ),
+          },
+        ]}
+      />
+    </Space>
   );
 }

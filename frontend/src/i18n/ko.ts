@@ -19,6 +19,7 @@ export const ko = {
     integrations: "통합",
     iamExplorer: "IAM 탐색",
     accessCenter: "권한 요청",
+    security: "보안 설정",
     settings: "설정",
   },
 

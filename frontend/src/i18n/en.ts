@@ -21,6 +21,7 @@ export const en: Dict = {
     integrations: "Integrations",
     iamExplorer: "IAM Explorer",
     accessCenter: "Access Center",
+    security: "Security",
     settings: "Settings",
   },
 

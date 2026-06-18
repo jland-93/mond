@@ -108,6 +108,44 @@ docker compose up -d
 
 첫 부팅 시 데모 자산 3개(레포 / 컨테이너 이미지 / URL)와 정책 3개가 자동 시드됩니다.
 
+### 첫 ADMIN 로그인 — 막힘 방지 가이드
+
+`/login` 화면에 이메일을 입력해 첫 로그인하는 사용자가 자동으로 **ADMIN**으로 가입됩니다.
+ADMIN은 기본 `MFA_REQUIRED_ROLES=admin,reviewer` 정책에 따라 즉시 `/mfa`로 이동하며,
+**패스키 또는 TOTP 중 하나를 인라인으로 등록**해야 합니다.
+
+| 환경 | 등록 가능 수단 |
+|---|---|
+| **`http://localhost:3000`** | 패스키(브라우저 생체인증) + TOTP 모두 가능 |
+| **사내 IP / HTTP 도메인** (예: `http://192.168.1.10:3000`) | 패스키는 브라우저 정책상 **차단** — **TOTP**를 사용하세요 (Google Authenticator · 1Password · Authy) |
+| **HTTPS 운영 도메인** | 둘 다 정상 |
+
+#### 만약 잠겼다면 — 운영자 복구 CLI
+
+비밀번호 매니저 분실 등으로 모든 MFA factor에 접근할 수 없게 됐을 때:
+
+```bash
+docker compose exec backend python -m scripts.admin_unlock admin@example.com
+# 또는 확인 프롬프트 없이:
+docker compose exec backend python -m scripts.admin_unlock admin@example.com --yes
+```
+
+해당 사용자의 모든 MFA factor (패스키·TOTP·백업코드)가 삭제되고, 다음 화면에서
+**첫 등록 화면**이 다시 보입니다. 사용자 데이터·자산·정책은 그대로 유지됩니다.
+
+#### MFA 강제 완화 (개발/데모 환경)
+
+데모 환경에서 MFA 강제를 끄고 싶다면 `.env`에:
+
+```bash
+# 아무도 강제 안 함 (옵션으로만)
+MFA_REQUIRED_ROLES=
+# 또는 ADMIN만 빼기
+MFA_REQUIRED_ROLES=reviewer
+```
+
+운영에서는 **반드시 `admin,reviewer` 이상** 유지를 권장합니다.
+
 ### 로컬 개발 (도커 없이)
 
 ```bash

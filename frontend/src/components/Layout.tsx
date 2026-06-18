@@ -62,6 +62,7 @@ export default function Layout() {
     // (라우트는 유지되어 기존 링크는 살아 있음)
     { key: "/iam-explorer", icon: <TeamOutlined />, label: t.menu.iamExplorer, minRole: "employee" as const },
     { key: "/access-center", icon: <KeyOutlined />, label: t.menu.accessCenter, minRole: "employee" as const },
+    { key: "/security", icon: <SafetyCertificateOutlined />, label: t.menu.security, minRole: "viewer" as const },
     { key: "/settings", icon: <SettingOutlined />, label: t.menu.settings, minRole: "viewer" as const },
   ].filter((i) => hasRole(user, i.minRole));
 
