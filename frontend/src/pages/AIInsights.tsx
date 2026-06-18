@@ -2,23 +2,75 @@
  * 🌙 AI Insights — 자연어로 묻고 의도 분류 결과 받기
  */
 
-import { SendOutlined } from "@ant-design/icons";
+import { LinkOutlined, SendOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Alert, Button, Card, Input, Space, Tag, Typography } from "antd";
+import { Alert, Button, Card, Input, Space, Tag, Tooltip, Typography } from "antd";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { useI18n } from "@/i18n";
 import { api } from "@/lib/api";
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
+
+interface Citation {
+  n: number;
+  kind: "finding" | "policy" | "knowledge" | string;
+  title: string;
+  snippet: string;
+  url?: string | null;
+}
 
 interface AnalyzeResponse {
   intent: string;
   summary: string;
   suggested_actions: Array<{ label: string; endpoint?: string }>;
   model: string;
+  citations?: Citation[];
+}
+
+const KIND_COLOR: Record<string, string> = {
+  finding: "red",
+  policy: "purple",
+  knowledge: "blue",
+};
+
+/** "...[1] 또는 [2]..." 같은 텍스트를 inline citation chip 으로 렌더. */
+function renderSummaryWithCitations(
+  summary: string,
+  citations: Citation[],
+  onJump: (c: Citation) => void,
+): React.ReactNode[] {
+  if (!summary) return [];
+  const map = new Map(citations.map((c) => [c.n, c]));
+  const parts: React.ReactNode[] = [];
+  const re = /\[(\d+)\]/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(summary))) {
+    if (m.index > last) parts.push(summary.slice(last, m.index));
+    const n = Number(m[1]);
+    const c = map.get(n);
+    if (c) {
+      parts.push(
+        <Tooltip key={`c-${n}-${m.index}`} title={`${c.title} — ${c.snippet}`}>
+          <Tag
+            color={KIND_COLOR[c.kind] || "default"}
+            style={{ cursor: "pointer", margin: "0 2px", fontWeight: 500 }}
+            onClick={() => onJump(c)}
+          >
+            [{n}]
+          </Tag>
+        </Tooltip>,
+      );
+    } else {
+      parts.push(m[0]);
+    }
+    last = m.index + m[0].length;
+  }
+  if (last < summary.length) parts.push(summary.slice(last));
+  return parts;
 }
 
 async function fetchStatus(): Promise<{ enabled: boolean }> {
@@ -27,9 +79,19 @@ async function fetchStatus(): Promise<{ enabled: boolean }> {
 }
 
 export default function AIInsights() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState(params.get("q") ?? "");
+
+  const jumpTo = (c: Citation) => {
+    if (!c.url) return;
+    if (c.url.startsWith("http")) {
+      window.open(c.url, "_blank", "noopener,noreferrer");
+    } else {
+      navigate(c.url);
+    }
+  };
   const { data: status } = useQuery({ queryKey: ["ai-status"], queryFn: fetchStatus });
 
   const analyze = useMutation<AnalyzeResponse, Error, string>({
@@ -102,14 +164,26 @@ export default function AIInsights() {
         {analyze.data && (
           <Card style={{ marginTop: 16 }} type="inner">
             <Space direction="vertical" style={{ width: "100%" }}>
-              <Space>
+              <Space wrap>
                 <Tag color="purple">intent: {analyze.data.intent}</Tag>
                 <Tag>{analyze.data.model}</Tag>
+                {(analyze.data.citations?.length ?? 0) > 0 && (
+                  <Tag color="cyan">
+                    {locale === "ko" ? "출처" : "Sources"} {analyze.data.citations!.length}
+                  </Tag>
+                )}
               </Space>
-              <Paragraph>{analyze.data.summary}</Paragraph>
+              <Paragraph style={{ whiteSpace: "pre-wrap" }}>
+                {renderSummaryWithCitations(
+                  analyze.data.summary,
+                  analyze.data.citations ?? [],
+                  jumpTo,
+                )}
+              </Paragraph>
+
               {analyze.data.suggested_actions.length > 0 && (
                 <div>
-                  <strong>Suggested actions</strong>
+                  <Text strong>{locale === "ko" ? "제안된 행동" : "Suggested actions"}</Text>
                   <ul>
                     {analyze.data.suggested_actions.map((a, i) => (
                       <li key={i}>
@@ -119,6 +193,43 @@ export default function AIInsights() {
                     ))}
                   </ul>
                 </div>
+              )}
+
+              {(analyze.data.citations?.length ?? 0) > 0 && (
+                <Card
+                  type="inner"
+                  size="small"
+                  title={
+                    <Space>
+                      <LinkOutlined />
+                      <span>{locale === "ko" ? "출처" : "Sources"}</span>
+                    </Space>
+                  }
+                  style={{ background: "var(--mond-surface-2)" }}
+                >
+                  <Space direction="vertical" style={{ width: "100%" }}>
+                    {analyze.data.citations!.map((c) => (
+                      <div
+                        key={c.n}
+                        style={{
+                          cursor: c.url ? "pointer" : "default",
+                          padding: "6px 0",
+                          borderBottom: "1px solid var(--mond-border)",
+                        }}
+                        onClick={() => jumpTo(c)}
+                      >
+                        <Space wrap>
+                          <Tag color={KIND_COLOR[c.kind] || "default"}>[{c.n}]</Tag>
+                          <Tag>{c.kind}</Tag>
+                          <Text strong>{c.title}</Text>
+                        </Space>
+                        <Text type="secondary" style={{ display: "block", marginTop: 4 }}>
+                          {c.snippet}
+                        </Text>
+                      </div>
+                    ))}
+                  </Space>
+                </Card>
               )}
             </Space>
           </Card>
