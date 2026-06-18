@@ -1,15 +1,14 @@
-# 🛠️ Mond — 설치 · 운영 가이드
+# Mond — 설치 · 운영 가이드
 
-> 데모 → 사내 운영까지. **Docker Compose**, **Helm chart**, **AI 세팅**, **SSO + MFA**, **관리자 초기 세팅** 한 곳에서.
-> 처음 보신다면 → 먼저 **[🚦 Part 0. 어느 시나리오인가요?](#part-0--어느-시나리오인가요)** 로 본인 환경을 고른 뒤, 해당 시나리오 경로만 따라가시면 됩니다.
+데모부터 사내 운영까지. Docker Compose, Helm chart, AI 세팅, SSO + MFA, 관리자 초기 세팅을 한 곳에 모았습니다. 처음 본다면 먼저 [Part 0. 어느 시나리오인가요?](#part-0-어느-시나리오인가요)에서 본인 환경을 고르고, 해당 시나리오 경로만 따라가면 됩니다.
 
-> **In English** — Everything you need to go from `docker compose up` to a Helm-deployed production instance with SSO, MFA, your-own-AI-provider, and a clean admin bootstrap. Start at **Part 0** to pick your scenario (Demo / Team / Startup / Closed-network), then follow only the steps that apply to you. English snippets in each section.
+In English — everything you need to go from `docker compose up` to a Helm-deployed production instance with SSO, MFA, your-own-AI-provider, and a clean admin bootstrap. Start at Part 0 to pick your scenario (Demo / Team / Startup / Closed-network), then follow only the steps that apply to you. English snippets in each section.
 
 ---
 
 ## 📑 목차
 
-- [Part 0. 🚦 어느 시나리오인가요?](#part-0--어느-시나리오인가요) — 4가지 페르소나 + 추천 옵션 매트릭스
+- [Part 0. 어느 시나리오인가요?](#part-0-어느-시나리오인가요) — 4가지 페르소나 + 추천 옵션 매트릭스
 - [Part 1. Docker Compose로 30초 데모](#part-1-docker-compose로-30초-데모)
 - [Part 2. Helm chart로 Kubernetes 운영 배포](#part-2-helm-chart로-kubernetes-운영-배포)
   - 2-A. DB / Redis 선택 — in-cluster vs 외부 매니지드
@@ -23,9 +22,9 @@
 
 ---
 
-## Part 0. 🚦 어느 시나리오인가요?
+## Part 0. 어느 시나리오인가요?
 
-> **EN**: Pick your scenario first — then only the matching column applies. Don't read every option; read the one that matches your environment.
+EN — Pick your scenario first; only the matching column applies. Don't read every option; read the one that matches your environment.
 
 본인 환경에 가까운 컬럼만 보세요. 다른 컬럼의 설정은 무시해도 됩니다.
 
@@ -45,7 +44,7 @@
 | 모니터링 | docker logs | `docker compose logs` | Prometheus + Grafana | 사내 관측 스택 (LGTM 등) |
 | **읽어야 할 파트** | **Part 1 → Part 4 (Dev) → Part 5 (1~2단계만)** | **Part 1 → Part 4 (Dev+MFA) → Part 5** | **Part 2 → Part 3(Anthropic) → Part 4(SSO+MFA) → Part 5 → Part 6** | **Part 2 → Part 3(Ollama) → Part 4(Keycloak+MFA) → Part 5 → Part 6** |
 
-> 💡 **시나리오를 모르겠으면** → 일단 **A**로 시작. `docker compose up` 한 줄로 띄워보고 화면을 만져본 뒤, 사내 도입 결정이 나면 B → C/D로 이동하면 됩니다. 데이터는 ENV만 바꾸면 흐름 유지.
+> 참고 — **시나리오를 모르겠으면** → 일단 **A**로 시작. `docker compose up` 한 줄로 띄워보고 화면을 만져본 뒤, 사내 도입 결정이 나면 B → C/D로 이동하면 됩니다. 데이터는 ENV만 바꾸면 흐름 유지.
 
 ---
 
@@ -178,7 +177,7 @@ secrets:
   redisUrl: redis://elasticache.../0
 ```
 
-> 🚨 in-cluster Postgres의 PVC는 **노드 사라지면 데이터도 사라질 수 있음**. 운영 전엔 반드시 외부 매니지드 또는 PV backup 정책 적용. 백업 가이드 → [Part 6-B 백업 전략](#part-6-업그레이드--백업--모니터링)
+> 주의 — in-cluster Postgres의 PVC는 **노드 사라지면 데이터도 사라질 수 있음**. 운영 전엔 반드시 외부 매니지드 또는 PV backup 정책 적용. 백업 가이드 → [Part 6-B 백업 전략](#part-6-업그레이드--백업--모니터링)
 
 ### 2-B. Ingress 선택 — ALB / Nginx / Cloudflare / 사내 GW
 
@@ -220,7 +219,7 @@ ingress:
 | 선택지 | 보안 등급 | 운영 비용 | 언제 쓰나 |
 |---|---|---|---|
 | **`kubectl create secret`** (직접) | 낮음 | 0 | 데모 · 1회성 |
-| **External-Secrets Operator + AWS Secrets Manager / GCP SM / Vault** ⭐ | 높음 | ESO 설치 비용 | 운영 권장 (C) |
+| **External-Secrets Operator + AWS Secrets Manager / GCP SM / Vault** (권장) | 높음 | ESO 설치 비용 | 운영 권장 (C) |
 | **Sealed-Secrets (bitnami-labs)** | 중간 | controller 1개 | 폐쇄망 GitOps (D) |
 | **External-Secrets + HashiCorp Vault** | 높음 | Vault 클러스터 | 다중 클라우드 |
 | **SOPS + age + Helm secrets** | 중간 | git-crypt 워크플로 | GitOps + 소규모 |
@@ -235,7 +234,7 @@ kubectl -n mond create secret generic mond-secrets \
   --from-literal=REDIS_URL="redis://elasticache.../0"
 ```
 
-#### B안 — External-Secrets + AWS Secrets Manager (운영 권장 ⭐)
+#### B안 — External-Secrets + AWS Secrets Manager (운영 권장 (권장))
 
 ```yaml
 # 1) AWS Secrets Manager에 secret 생성
@@ -318,20 +317,20 @@ SESSION_SECURE=true
 | 본인 환경 | 추천 provider | 이유 |
 |---|---|---|
 | 평가 / 데모 / 키 없음 | **(없음 → 휴리스틱)** | UI는 정상 동작, AI는 규칙 기반 fallback |
-| 가장 빠르게 좋은 결과 | **Anthropic 직접** ⭐ | 한국어 reasoning 강함, prompt 호환성 100% (Mond는 Claude로 최적화됨) |
+| 가장 빠르게 좋은 결과 | **Anthropic 직접** (권장) | 한국어 reasoning 강함, prompt 호환성 100% (Mond는 Claude로 최적화됨) |
 | 회사가 OpenAI/Azure 계약 보유 | **OpenAI** | 결제·거버넌스 통합. `gpt-4o-mini`로 비용 절감 |
 | AWS 단독 사용 + IAM 통합 비용 정책 | **AWS Bedrock** | IRSA로 API key 관리 불요, 결제 통합 |
 | **폐쇄망 / 금융 / 공공 / 의료** — 데이터 외부 유출 금지 | **Ollama** (로컬 LLM) | 모든 추론이 사내 GPU에서. 외부 API 호출 0 |
 | 다국적 — 미국·EU 데이터 거주성 강제 | Bedrock (region 선택) 또는 Azure OpenAI | 데이터 리전 명시적 |
 
-> 💡 **헷갈리면** → 일단 Anthropic으로 시작. 나중에 ENV 한 줄만 바꾸면 다른 provider로 즉시 전환 가능 (대화 기록·자산 데이터는 그대로).
+> 참고 — **헷갈리면** → 일단 Anthropic으로 시작. 나중에 ENV 한 줄만 바꾸면 다른 provider로 즉시 전환 가능 (대화 기록·자산 데이터는 그대로).
 
 ### 3-1. provider 매트릭스 — 한눈에
 
 | Provider | ENV | 모델 예시 | 시나리오 | 한국어 |
 |---|---|---|---|---|
 | **(없음)** | (env 미설정) | — | A | 휴리스틱 KO |
-| **Anthropic 직접** ⭐ | `AI_PROVIDER=anthropic` + `ANTHROPIC_API_KEY` | `claude-haiku-4-5-20251001` · `claude-sonnet-4-6` | B / C | ★★★★★ |
+| **Anthropic 직접** (권장) | `AI_PROVIDER=anthropic` + `ANTHROPIC_API_KEY` | `claude-haiku-4-5-20251001` · `claude-sonnet-4-6` | B / C | ★★★★★ |
 | **OpenAI / Azure OpenAI** | `AI_PROVIDER=openai` + `OPENAI_API_KEY` (+`OPENAI_BASE_URL` for Azure) | `gpt-4o-mini` · `gpt-4o` | C | ★★★★☆ |
 | **AWS Bedrock** | `AI_PROVIDER=bedrock` + IAM 자격 | `anthropic.claude-3-5-sonnet-20241022-v2:0` | C (AWS heavy) | ★★★★★ |
 | **Ollama / vLLM (로컬)** | `AI_PROVIDER=ollama` + `OLLAMA_BASE_URL` | `llama3.1:8b` · `llama3.1:70b` · `qwen2.5:32b` | **D (폐쇄망)** | ★★★☆☆ (모델 따라) |
@@ -409,7 +408,7 @@ OLLAMA_MODEL_DEEP=llama3.1:70b
 |---|---|---|
 | 평가 / 데모 / 사용자 1명 | **Dev login** | 이메일만 입력 — SSO 설정 불필요 |
 | 사내 Google Workspace 사용 | **Google SSO** | 가장 빠른 SSO 도입 (3 클릭) |
-| 사내 IdP 자체 호스팅 — 오픈소스 | **Keycloak** ⭐ | 무료, Realm·정책 자유. 폐쇄망 가능 |
+| 사내 IdP 자체 호스팅 — 오픈소스 | **Keycloak** (권장) | 무료, Realm·정책 자유. 폐쇄망 가능 |
 | 회사가 Okta 계약 보유 | **Okta** | 기존 user 정책·MFA 정책 그대로 |
 | 다중 IdP — 임직원 Okta + 외주 Google | (혼합) `SSO_PROVIDERS=okta,google` | 두 버튼 동시 노출 |
 | 폐쇄망 + AD 도메인 | **Keycloak** + LDAP federation | Keycloak이 AD bridge 역할 |
@@ -421,7 +420,7 @@ OLLAMA_MODEL_DEEP=llama3.1:70b
 | **Dev login** | `dev` | 데모 · 로컬 개발 · CI | ❌ — 이메일만 입력 | A · B |
 | **SSO 전용** | `sso` | 운영 — OIDC 강제 | ✅ — Keycloak / Okta / Google | C · D |
 
-> 🚨 운영(`ENVIRONMENT=production`)에서 `AUTH_MODE=dev`는 부팅 거부됨. 이메일만 입력해서 누구나 admin 잠탈 가능하므로 운영에선 반드시 SSO.
+> 주의 — 운영(`ENVIRONMENT=production`)에서 `AUTH_MODE=dev`는 부팅 거부됨. 이메일만 입력해서 누구나 admin 잠탈 가능하므로 운영에선 반드시 SSO.
 
 ### 4-2. Dev Login (데모용)
 
@@ -522,13 +521,13 @@ kubectl -n mond exec deploy/mond-backend -- python -m scripts.admin_unlock admin
 
 처음 띄운 뒤 ADMIN이 30분 안에 끝낼 수 있는 흐름. **각 단계마다 본인 시나리오에 맞춰 선택지를 골라 진행하세요.**
 
-### ✅ 1) 첫 로그인 + MFA 등록
+### 1) 첫 로그인 + MFA 등록
 
 - `/login` 이메일 입력 → 첫 가입자 자동 ADMIN
 - `/mfa` 화면에서 패스키 또는 TOTP 등록
 - 백업 코드 10개를 **반드시 별도 저장** (비밀번호 매니저 등)
 
-### ✅ 2) 추가 관리자 지정 — `SSO_ADMIN_EMAILS`
+### 2) 추가 관리자 지정 — `SSO_ADMIN_EMAILS`
 
 운영용 `.env` 또는 secret에:
 
@@ -538,7 +537,7 @@ SSO_ADMIN_EMAILS=admin1@your-corp.com,admin2@your-corp.com
 
 해당 이메일로 첫 SSO 로그인 시 자동 ADMIN 부여.
 
-### ✅ 3) 사용자 + 역할 (Admin → Users & Roles)
+### 3) 사용자 + 역할 (Admin → Users & Roles)
 
 - 4-tier RBAC: `viewer` < `employee` < `reviewer` < `admin`
 - 각 역할이 접근 가능한 메뉴:
@@ -547,7 +546,7 @@ SSO_ADMIN_EMAILS=admin1@your-corp.com,admin2@your-corp.com
   - **reviewer**: + 권한 검토 (Admin Area)
   - **admin**: + Connections / Users & Roles
 
-### ✅ 4) IAM Source 연동 (Admin → Connections)
+### 4) IAM Source 연동 (Admin → Connections)
 
 권한 셀프서비스를 쓰려면 클라우드 IAM source 연결:
 
@@ -561,17 +560,17 @@ SSO_ADMIN_EMAILS=admin1@your-corp.com,admin2@your-corp.com
 
 연동 후 IAM Explorer에서 자동 sync 시작.
 
-### ✅ 5) 스캐너 바이너리 — 어떤 것부터 설치하나요?
+### 5) 스캐너 바이너리 — 어떤 것부터 설치하나요?
 
 | 스캐너 | 무엇 | 우선순위 | 설치 |
 |---|---|---|---|
-| **Trivy** ⭐ | 컨테이너 이미지 CVE · IaC · SBOM | **1순위** | `brew install trivy` / `apt install trivy` / Docker 이미지에 사전 포함 |
+| **Trivy** (권장) | 컨테이너 이미지 CVE · IaC · SBOM | **1순위** | `brew install trivy` / `apt install trivy` / Docker 이미지에 사전 포함 |
 | **Semgrep** | 정적 코드 분석 (SAST) | 2순위 | `pip install semgrep` / `brew install semgrep` |
 | **Nuclei** | 템플릿 기반 동적 스캔 (DAST) | 3순위 | `go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest` |
 
-**🅰️ 옵션 A — Docker 이미지에 사전 설치**: backend Dockerfile에 추가 (운영 권장)
-**🅱️ 옵션 B — 사이드카 컨테이너**: K8s에서 별도 pod로 띄우고 `SCANNER_*_BIN` 경로 지정
-**⏭️ 옵션 C — Skip**: 아무 것도 설치 안 함 → stub 모드 (UI는 정상, 결과는 가짜 데이터)
+****옵션 A** — Docker 이미지에 사전 설치**: backend Dockerfile에 추가 (운영 권장)
+****옵션 B** — 사이드카 컨테이너**: K8s에서 별도 pod로 띄우고 `SCANNER_*_BIN` 경로 지정
+****옵션 C** — Skip**: 아무 것도 설치 안 함 → stub 모드 (UI는 정상, 결과는 가짜 데이터)
 
 ```bash
 # .env 경로 지정 — 없으면 stub
@@ -582,7 +581,7 @@ SCANNER_NUCLEI_BIN=nuclei
 
 > 🔒 폐쇄망(D 시나리오): Trivy는 `--offline-scan` + DB mirror 필요. Trivy DB는 ECR / Harbor 등 사내 registry에서 미러링.
 
-### ✅ 6) 정책 시드 — 유지 vs 초기화
+### 6) 정책 시드 — 유지 vs 초기화
 
 | 시드된 정책 3개 | 무엇 | 보통 어떻게 |
 |---|---|---|
@@ -590,15 +589,15 @@ SCANNER_NUCLEI_BIN=nuclei
 | `require-mfa-admin` | admin/reviewer는 MFA 강제 | 그대로 유지 권장 |
 | `pii-data-encryption` | PII 다루는 자산은 암호화 라벨 강제 | 한국 PIPA 대응 — 조직 라벨링에 맞춰 조정 |
 
-**🅰️ 옵션 A — 그대로 시작** (대부분의 경우 권장)
-**🅱️ 옵션 B — 정책 삭제 후 자체 정책 작성** — Policies 화면에서 신규 작성
-**⏭️ 옵션 C — Skip** (`SEED_ON_STARTUP=false`) — 비어있는 상태로 시작
+****옵션 A** — 그대로 시작** (대부분의 경우 권장)
+****옵션 B** — 정책 삭제 후 자체 정책 작성** — Policies 화면에서 신규 작성
+****옵션 C** — Skip** (`SEED_ON_STARTUP=false`) — 비어있는 상태로 시작
 
-### ✅ 7) 알림 — Slack / Generic Webhook / 둘 다
+### 7) 알림 — Slack / Generic Webhook / 둘 다
 
 | 선택지 | 언제 쓰나 | 설정 |
 |---|---|---|
-| **Slack Webhook** ⭐ | 팀이 Slack 사용 | `SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...` |
+| **Slack Webhook** (권장) | 팀이 Slack 사용 | `SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...` |
 | **Generic Webhook** | Teams · Discord · 사내 incident bot | `GENERIC_WEBHOOK_URL=https://your-bot/mond` (JSON POST) |
 | **둘 다 동시** | severity 다른 채널로 분리하고 싶을 때 | 둘 다 설정. 알림은 양쪽으로 전송 |
 | **알림 끄기** | 데모 · 조용한 환경 | 두 ENV 모두 비워두기 |
@@ -614,7 +613,7 @@ NOTIFY_MIN_SEVERITY=high   # critical / high / medium / low / info (threshold)
 - 보안팀 전담 채널 — `medium`
 - 데모 — `critical`만
 
-### ✅ 8) GitHub Webhook 자동 스캔 (선택)
+### 8) GitHub Webhook 자동 스캔 (선택)
 
 push마다 자동 스캔하려면:
 
@@ -629,9 +628,9 @@ GitHub repo Settings → Webhooks:
 - **Secret**: 위 secret과 동일
 - **Events**: `push` (선택) + `pull_request` (권장)
 
-**⏭️ Skip 옵션**: 수동 스캔 화면에서 충분하면 webhook 없이도 OK.
+**Skip 옵션 옵션**: 수동 스캔 화면에서 충분하면 webhook 없이도 OK.
 
-### ✅ 9) 데모 시드 끄기
+### 9) 데모 시드 끄기
 
 ```bash
 SEED_ON_STARTUP=true    # A · B (데모): 첫 부팅 시 자산 3 + 정책 3 자동 추가
@@ -640,7 +639,7 @@ SEED_ON_STARTUP=false   # C · D (운영 권장): 빈 상태로 시작
 
 **이미 띄운 후 끄려면**: DB에서 시드 자산 (`source=seed`)을 삭제하고 ENV 변경 후 재시작.
 
-### ✅ 10) Locale 기본값 — KO / EN
+### 10) Locale 기본값 — KO / EN
 
 ```bash
 DEFAULT_LOCALE=ko   # 기본 (한국 조직)
@@ -649,7 +648,7 @@ DEFAULT_LOCALE=en   # 글로벌 팀
 
 각 사용자는 우상단 언어 스위처로 개별 선택 가능 — `DEFAULT_LOCALE`은 미설정 사용자의 첫 화면 언어만 결정.
 
-### ✅ 11) MCP 서버 활성화 (선택) — Claude Desktop / Code 연동
+### 11) MCP 서버 활성화 (선택) — Claude Desktop / Code 연동
 
 Mond를 외부 AI 에이전트의 도구로 노출하려면:
 
@@ -671,7 +670,7 @@ Claude Desktop `claude_desktop_config.json`:
 
 Claude가 Mond의 자산·발견·정책을 자연어로 조회 가능.
 
-**⏭️ Skip**: `MCP_HTTP_ENABLED=false` — 외부 도구 노출 안 함.
+**Skip 옵션**: `MCP_HTTP_ENABLED=false` — 외부 도구 노출 안 함.
 
 ---
 
@@ -708,7 +707,7 @@ helm upgrade mond oci://ghcr.io/jland-93/charts/mond \
 
 > ✅ 백엔드 Deployment의 `initContainer`가 자동으로 `alembic upgrade head` 실행. 수동 단계 불필요.
 
-> 🚨 메이저 업그레이드(v0.x → v1.x)는 반드시 [CHANGELOG.md](../CHANGELOG.md)의 BREAKING CHANGES 섹션 확인 후.
+> 주의 — 메이저 업그레이드(v0.x → v1.x)는 반드시 [CHANGELOG.md](../CHANGELOG.md)의 BREAKING CHANGES 섹션 확인 후.
 
 ### 6-B. 백업 전략 — 시나리오별
 
@@ -732,7 +731,7 @@ kubectl -n mond exec deploy/postgres -- pg_dump -U mond mond | gzip > mond-$(dat
 gunzip -c mond-2026-06-18.sql.gz | docker compose exec -T postgres psql -U mond mond
 ```
 
-> 🚨 **Mond 백업 = DB 백업**입니다. 사용자·자산·정책·발견사항·MFA factor 모두 DB에 있음. 시크릿(SECRET_KEY 등)만 별도 관리.
+> 주의 — **Mond 백업 = DB 백업**입니다. 사용자·자산·정책·발견사항·MFA factor 모두 DB에 있음. 시크릿(SECRET_KEY 등)만 별도 관리.
 
 ### 6-C. 모니터링 — 무엇을 봐야 하나
 
@@ -787,7 +786,7 @@ docker compose exec -T postgres psql -U mond -d mond < dump.sql
 # 3) SECRET_KEY는 그대로 유지 — 안 그러면 모든 세션 무효화
 ```
 
-> 🚨 SECRET_KEY를 바꾸면 기존 세션 쿠키·MFA enrollment 모두 무효화. 의도된 경우만 변경.
+> 주의 — SECRET_KEY를 바꾸면 기존 세션 쿠키·MFA enrollment 모두 무효화. 의도된 경우만 변경.
 
 ---
 
