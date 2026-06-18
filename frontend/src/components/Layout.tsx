@@ -1,5 +1,7 @@
 /**
  * 🌙 Mond — 사이드바 + 헤더 레이아웃 + 언어 스위처 + 사용자 메뉴
+ *
+ * 일반 모드와 관리자 모드(/admin/*)에서 사이드바 메뉴가 전환된다.
  */
 
 import {
@@ -14,10 +16,12 @@ import {
   GlobalOutlined,
   KeyOutlined,
   LogoutOutlined,
+  RollbackOutlined,
   SafetyCertificateOutlined,
   SafetyOutlined,
   ScanOutlined,
   SettingOutlined,
+  SolutionOutlined,
   TeamOutlined,
   ThunderboltOutlined,
   UserOutlined,
@@ -40,8 +44,9 @@ export default function Layout() {
   const { t, locale, setLocale } = useI18n();
   const { user, logout } = useAuth();
 
-  // role에 따라 메뉴를 필터링한다.
-  const items = [
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
+  const userItems = [
     { key: "/", icon: <DashboardOutlined />, label: t.menu.dashboard, minRole: "viewer" as const },
     { key: "/assets", icon: <AppstoreOutlined />, label: t.menu.assets, minRole: "viewer" as const },
     { key: "/scans", icon: <ScanOutlined />, label: t.menu.scans, minRole: "employee" as const },
@@ -58,10 +63,16 @@ export default function Layout() {
     { key: "/settings", icon: <SettingOutlined />, label: t.menu.settings, minRole: "viewer" as const },
   ].filter((i) => hasRole(user, i.minRole));
 
-  const isAdminRoute = location.pathname.startsWith("/access-review");
-  const selectedKey = isAdminRoute
-    ? ""
-    : items.find((i) => i.key !== "/" && location.pathname.startsWith(i.key))?.key ?? "/";
+  const adminItems = [
+    { key: "/admin/access-review", icon: <SolutionOutlined />, label: t.adminArea.menuAccessReview, minRole: "reviewer" as const },
+    { key: "/admin/policies", icon: <ExperimentOutlined />, label: t.adminArea.menuPolicies, minRole: "reviewer" as const },
+    { key: "/admin/connections", icon: <ApiOutlined />, label: t.adminArea.menuConnections, minRole: "admin" as const },
+    { key: "/admin/users", icon: <TeamOutlined />, label: t.adminArea.menuUsers, minRole: "admin" as const },
+  ].filter((i) => hasRole(user, i.minRole));
+
+  const items = isAdminRoute ? adminItems : userItems;
+  const selectedKey =
+    items.find((i) => location.pathname.startsWith(i.key))?.key ?? items[0]?.key ?? "";
 
   const canEnterAdmin = hasRole(user, "reviewer");
 
@@ -86,6 +97,11 @@ export default function Layout() {
         style={{ borderRight: "1px solid var(--mond-border)" }}
       >
         <Logo collapsed={collapsed} />
+        {isAdminRoute && !collapsed && (
+          <div style={{ padding: "6px 18px" }}>
+            <Tag color="red">{t.admin.badge}</Tag>
+          </div>
+        )}
         <Menu
           theme="dark"
           mode="inline"
@@ -114,10 +130,10 @@ export default function Layout() {
               <Button
                 type={isAdminRoute ? "primary" : "default"}
                 danger={isAdminRoute}
-                icon={<SafetyCertificateOutlined />}
-                onClick={() => navigate(isAdminRoute ? "/" : "/access-review")}
+                icon={isAdminRoute ? <RollbackOutlined /> : <SafetyCertificateOutlined />}
+                onClick={() => navigate(isAdminRoute ? "/" : "/admin/access-review")}
               >
-                {isAdminRoute ? "←" : t.admin.enter}
+                {isAdminRoute ? t.adminArea.backToApp : t.admin.enter}
               </Button>
             )}
             <Dropdown

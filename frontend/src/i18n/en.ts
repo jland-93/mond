@@ -30,6 +30,38 @@ export const en: Dict = {
     badge: "ADMIN",
   },
 
+  adminArea: {
+    home: "Admin Home",
+    backToApp: "Back to app",
+    menuAccessReview: "Access Review",
+    menuConnections: "Connections",
+    menuPolicies: "Policy Management",
+    menuUsers: "Users & Roles",
+    connectionsTitle: "Connections",
+    connectionsDesc:
+      "Manage external integrations in one place — cloud IAM sources, SSO IdPs, and external webhooks. ADMIN role required.",
+    iamSources: "IAM Sources (cloud)",
+    ssoTitle: "SSO / IdP",
+    ssoDesc:
+      "Check current OIDC SSO status. Enable additional IdPs via runtime ENV. Default is Dev Login.",
+    ssoMode: "Current mode",
+    ssoActive: "Active IdPs",
+    ssoEnvHint: "Production ENV example (.env)",
+    webhookTitle: "GitHub Webhook",
+    webhookDesc:
+      "Receives GitHub push events and auto-scans matching repository assets. Set the same secret in ENV as GITHUB_WEBHOOK_SECRET.",
+    policyMgmtTitle: "Policy Management",
+    policyMgmtDesc:
+      "Only security reviewers can change policies that gate scanner results. Toggle/threshold/delete + bulk-install regulation templates.",
+    usersTitle: "Users & Roles",
+    usersDesc:
+      "See all users with their roles and change them as ADMIN. Self-lockout prevention: you can't demote yourself from ADMIN.",
+    user: "User",
+    role: "Role",
+    ssoProvider: "SSO source",
+    lastLogin: "Last login",
+  },
+
   auth: {
     loginTitle: "Sign in",
     ssoLogin: "Sign in with your company account (SSO)",

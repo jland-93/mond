@@ -20,6 +20,7 @@ from app.api.v1.endpoints import (
     regulations,
     reports,
     scans,
+    users,
     webhooks,
 )
 
@@ -41,3 +42,4 @@ api_router.include_router(integrations.router, prefix="/integrations", tags=["In
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 api_router.include_router(iam.router, prefix="/iam", tags=["IAM Self-Service"])
 api_router.include_router(knowledge.router, prefix="/knowledge", tags=["Knowledge Hub"])
+api_router.include_router(users.router, prefix="/users", tags=["Users (Admin)"])
