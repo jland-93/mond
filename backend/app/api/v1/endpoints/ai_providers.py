@@ -1,5 +1,5 @@
 """
-🌙 AI Provider 동적 설정 — 관리자가 UI에서 LLM provider 자격증명을 관리.
+AI Provider 동적 설정 — 관리자가 UI에서 LLM provider 자격증명을 관리.
 
 권한: 모든 엔드포인트 ADMIN 전용.
 api_key는 응답에 마스킹("sk-...••••...abcd")으로만 노출되고, 평문은 절대 반환되지 않는다.

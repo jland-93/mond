@@ -1,5 +1,5 @@
 """
-🌙 AI Provider 자격증명 암호화
+AI Provider 자격증명 암호화
 
 SECRET_KEY를 SHA-256로 유도해 Fernet 키로 사용한다. SECRET_KEY가 바뀌면 기존
 암호문은 복호화 불가 → 운영에서는 키 회전 시 마이그레이션 절차 필요.

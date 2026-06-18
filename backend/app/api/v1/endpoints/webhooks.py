@@ -1,5 +1,5 @@
 """
-🌙 Webhooks — 외부 시스템 이벤트 수신
+Webhooks — 외부 시스템 이벤트 수신
 
 지원:
   - GitHub `push` 이벤트 → 해당 레포 자산을 찾아 자동 스캔(기본 trivy)

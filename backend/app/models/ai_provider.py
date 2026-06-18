@@ -1,5 +1,5 @@
 """
-🌙 AI Provider 동적 설정 — 관리자가 UI에서 추가/변경하는 LLM provider 자격증명.
+AI Provider 동적 설정 — 관리자가 UI에서 추가/변경하는 LLM provider 자격증명.
 
 저장 방식
 ---------

@@ -1,5 +1,5 @@
 """
-🌙 Knowledge Hub 초기 시드 (정적) — 빈 DB에 한 번만 채운다.
+Knowledge Hub 초기 시드 (정적) — 빈 DB에 한 번만 채운다.
 """
 
 from app.models.knowledge import KnowledgeCategory

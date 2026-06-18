@@ -1,5 +1,5 @@
 """
-🌙 AIInsight 스키마
+AIInsight 스키마
 """
 
 from pydantic import BaseModel, Field

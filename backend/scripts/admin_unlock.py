@@ -1,5 +1,5 @@
 """
-🌙 ADMIN MFA 복구 스크립트 — 사용자가 MFA에서 잠겼을 때 운영자가 직접 풀어준다.
+ADMIN MFA 복구 스크립트 — 사용자가 MFA에서 잠겼을 때 운영자가 직접 풀어준다.
 
 사용:
   docker compose exec backend python -m scripts.admin_unlock admin@example.com

@@ -1,5 +1,5 @@
 """
-🌙 Users 관리 엔드포인트 — ADMIN 전용 (사용자 목록 + role 변경)
+Users 관리 엔드포인트 — ADMIN 전용 (사용자 목록 + role 변경)
 """
 
 from fastapi import APIRouter, Depends, HTTPException

@@ -1,5 +1,5 @@
 """
-🌙 Dashboard 서비스 — 메인 페이지 요약 통계 + 시계열 + 활동 피드
+Dashboard 서비스 — 메인 페이지 요약 통계 + 시계열 + 활동 피드
 """
 
 from __future__ import annotations

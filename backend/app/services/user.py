@@ -1,5 +1,5 @@
 """
-🌙 User 서비스 — SSO callback / Dev login 처리, 첫 가입자 ADMIN 지정
+User 서비스 — SSO callback / Dev login 처리, 첫 가입자 ADMIN 지정
 """
 
 from __future__ import annotations

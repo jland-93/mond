@@ -1,5 +1,5 @@
 """
-🌙 IAM 셀프서비스 엔드포인트
+IAM 셀프서비스 엔드포인트
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status

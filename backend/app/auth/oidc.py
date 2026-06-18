@@ -1,5 +1,5 @@
 """
-🌙 OIDC provider 동적 등록 — Keycloak / Okta / Google / Azure AD 등
+OIDC provider 동적 등록 — Keycloak / Okta / Google / Azure AD 등
 
 settings.SSO_PROVIDERS에 콤마로 묶인 provider 이름만 들어가면 자동 활성.
 각 provider는 issuer URL을 ENV로 받아 discovery로 메타 자동 로드.

@@ -1,5 +1,5 @@
 """
-🌙 KnowledgeCard — 지식 허브 카드 (동적)
+KnowledgeCard — 지식 허브 카드 (동적)
 
 초기에는 db_seed가 17건을 채우고, 이후 다음 두 경로로 늘어난다:
   - AI 생성: POST /knowledge/cards/generate (Claude가 새 카드 N건 제안)

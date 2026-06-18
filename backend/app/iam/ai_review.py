@@ -1,5 +1,5 @@
 """
-🌙 Access Request AI 1차 자율 판단
+Access Request AI 1차 자율 판단
 
 Claude가 요청을 평가해 다음 3개 분기로 결정:
   - auto_approve : 위험 낮음, 자동 승인 (사용자에게 즉시 grant 진행)

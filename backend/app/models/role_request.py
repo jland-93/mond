@@ -1,5 +1,5 @@
 """
-🌙 셀프서비스 역할 변경 요청 — 임직원이 자기 role 변경을 요청, AI 1차 + ADMIN 2차.
+셀프서비스 역할 변경 요청 — 임직원이 자기 role 변경을 요청, AI 1차 + ADMIN 2차.
 
 흐름:
   pending → (AI 평가) → needs_review|auto_approved → (ADMIN) → approved|denied → 적용

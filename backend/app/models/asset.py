@@ -1,5 +1,5 @@
 """
-🌙 Asset — 보호 대상 (repo / image / host / URL / cloud resource / application)
+Asset — 보호 대상 (repo / image / host / URL / cloud resource / application)
 
 회사 특화 ARN/AWS 의존을 제거하고, URI 기반의 범용 자산으로 일반화한다.
 """

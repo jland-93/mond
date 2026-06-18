@@ -1,5 +1,5 @@
 """
-🌙 Policy Simulator — 가상의 finding 목록을 받아 활성 정책 게이트를 시뮬레이션
+Policy Simulator — 가상의 finding 목록을 받아 활성 정책 게이트를 시뮬레이션
 """
 
 from __future__ import annotations

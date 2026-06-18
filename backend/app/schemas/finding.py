@@ -1,5 +1,5 @@
 """
-🌙 Finding 스키마
+Finding 스키마
 """
 
 from pydantic import BaseModel, Field

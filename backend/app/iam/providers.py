@@ -1,5 +1,5 @@
 """
-🌙 IAM 프로바이더 어댑터 — AWS / mock
+IAM 프로바이더 어댑터 — AWS / mock
 
 각 프로바이더는 (1) `import_identities_and_permissions(source)` 로 외부에서 데이터를 가져오고
 (2) `attach(identity, permission)` 로 실제 권한을 부여한다.

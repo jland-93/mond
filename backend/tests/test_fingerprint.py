@@ -1,5 +1,5 @@
 """
-🌙 Finding fingerprint 안정성 테스트
+Finding fingerprint 안정성 테스트
 
 같은 (scanner, rule, asset, location) 조합은 항상 같은 fingerprint를 내야 하고,
 다른 조합이면 달라야 한다. dedup의 코어 invariant.

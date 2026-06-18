@@ -1,5 +1,5 @@
 """
-🌙 Mond — AI-Powered Self-Service DevSecOps Platform
+Mond — AI-Powered Self-Service DevSecOps Platform
 
 FastAPI 엔트리포인트.
 """
@@ -58,7 +58,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Mond API",
-    description="🌙 AI-Powered Self-Service DevSecOps Platform",
+    description="AI-Powered Self-Service DevSecOps Platform",
     version=settings.VERSION,
     lifespan=lifespan,
     docs_url="/docs",

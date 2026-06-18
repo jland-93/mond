@@ -1,5 +1,5 @@
 """
-🌙 IAM 셀프서비스 서비스 — Source import / Identities / Permissions / AccessRequest workflow
+IAM 셀프서비스 서비스 — Source import / Identities / Permissions / AccessRequest workflow
 """
 
 from __future__ import annotations

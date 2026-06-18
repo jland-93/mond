@@ -1,5 +1,5 @@
 """
-🌙 Trivy 어댑터 — 컨테이너 이미지/IaC/SBOM 스캐너
+Trivy 어댑터 — 컨테이너 이미지/IaC/SBOM 스캐너
 
 trivy 바이너리가 PATH에 있으면 실제 호출하고, 없으면 stub 결과를 반환한다.
 """

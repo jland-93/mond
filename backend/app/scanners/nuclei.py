@@ -1,5 +1,5 @@
 """
-🌙 Nuclei 어댑터 — 템플릿 기반 동적 스캐너 (DAST)
+Nuclei 어댑터 — 템플릿 기반 동적 스캐너 (DAST)
 """
 
 from __future__ import annotations

@@ -1,5 +1,5 @@
 """
-🌙 헬스체크 / 메타 정보
+헬스체크 / 메타 정보
 """
 
 from fastapi import APIRouter

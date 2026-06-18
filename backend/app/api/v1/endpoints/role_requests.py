@@ -1,5 +1,5 @@
 """
-🌙 역할 변경 셀프서비스 요청 + ADMIN 검토
+역할 변경 셀프서비스 요청 + ADMIN 검토
 
   - POST   /me/role-request          — 임직원이 자기 role 변경 요청
   - GET    /me/role-request          — 자기 요청 이력

@@ -1,5 +1,5 @@
 """
-🌙 스캐너 어댑터 베이스
+스캐너 어댑터 베이스
 
 각 통합(Trivy/Semgrep/Nuclei/…)은 ScannerAdapter를 구현한다.
 바이너리/원격 API 없이도 stub 모드로 동작해 OSS 사용자가 즉시 데모할 수 있다.

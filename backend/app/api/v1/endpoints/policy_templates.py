@@ -1,5 +1,5 @@
 """
-🌙 정책 템플릿 카탈로그 — 한국·글로벌 규제 매핑된 정책을 한 번에 install
+정책 템플릿 카탈로그 — 한국·글로벌 규제 매핑된 정책을 한 번에 install
 
 GET  /policy/templates                       — 전체 카탈로그
 GET  /policy/templates/frameworks            — 프레임워크 목록 (필터 칩)

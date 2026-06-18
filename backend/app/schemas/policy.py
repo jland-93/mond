@@ -1,5 +1,5 @@
 """
-🌙 Policy 스키마
+Policy 스키마
 """
 
 from pydantic import BaseModel, Field

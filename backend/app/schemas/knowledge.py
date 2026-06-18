@@ -1,5 +1,5 @@
 """
-🌙 Knowledge 스키마
+Knowledge 스키마
 """
 
 from pydantic import BaseModel, Field

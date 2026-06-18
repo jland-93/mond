@@ -1,5 +1,5 @@
 """
-🌙 Asset 서비스
+Asset 서비스
 """
 
 from __future__ import annotations

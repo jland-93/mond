@@ -1,5 +1,5 @@
 """
-🌙 IAM 셀프서비스 도메인
+IAM 셀프서비스 도메인
 
 - IAMSource    : 외부 IAM 시스템 등록 (AWS / GCP / Azure / k8s / custom)
 - IAMIdentity  : 외부 시스템에서 가져온 user / role / service_account / group

@@ -1,5 +1,5 @@
 """
-🌙 Policy Simulator 엔드포인트
+Policy Simulator 엔드포인트
 """
 
 from dataclasses import asdict

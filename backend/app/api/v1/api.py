@@ -1,5 +1,5 @@
 """
-🌙 API v1 라우터
+API v1 라우터
 """
 
 from fastapi import APIRouter

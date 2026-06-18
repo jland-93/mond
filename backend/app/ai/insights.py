@@ -1,5 +1,5 @@
 """
-🌙 AI 인사이트 생성기
+AI 인사이트 생성기
 
 Claude를 호출해 Finding을 triage / remediation / explain 한다.
 API 키가 없으면 기본 규칙 fallback이 동작하므로 OSS 사용자가 즉시 UI를 볼 수 있다.
