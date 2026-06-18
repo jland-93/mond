@@ -1,0 +1,17 @@
+# 🌙 Mond Issue Template Chooser
+# blank issue 안 쓰도록 + Discussions/Security 동선 분리
+
+blank_issues_enabled: false
+
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/jland-93/mond/discussions
+    about: 자유로운 질문·아이디어·로드맵 토론. 정형화된 이슈 아닌 모든 대화는 여기로.
+
+  - name: 🔐 Security Vulnerability (private)
+    url: https://github.com/jland-93/mond/security/advisories/new
+    about: 보안 취약점은 public Issue 대신 Security Advisory(private)로 신고. SECURITY.md 정책 참고.
+
+  - name: 📖 Setup / Operation Guide
+    url: https://github.com/jland-93/mond/blob/main/docs/SETUP.md
+    about: 설치·운영 가이드. Part 0 시나리오 선택부터 시작하세요.

@@ -1,0 +1,87 @@
+# 🌙 Mond — 의존성 자동 업데이트
+# 보안 패치 누락 방지 + 정기적인 dep refresh. 작은 PR이 많이 들어와도 머지는 메인테이너 판단.
+#
+# 4종 ecosystem 동시 감시: pip(backend) · npm(frontend) · github-actions · docker(compose+Dockerfile)
+
+version: 2
+
+updates:
+  # ── Backend (Python) ─────────────────────────────────────
+  - package-ecosystem: "pip"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      # 매주 다 합쳐서 1 PR — 노이즈 ↓
+      backend-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # ── Frontend (npm) ───────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "frontend"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    ignore:
+      # antd 5.x → 6.x 같은 major는 별도 검토
+      - dependency-name: "antd"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+    groups:
+      frontend-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # ── GitHub Actions ───────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "chore(ci)"
+
+  # ── Docker images (backend/frontend Dockerfile + compose) ─
+  - package-ecosystem: "docker"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(docker)"
+
+  - package-ecosystem: "docker"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(docker)"

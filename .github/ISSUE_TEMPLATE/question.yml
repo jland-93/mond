@@ -1,0 +1,66 @@
+name: ❓ Question / Discussion
+description: Ask a question or start a discussion about Mond
+title: "[Question]: "
+labels: ["question", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Got a question about Mond? 🌙
+
+        💬 For open-ended discussions (architecture ideas, "is X possible?", roadmap input),
+        prefer **[GitHub Discussions](https://github.com/jland-93/mond/discussions)**.
+
+        Use this Issue form when:
+        - You're stuck setting up Mond and need help
+        - You're not sure if something is a bug or expected behavior
+        - You want to confirm an interpretation of a doc
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I have searched existing issues and Discussions
+          required: true
+        - label: I have read the [SETUP guide](../../docs/SETUP.md) — especially Part 0 (scenario selection) and Part 7 (troubleshooting)
+          required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What are you trying to figure out?
+      placeholder: e.g. "How do I switch from Anthropic to Ollama without resetting users?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What have you already tried? What's your scenario (A/B/C/D from SETUP Part 0)?
+      placeholder: |
+        - Scenario: C (운영 스타트업, EKS)
+        - I'm trying to: ...
+        - I already tried: ...
+        - I read: docs/SETUP.md Part 3
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Installation / Deployment (Docker · Helm · EKS)
+        - AI provider configuration
+        - SSO / MFA / Auth
+        - Scanner adapters
+        - IAM Self-service
+        - Policy / Regulations
+        - Architecture / how it works
+        - Documentation
+        - Other
+    validations:
+      required: true
