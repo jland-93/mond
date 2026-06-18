@@ -97,12 +97,27 @@ export default function Layout() {
         onCollapse={setCollapsed}
         width={232}
         theme="dark"
-        style={{ borderRight: "1px solid var(--mond-border)" }}
+        className="mond-sider"
+        style={{
+          borderRight: "1px solid var(--border)",
+          background: "var(--surface-0)",
+        }}
       >
         <Logo collapsed={collapsed} />
         {isAdminRoute && !collapsed && (
           <div style={{ padding: "6px 18px" }}>
-            <Tag color="red">{t.admin.badge}</Tag>
+            <Tag
+              style={{
+                background: "var(--severity-critical-bg)",
+                color: "var(--severity-critical)",
+                border: "1px solid var(--severity-critical)",
+                borderRadius: 999,
+                fontWeight: 500,
+                letterSpacing: "0.04em",
+              }}
+            >
+              {t.admin.badge}
+            </Tag>
           </div>
         )}
         <Menu
@@ -116,15 +131,18 @@ export default function Layout() {
       </Sider>
       <AntLayout>
         <Header
+          className="mond-header"
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             padding: "0 24px",
-            borderBottom: "1px solid var(--mond-border)",
+            background: "var(--surface-0)",
+            borderBottom: "1px solid var(--border)",
+            height: 56,
           }}
         >
-          <Space size={8} align="center">
+          <Space size={10} align="center">
             <img
               src="/logo.png"
               alt="Mond"
@@ -132,12 +150,32 @@ export default function Layout() {
               height={20}
               style={{
                 borderRadius: 4,
-                filter: "drop-shadow(0 0 6px oklch(72% 0.16 285 / 0.5))",
+                filter: "drop-shadow(0 0 8px var(--accent) / 0.4)",
                 verticalAlign: "middle",
               }}
             />
-            <span style={{ color: "var(--mond-text-dim)" }}>{t.appTagline}</span>
-            {isAdminRoute && <Tag color="red">{t.admin.badge}</Tag>}
+            <span
+              style={{
+                color: "var(--fg-secondary)",
+                fontSize: 13,
+                letterSpacing: "-0.005em",
+              }}
+            >
+              {t.appTagline}
+            </span>
+            {isAdminRoute && (
+              <Tag
+                style={{
+                  background: "var(--severity-critical-bg)",
+                  color: "var(--severity-critical)",
+                  border: "1px solid var(--severity-critical)",
+                  borderRadius: 999,
+                  marginLeft: 6,
+                }}
+              >
+                {t.admin.badge}
+              </Tag>
+            )}
           </Space>
           <Space>
             {canEnterAdmin && (

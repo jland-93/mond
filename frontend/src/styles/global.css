@@ -120,3 +120,62 @@ a:hover {
 .ant-table {
   background: transparent !important;
 }
+
+/* ── Mond Sider 시그니처 — 옥색 active rail + hairline ───────── */
+.mond-sider .ant-menu-item {
+  margin: 2px 8px !important;
+  width: calc(100% - 16px) !important;
+  border-radius: var(--radius-sm);
+  position: relative;
+  transition:
+    background var(--motion-fast) var(--motion-ease),
+    color var(--motion-fast) var(--motion-ease);
+}
+.mond-sider .ant-menu-item:hover {
+  background: oklch(82% 0.06 180 / 0.06) !important;
+  color: var(--fg-primary) !important;
+}
+/* 활성 메뉴 — 1px 옥색 left rail + inset 미세 글로우 */
+.mond-sider .ant-menu-item-selected {
+  background: oklch(82% 0.06 180 / 0.10) !important;
+  color: var(--accent) !important;
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.mond-sider .ant-menu-item-selected::before {
+  content: "";
+  position: absolute;
+  left: -8px; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--accent);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 12px var(--accent);
+  opacity: 0.7;
+}
+.mond-sider .ant-menu-item .anticon {
+  font-size: 15px;
+  color: inherit;
+}
+.mond-sider .ant-layout-sider-trigger {
+  background: var(--surface-1);
+  border-top: 1px solid var(--border);
+  color: var(--fg-tertiary);
+}
+
+/* ── Header — hairline 강화 + 헤어 그라데이션 ────────────────── */
+.mond-header {
+  position: relative;
+}
+.mond-header::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px; height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent) 12%,
+    transparent 24%,
+    var(--border) 50%,
+    transparent 100%
+  );
+  opacity: 0.5;
+}
