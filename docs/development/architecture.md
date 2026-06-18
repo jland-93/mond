@@ -157,3 +157,17 @@ GitHub push → /webhooks/github  → Asset 매칭 → trigger_scan
 ---
 
 작은 코어, 명확한 어댑터 경계. 확장은 자유롭게.
+
+---
+
+## 🧭 문서 한눈에 · Doc Map
+
+| 문서 | 무엇 |
+|---|---|
+| 🏠 [`/README.md`](../../README.md) | 프로젝트 소개 · 스크린샷 |
+| 🌙 [`ABOUT.md`](../ABOUT.md) | 왜 만들었나 · 무엇을 푸는가 · 로드맵 |
+| 🛠️ [`SETUP.md`](../SETUP.md) | 설치 · 운영 · 시나리오 가이드 |
+| 🏗️ [`development/architecture.md`](architecture.md) (이 문서) | 시스템 구조 |
+| 🎨 [`assets/brand-guidelines.md`](../assets/brand-guidelines.md) | 로고 · 컬러 · 타이포 |
+| 🤝 [`/CONTRIBUTING.md`](../../CONTRIBUTING.md) | 기여 가이드 |
+| 🔐 [`/SECURITY.md`](../../SECURITY.md) | 취약점 신고 |

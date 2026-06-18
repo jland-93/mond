@@ -2,14 +2,123 @@
 
 <div align="center">
   <img src="docs/assets/images/mond-logo.png" alt="Mond Logo" width="280"/>
+
+  <h3>AI-Powered Self-Service DevSecOps Platform<br/>AI 기반 셀프서비스 DevSecOps 플랫폼</h3>
+
+  <p>
+    <em>분석은 AI가, 결정은 사람이.</em><br/>
+    <em>AI does triage. You decide what matters.</em>
+  </p>
+
+  <p>
+    자산 · 스캔 · 발견 · 승인 · 감사까지 한 흐름에서.<br/>
+    Inventory · scan · triage · approve · audit — in one flow.
+  </p>
+
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
+  [![React](https://img.shields.io/badge/React-18-61DAFB.svg)](https://reactjs.org/)
+  [![Claude](https://img.shields.io/badge/AI-Claude-7c8cff.svg)](https://www.anthropic.com/)
+  [![Helm](https://img.shields.io/badge/Helm-OCI-0F1689.svg)](https://github.com/jland-93/mond/pkgs/container/charts%2Fmond)
 </div>
 
-> **AI-Powered Self-Service DevSecOps Platform** — 자산 인벤토리부터 스캔, 트리아지까지 한 곳에서.
+---
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
-[![React](https://img.shields.io/badge/React-18-61DAFB.svg)](https://reactjs.org/)
-[![Claude](https://img.shields.io/badge/AI-Claude-7c8cff.svg)](https://www.anthropic.com/)
+## 🌒 화면 미리보기 · Preview
+
+<table>
+  <tr>
+    <td width="50%">
+      <a href="docs/screenshots/01-dashboard.jpg"><img src="docs/screenshots/01-dashboard.jpg" alt="Mond Dashboard — 보안 점수 + 7일 trend + 활동 피드"/></a>
+      <p align="center">
+        <strong>대시보드</strong> · Moon-phase 보안 점수, 7일 trend, 활동 피드, 주의 자산<br/>
+        <sub>🛠️ <a href="docs/SETUP.md#part-5-관리자-초기-세팅-체크리스트">관리자 초기 세팅 →</a> · 📖 <a href="docs/ABOUT.md#-무엇을-제공하나요">무엇을 제공? →</a></sub>
+      </p>
+    </td>
+    <td width="50%">
+      <a href="docs/screenshots/05-login-hero.jpg"><img src="docs/screenshots/05-login-hero.jpg" alt="Login Hero — 3D Moon + AI Triage / Self-service / Auto-audit"/></a>
+      <p align="center">
+        <strong>Login Hero</strong> · 3D 초승달 · 3 pillars (AI Triage · Self-service · Auto-audit)<br/>
+        <sub>🔐 <a href="docs/SETUP.md#part-4-로그인--dev--sso--mfa">로그인 · SSO · MFA 설정 →</a></sub>
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <a href="docs/screenshots/02-knowledge-hub.jpg"><img src="docs/screenshots/02-knowledge-hub.jpg" alt="Knowledge Hub — DevSecOps + 규제 카드 + AI 연계"/></a>
+      <p align="center">
+        <strong>지식 허브</strong> · DevSecOps 기초, OWASP, K-PIPA, ISMS-P, PCI DSS, GDPR — AI에 바로 이어 묻기<br/>
+        <sub>📖 <a href="docs/ABOUT.md#3-한국-규제-매핑-부재--regulations-guide--정책-템플릿">한국 규제 매핑 →</a></sub>
+      </p>
+    </td>
+    <td width="50%">
+      <a href="docs/screenshots/03-ai-insights.jpg"><img src="docs/screenshots/03-ai-insights.jpg" alt="AI Insights — Claude 자연어 질의"/></a>
+      <p align="center">
+        <strong>AI 인사이트</strong> · 자연어로 자산·발견·정책 질의. 키 없으면 기본 규칙 모드<br/>
+        <sub>🤖 <a href="docs/SETUP.md#part-3-ai-provider-세팅">AI provider 세팅 (Anthropic / OpenAI / Bedrock / Ollama) →</a></sub>
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <a href="docs/screenshots/04-iam-explorer.jpg"><img src="docs/screenshots/04-iam-explorer.jpg" alt="IAM Explorer — AWS / GCP / Azure / K8s / LDAP 통합 권한 탐색"/></a>
+      <p align="center">
+        <strong>IAM 탐색</strong> · AWS · GCP · Azure · Kubernetes · LDAP/AD — 멀티 클라우드 권한 한눈에 + 위험도 라벨<br/>
+        <sub>🔗 <a href="docs/SETUP.md#-4-iam-source-연동-admin--connections">IAM Source 연동 (Admin → Connections) →</a></sub>
+      </p>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 📚 어떤 OSS인가요? · What is Mond?
+
+- **무엇을 푸는가** — DevSecOps 도구가 너무 흩어져 있고, 발견사항이 너무 많고, 의사결정은 너무 느립니다. Mond는 **AI가 1차 분석**해서 **사람이 결정만** 하면 되는 흐름을 만듭니다.
+- **어떻게 다른가** — 클라우드 / 스캐너 / AI provider / IdP — 어디에도 묶이지 않습니다. 어댑터로 갈아끼우고, 한국어가 1급 시민입니다.
+- **어디로 가는가** — 자산 자동 동기화, RAG 기반 AI Insights, OPA Rego 평가, CI 패키지로 확장합니다.
+
+> 📖 **자세한 이야기는 → [docs/ABOUT.md](docs/ABOUT.md)**
+> 🛠️ **설치·운영 가이드 → [docs/SETUP.md](docs/SETUP.md)**
+
+In English: a vendor-neutral, self-service DevSecOps platform that consolidates asset inventory, scanning, AI-triaged findings, IAM access requests, policy simulation, and regulation mapping into a single flow. Bring your own scanners (Trivy/Semgrep/Nuclei/...), your own AI provider (Anthropic/OpenAI/Bedrock/Ollama), your own IdP (Keycloak/Okta/Google). See [docs/ABOUT.md](docs/ABOUT.md) and [docs/SETUP.md](docs/SETUP.md).
+
+---
+
+## ⚡ 시작하기 · Get started
+
+### 🐳 Docker Compose — 30초 데모 (로컬·평가용)
+
+```bash
+git clone https://github.com/jland-93/mond.git && cd mond
+cp .env.example .env
+# (선택) ANTHROPIC_API_KEY를 .env에 넣으면 실제 Claude 분석이 동작합니다.
+docker compose up -d
+```
+
+- 프론트 → <http://localhost:3000>
+- 백엔드 docs → <http://localhost:8000/docs>
+- 첫 가입자가 자동 `ADMIN`. MFA(패스키 or TOTP) 1회 등록 후 진입.
+
+### ⛵ Helm chart — 운영 배포 (Kubernetes)
+
+OCI 레지스트리에 자동 배포되는 차트로 한 줄 설치:
+
+```bash
+helm install mond oci://ghcr.io/jland-93/charts/mond \
+  --version 0.1.0 \
+  -n mond --create-namespace \
+  -f charts/mond/values-prod.yaml \
+  --set ingress.hosts[0].host=mond.your-corp.com \
+  --set secrets.existingSecret=mond-secrets
+```
+
+- 차트 소스 → [`charts/mond/`](charts/mond) (`values.yaml` · `values-prod.yaml`)
+- 자동 배포 → 태그 push 시 [`.github/workflows/release.yml`](.github/workflows/release.yml) helm job
+- 컨테이너 이미지 → `ghcr.io/jland-93/mond-backend:<ver>` · `…-frontend:<ver>` (multi-arch amd64/arm64)
+- EKS / GKE / AKS 권장 설정 · 시크릿 관리(External-Secrets) → **[docs/SETUP.md Part 2](docs/SETUP.md#part-2-helm-chart로-kubernetes-운영-배포)**
+
+> 🛠️ SSO · MFA · AI provider 전환 · 관리자 초기 세팅 → **[docs/SETUP.md](docs/SETUP.md)**
 
 ---
 
@@ -305,6 +414,35 @@ class MyAdapter(ScannerAdapter):
 ## 📄 License
 
 MIT — [LICENSE](LICENSE)
+
+---
+
+## 🧭 문서 한눈에 · Doc Map
+
+문서 어디서든 다른 곳으로 한 번에 — 처음이라면 **Setup → Part 0** 부터.
+
+| 문서 | 위치 | 무엇 |
+|---|---|---|
+| 🏠 **메인 README** (이 문서) | [`/README.md`](README.md) | 프로젝트 소개 · 스크린샷 · 빠른 시작 |
+| 🌙 **About** | [`docs/ABOUT.md`](docs/ABOUT.md) | 왜 만들었나 · 무엇을 푸는가 · 로드맵 |
+| 🛠️ **Setup** | [`docs/SETUP.md`](docs/SETUP.md) | 설치 · 운영 · **[Part 0 — 시나리오 선택](docs/SETUP.md#part-0--어느-시나리오인가요)** |
+| 🏗️ **Architecture** | [`docs/development/architecture.md`](docs/development/architecture.md) | 시스템 구조 · 모듈 · 데이터 흐름 |
+| 🎨 **Brand Guidelines** | [`docs/assets/brand-guidelines.md`](docs/assets/brand-guidelines.md) | 로고 · 컬러 · 타이포 |
+| 🤝 **Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) | 기여 가이드 · PR 규칙 |
+| 🔐 **Security Policy** | [`SECURITY.md`](SECURITY.md) | 취약점 신고 절차 |
+| 📜 **Code of Conduct** | [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | 커뮤니티 규범 |
+| 📋 **Changelog** | [`CHANGELOG.md`](CHANGELOG.md) | 버전별 변경 내역 |
+| ✅ **Pre-release Checklist** | [`PRE_RELEASE_CHECKLIST.md`](PRE_RELEASE_CHECKLIST.md) | 릴리즈 전 점검 항목 |
+| 📦 **Helm Chart** | [`charts/mond/`](charts/mond) | `values.yaml` · `values-prod.yaml` |
+| 🐳 **Docker Compose** | [`docker-compose.yml`](docker-compose.yml) | 로컬 데모용 |
+| ⚙️ **환경 변수 예시** | [`.env.example`](.env.example) | 모든 ENV 키 + 주석 |
+
+### 시나리오별 빠른 진입
+
+- 🐳 **A. 개인·평가** → [SETUP Part 1 (Docker 30초)](docs/SETUP.md#part-1-docker-compose로-30초-데모)
+- 🏢 **B. 사내 데모** → [SETUP Part 1](docs/SETUP.md#part-1-docker-compose로-30초-데모) + [Part 4 (Dev+MFA)](docs/SETUP.md#part-4-로그인--dev--sso--mfa) + [Part 5](docs/SETUP.md#part-5-관리자-초기-세팅-체크리스트)
+- 🚀 **C. 운영 (스타트업)** → [SETUP Part 2 (Helm)](docs/SETUP.md#part-2-helm-chart로-kubernetes-운영-배포) + [Part 3 (Anthropic)](docs/SETUP.md#part-3-ai-provider-세팅) + [Part 4 (SSO+MFA)](docs/SETUP.md#part-4-로그인--dev--sso--mfa) + [Part 6 (운영)](docs/SETUP.md#part-6-업그레이드--백업--모니터링)
+- 🔒 **D. 폐쇄망 (대기업/공공/금융)** → [Part 2-C 시크릿(Sealed)](docs/SETUP.md#2-c-시크릿-관리-선택--kubectl--external-secrets--sealed-secrets) + [Part 3 (Ollama)](docs/SETUP.md#part-3-ai-provider-세팅) + [Part 4 (Keycloak+MFA)](docs/SETUP.md#part-4-로그인--dev--sso--mfa) + [Part 6 (백업)](docs/SETUP.md#part-6-업그레이드--백업--모니터링)
 
 ---
 
