@@ -1,5 +1,5 @@
 /**
- * 🌙 Knowledge Hub — DB 기반 동적 카드 + Claude 자동 생성
+ * Knowledge Hub — DB 기반 동적 카드 + Claude 자동 생성
  */
 
 import { LinkOutlined, MessageOutlined, ThunderboltOutlined } from "@ant-design/icons";

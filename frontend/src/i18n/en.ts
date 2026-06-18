@@ -1,5 +1,5 @@
 /**
- * 🌙 Mond — English dictionary
+ * Mond — English dictionary
  */
 import type { Dict } from "./ko";
 

@@ -1,5 +1,5 @@
 /**
- * 🌙 Mond — 한국어 사전 (기본)
+ * Mond — 한국어 사전 (기본)
  */
 export const ko = {
   appTagline: "AI 기반 셀프서비스 DevSecOps 플랫폼",

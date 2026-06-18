@@ -1,5 +1,5 @@
 /**
- * 🌙 AI Providers (Admin) API helpers
+ * AI Providers (Admin) API helpers
  */
 
 import { api } from "@/lib/api";

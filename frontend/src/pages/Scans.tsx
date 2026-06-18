@@ -1,5 +1,5 @@
 /**
- * 🌙 Scans — 스캔 이력 + 트리거
+ * Scans — 스캔 이력 + 트리거
  */
 
 import { ThunderboltOutlined } from "@ant-design/icons";

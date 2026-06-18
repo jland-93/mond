@@ -1,5 +1,5 @@
 /**
- * 🌙 Mond 로고 컴포넌트 — public/logo.png 사용 (원본: docs/assets/images/mond-logo.png)
+ * Mond 로고 컴포넌트 — public/logo.png 사용 (원본: docs/assets/images/mond-logo.png)
  */
 
 interface LogoProps {

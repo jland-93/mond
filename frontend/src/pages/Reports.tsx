@@ -1,5 +1,5 @@
 /**
- * 🌙 Reports — SBOM / Compliance 다운로드
+ * Reports — SBOM / Compliance 다운로드
  */
 
 import { DownloadOutlined, ExperimentOutlined } from "@ant-design/icons";

@@ -1,5 +1,5 @@
 /**
- * 🌙 Role Change Requests API — 셀프서비스 역할 변경 + ADMIN 검토
+ * Role Change Requests API — 셀프서비스 역할 변경 + ADMIN 검토
  */
 
 import { api } from "@/lib/api";

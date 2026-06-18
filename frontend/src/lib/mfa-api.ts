@@ -1,5 +1,5 @@
 /**
- * 🌙 MFA API helpers — 패스키 + TOTP + 백업 코드
+ * MFA API helpers — 패스키 + TOTP + 백업 코드
  *
  * @simplewebauthn/browser의 startRegistration/startAuthentication에 그대로 넘기는
  * options 객체와, complete 단계에 보낼 credential 객체를 다룬다.

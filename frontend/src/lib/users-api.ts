@@ -1,5 +1,5 @@
 /**
- * 🌙 Users 관리 API (ADMIN 전용)
+ * Users 관리 API (ADMIN 전용)
  */
 
 import { api } from "@/lib/api";

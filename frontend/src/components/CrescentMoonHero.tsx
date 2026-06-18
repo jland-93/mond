@@ -1,5 +1,5 @@
 /**
- * 🌙 CrescentMoonHero — 초승달이 우방향으로 천천히 회전하는 동적 hero
+ * CrescentMoonHero — 초승달이 우방향으로 천천히 회전하는 동적 hero
  *
  * 큰 disk(달 본체) 위에 offset된 shadow disk를 얹어 초승달 silhouette을 만들고,
  * 전체를 60s 한 바퀴 속도로 시계방향 회전. 떠다니는 별 + 외곽 글로우.

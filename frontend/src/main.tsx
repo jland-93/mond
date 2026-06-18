@@ -1,5 +1,5 @@
 /**
- * 🌙 Mond — 앱 엔트리포인트
+ * Mond — 앱 엔트리포인트
  */
 
 import { ConfigProvider, theme } from "antd";

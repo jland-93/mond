@@ -1,5 +1,5 @@
 /**
- * 🌙 Integrations — Scanners / AI / MCP / Webhooks / Notifications
+ * Integrations — Scanners / AI / MCP / Webhooks / Notifications
  */
 
 import { useQuery } from "@tanstack/react-query";

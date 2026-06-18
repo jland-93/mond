@@ -1,5 +1,5 @@
 /**
- * 🌙 Mond — 자체 i18n Provider
+ * Mond — 자체 i18n Provider
  *
  * react-i18next 같은 외부 의존성 없이 가벼운 사전 기반.
  * 한국어 기본 + 영어 토글, localStorage에 선택 지속.

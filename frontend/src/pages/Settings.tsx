@@ -1,5 +1,5 @@
 /**
- * 🌙 Settings — 헬스/버전 정보
+ * Settings — 헬스/버전 정보
  */
 
 import { useQuery } from "@tanstack/react-query";

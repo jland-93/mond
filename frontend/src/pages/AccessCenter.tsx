@@ -1,5 +1,5 @@
 /**
- * 🌙 Access Center — 직원이 권한을 요청하고 자기 요청 상태를 본다
+ * Access Center — 직원이 권한을 요청하고 자기 요청 상태를 본다
  *
  * UX:
  *   1) Source(연동)별로 identity / permission 필터링

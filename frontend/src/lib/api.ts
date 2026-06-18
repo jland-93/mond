@@ -1,5 +1,5 @@
 /**
- * 🌙 Mond — 백엔드 API 클라이언트
+ * Mond — 백엔드 API 클라이언트
  */
 
 import axios from "axios";

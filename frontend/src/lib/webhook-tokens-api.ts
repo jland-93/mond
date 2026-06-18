@@ -1,5 +1,5 @@
 /**
- * 🌙 Personal Webhook Tokens API
+ * Personal Webhook Tokens API
  */
 
 import { api } from "@/lib/api";
