@@ -1,0 +1,74 @@
+# 🌙 Mond PR auto-label by changed paths
+# release-drafter의 title 기반 autolabel과 보완 — 경로 변경에 따른 영역 라벨.
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "backend/**"
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "frontend/**"
+
+ai:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "backend/app/ai/**"
+          - "backend/app/services/ai_*.py"
+
+scanner:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "backend/app/scanners/**"
+
+iam:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "backend/app/iam/**"
+          - "frontend/src/pages/IamExplorer*.tsx"
+          - "frontend/src/pages/AccessCenter*.tsx"
+
+auth:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "backend/app/auth/**"
+          - "backend/app/api/v1/endpoints/auth*.py"
+          - "frontend/src/auth/**"
+          - "frontend/src/pages/Login*.tsx"
+          - "frontend/src/pages/Mfa*.tsx"
+
+design:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "frontend/src/styles/**"
+          - "frontend/src/components/Moon*.tsx"
+          - "frontend/src/components/CrescentMoon*.tsx"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "docs/**"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+          - ".github/dependabot.yml"
+
+helm:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "charts/**"
+
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/Dockerfile"
+          - "docker-compose.yml"
+
+i18n:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "frontend/src/i18n/**"

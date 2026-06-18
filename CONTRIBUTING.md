@@ -192,6 +192,46 @@ Add screenshots for UI changes
 4. **Approval**: Maintainer approval required
 5. **Merge**: Squash and merge to main
 
+---
+
+## 🤖 자동화 · Automation (불특정 다수 기여자가 알아두면 좋은 것)
+
+PR을 올리면 다음이 **자동**으로 일어납니다 — 손댈 필요 없습니다.
+
+| 자동화 | 무엇이 일어나는가 | 어디 |
+|---|---|---|
+| **CI** | Backend (Python 3.12) / Frontend (Node 24) / Knowledge Link Check 동시 실행 | [.github/workflows/ci.yml](.github/workflows/ci.yml) |
+| **CodeQL** | Python + TypeScript 정적 보안 분석. 결과는 Security → Code scanning 탭 | [.github/workflows/codeql.yml](.github/workflows/codeql.yml) |
+| **PR auto-label by path** | 변경 파일 경로 기반으로 `backend`/`frontend`/`design`/`docs` 등 자동 라벨 | [.github/labeler.yml](.github/labeler.yml) |
+| **PR auto-label by title** | Conventional Commits title(`feat:` / `fix:` / `docs:` ...)로 라벨 자동 부착 | [.github/release-drafter.yml](.github/release-drafter.yml) |
+| **Release Drafter** | PR이 머지될 때마다 다음 릴리즈의 노트 draft 자동 갱신 | [.github/workflows/release-drafter.yml](.github/workflows/release-drafter.yml) |
+| **CODEOWNERS auto-review** | 변경 경로에 따라 reviewer가 자동 지정 | [.github/CODEOWNERS](.github/CODEOWNERS) |
+| **Dependabot** | 의존성 업데이트를 weekly로 자동 PR (4 ecosystem: pip · npm · actions · docker) | [.github/dependabot.yml](.github/dependabot.yml) |
+
+→ 기여자가 신경 쓸 건 **PR title을 Conventional Commits 형식으로** 적는 것만 신경 쓰면 됨.
+
+### Branch Protection (main)
+
+`main`은 보호되어 있습니다:
+- 직접 push **차단** — 반드시 PR
+- PR 머지에 **CI 통과 + 1명 이상 review 승인** 필요
+- force-push / 삭제 차단
+- 머지 방식: merge commit (commit 의미 단위 보존)
+
+### Issue / Discussion 동선
+
+| 무엇을 하고 싶나 | 어디로 |
+|---|---|
+| 🐛 버그 신고 | [Issue → Bug Report](https://github.com/jland-93/mond/issues/new?template=bug_report.yml) |
+| ✨ 새 기능 제안 | [Issue → Feature Request](https://github.com/jland-93/mond/issues/new?template=feature_request.yml) |
+| ❓ 설치/사용 질문 (구체) | [Issue → Question](https://github.com/jland-93/mond/issues/new?template=question.yml) |
+| 💬 자유 토론 / 아이디어 / 로드맵 의견 | [GitHub Discussions](https://github.com/jland-93/mond/discussions) |
+| 🔐 보안 취약점 (비공개) | [Security Advisory](https://github.com/jland-93/mond/security/advisories/new) |
+
+### 처음 기여하시나요?
+
+→ [`good first issue` 라벨](https://github.com/jland-93/mond/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) 부터 살펴보세요. 메인테이너가 가이드도 함께 답변합니다.
+
 ## 🏷️ Issue Guidelines
 
 ### Bug Reports

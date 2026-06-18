@@ -1,0 +1,25 @@
+# 🌙 Release Drafter — PR 머지마다 다음 릴리즈 노트 draft 갱신 + Conventional Commits 자동 라벨링
+# 태그 push할 때는 .github/workflows/release.yml이 따로 빌드/푸시. 이 workflow는 노트 초안만.
+
+name: Release Drafter
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    types: [ "opened", "reopened", "synchronize", "edited" ]
+
+permissions:
+  contents: write       # draft release 생성/갱신
+  pull-requests: write  # autolabel
+
+jobs:
+  update_release_draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v6
+        with:
+          config-name: release-drafter.yml
+          disable-autolabeler: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

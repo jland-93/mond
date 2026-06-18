@@ -1,0 +1,27 @@
+# 🌙 Mond CODEOWNERS
+# PR이 다음 경로를 건드리면 자동으로 reviewer로 지정됩니다.
+# 자세히 → https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# 전체 기본 — 메인테이너
+*                       @jland-93
+
+# 백엔드 / 스캐너 / AI
+/backend/                @jland-93
+/backend/app/scanners/   @jland-93
+/backend/app/ai/         @jland-93
+
+# 프론트엔드 / 디자인 시스템
+/frontend/                       @jland-93
+/frontend/src/styles/             @jland-93
+/frontend/src/components/         @jland-93
+
+# 배포 — Helm chart / Docker / CI
+/charts/                  @jland-93
+/docker-compose.yml       @jland-93
+/.github/workflows/       @jland-93
+/.github/CODEOWNERS       @jland-93
+
+# 문서 — 외부 기여 환영. 그래도 메인테이너 1명 review.
+/docs/                    @jland-93
+/README.md                @jland-93
+/SECURITY.md              @jland-93

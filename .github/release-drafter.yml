@@ -1,0 +1,122 @@
+# 🌙 Mond Release Drafter
+# Conventional Commits + PR 라벨을 모아 다음 릴리즈 노트 초안을 자동 생성·갱신.
+# 사용법: PR 머지 시마다 draft release가 업데이트됨. 태그 push 직전 maintainer가 정리만.
+
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
+categories:
+  - title: '✨ 새 기능'
+    labels:
+      - 'feature'
+      - 'enhancement'
+      - 'feat'
+  - title: '🐛 버그 수정'
+    labels:
+      - 'fix'
+      - 'bug'
+      - 'bugfix'
+  - title: '🔐 보안'
+    labels:
+      - 'security'
+  - title: '📖 문서'
+    labels:
+      - 'documentation'
+      - 'docs'
+  - title: '🎨 디자인 / UI'
+    labels:
+      - 'design'
+      - 'ui'
+  - title: '⚡ 성능'
+    labels:
+      - 'performance'
+      - 'perf'
+  - title: '🛠️ 운영 / 인프라'
+    labels:
+      - 'chore'
+      - 'ci'
+      - 'build'
+      - 'infrastructure'
+  - title: '🔧 리팩터링'
+    labels:
+      - 'refactor'
+  - title: '📦 의존성'
+    labels:
+      - 'dependencies'
+  - title: '🧪 테스트'
+    labels:
+      - 'test'
+
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&'
+
+# SemVer 자동 결정
+version-resolver:
+  major:
+    labels:
+      - 'breaking'
+      - 'major'
+  minor:
+    labels:
+      - 'feature'
+      - 'enhancement'
+      - 'feat'
+      - 'minor'
+  patch:
+    labels:
+      - 'fix'
+      - 'bug'
+      - 'patch'
+      - 'dependencies'
+      - 'chore'
+  default: patch
+
+template: |
+  ## 🌙 Mond $RESOLVED_VERSION
+
+  $CHANGES
+
+  ---
+
+  ## 📦 어떻게 가져다 쓰나
+  - 🐳 Docker: `docker compose up -d` ([SETUP Part 1](https://github.com/$OWNER/$REPOSITORY/blob/main/docs/SETUP.md#part-1-docker-compose로-30초-데모))
+  - ⛵ Helm: `helm install mond oci://ghcr.io/$OWNER/charts/mond --version $RESOLVED_VERSION` ([SETUP Part 2](https://github.com/$OWNER/$REPOSITORY/blob/main/docs/SETUP.md#part-2-helm-chart로-kubernetes-운영-배포))
+  - 📖 시나리오별 가이드 → [SETUP Part 0](https://github.com/$OWNER/$REPOSITORY/blob/main/docs/SETUP.md#part-0--어느-시나리오인가요)
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+# Conventional Commits 자동 라벨 매핑 (autolabeler)
+autolabeler:
+  - label: 'feat'
+    title:
+      - '/^feat(\(.+\))?:/'
+  - label: 'fix'
+    title:
+      - '/^fix(\(.+\))?:/'
+  - label: 'docs'
+    title:
+      - '/^docs(\(.+\))?:/'
+  - label: 'design'
+    title:
+      - '/^(design|style)(\(.+\))?:/'
+  - label: 'refactor'
+    title:
+      - '/^refactor(\(.+\))?:/'
+  - label: 'perf'
+    title:
+      - '/^perf(\(.+\))?:/'
+  - label: 'test'
+    title:
+      - '/^test(\(.+\))?:/'
+  - label: 'chore'
+    title:
+      - '/^chore(\(.+\))?:/'
+  - label: 'security'
+    title:
+      - '/^security(\(.+\))?:/'
+  - label: 'breaking'
+    body:
+      - '/BREAKING CHANGE/'
+  - label: 'dependencies'
+    title:
+      - '/^chore\(deps\)/'
