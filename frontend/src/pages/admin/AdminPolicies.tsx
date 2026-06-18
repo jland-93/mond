@@ -1,5 +1,5 @@
 /**
- * 🌙 Admin · Policy Management — 정책 enable/disable, threshold 조정, 삭제 + 템플릿 카탈로그
+ * Admin · Policy Management — 정책 enable/disable, threshold 조정, 삭제 + 템플릿 카탈로그
  */
 
 import { AppstoreAddOutlined, DeleteOutlined, PlusOutlined, SafetyOutlined } from "@ant-design/icons";

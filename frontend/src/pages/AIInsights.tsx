@@ -1,5 +1,5 @@
 /**
- * 🌙 AI Insights — 자연어로 묻고 의도 분류 결과 받기
+ * AI Insights — 자연어로 묻고 의도 분류 결과 받기
  */
 
 import { LinkOutlined, SendOutlined } from "@ant-design/icons";

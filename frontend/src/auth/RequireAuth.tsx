@@ -1,5 +1,5 @@
 /**
- * 🌙 RequireAuth — 미인증 시 /login으로 리다이렉트하는 라우트 가드
+ * RequireAuth — 미인증 시 /login으로 리다이렉트하는 라우트 가드
  */
 
 import { Spin } from "antd";

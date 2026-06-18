@@ -1,5 +1,5 @@
 /**
- * 🌙 Findings — 발견된 보안 이슈 + 상태 변경 + AI 분석
+ * Findings — 발견된 보안 이슈 + 상태 변경 + AI 분석
  */
 
 import { BulbOutlined } from "@ant-design/icons";

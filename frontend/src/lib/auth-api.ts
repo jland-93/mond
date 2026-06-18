@@ -1,5 +1,5 @@
 /**
- * 🌙 Auth API helpers
+ * Auth API helpers
  */
 
 import { api } from "@/lib/api";

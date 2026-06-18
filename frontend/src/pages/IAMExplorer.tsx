@@ -1,5 +1,5 @@
 /**
- * 🌙 IAM Explorer — Identities / Permissions 조회 (read-only).
+ * IAM Explorer — Identities / Permissions 조회 (read-only).
  * 연동(Source) 추가/동기화는 관리자 모드 → 연동 관리로 분리.
  */
 

@@ -1,5 +1,5 @@
 /**
- * 🌙 Knowledge Hub API helpers
+ * Knowledge Hub API helpers
  */
 
 import { api } from "@/lib/api";

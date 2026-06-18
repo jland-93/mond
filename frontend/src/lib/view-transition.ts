@@ -1,5 +1,5 @@
 /**
- * 🌙 View Transitions API — 페이지 전환 native feel
+ * View Transitions API — 페이지 전환 native feel
  *
  * Chrome 111+, Safari 18+, Firefox 144+ (2026 기준 전세계 ~93%).
  * 미지원 브라우저는 그냥 즉시 전환으로 안전 폴백.

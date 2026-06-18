@@ -1,5 +1,5 @@
 /**
- * 🌙 AuthContext — 전역 사용자 상태
+ * AuthContext — 전역 사용자 상태
  */
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";

@@ -1,5 +1,5 @@
 /**
- * 🌙 Assets — 자산 인벤토리
+ * Assets — 자산 인벤토리
  */
 
 import { PlusOutlined } from "@ant-design/icons";

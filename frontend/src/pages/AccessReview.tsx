@@ -1,5 +1,5 @@
 /**
- * 🌙 Access Review — 보안 담당자가 AI가 담당자 검토로 넘긴 요청을 처리한다
+ * Access Review — 보안 담당자가 AI가 담당자 검토로 넘긴 요청을 처리한다
  */
 
 import { CheckOutlined, CloseOutlined, ClockCircleOutlined } from "@ant-design/icons";

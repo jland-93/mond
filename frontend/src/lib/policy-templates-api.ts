@@ -1,5 +1,5 @@
 /**
- * 🌙 Policy Templates API
+ * Policy Templates API
  */
 
 import { api } from "@/lib/api";

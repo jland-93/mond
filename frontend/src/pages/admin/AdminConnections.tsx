@@ -1,5 +1,5 @@
 /**
- * 🌙 Admin · Connections — 외부 시스템 연동 통합 관리 (IAM Source · SSO · Webhook)
+ * Admin · Connections — 외부 시스템 연동 통합 관리 (IAM Source · SSO · Webhook)
  */
 
 import {

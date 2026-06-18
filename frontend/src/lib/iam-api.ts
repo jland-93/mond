@@ -1,5 +1,5 @@
 /**
- * 🌙 IAM Self-Service API helpers
+ * IAM Self-Service API helpers
  */
 
 import { api } from "@/lib/api";

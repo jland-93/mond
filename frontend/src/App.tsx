@@ -1,5 +1,5 @@
 /**
- * 🌙 Mond — 라우팅 (인증 가드 + 관리자 영역 포함)
+ * Mond — 라우팅 (인증 가드 + 관리자 영역 포함)
  */
 
 import { Navigate, Route, Routes } from "react-router-dom";

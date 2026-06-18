@@ -1,5 +1,5 @@
 /**
- * 🌙 보안 설정 — 패스키 등록·삭제, TOTP setup/disable, 백업 코드
+ * 보안 설정 — 패스키 등록·삭제, TOTP setup/disable, 백업 코드
  */
 
 import {

@@ -1,5 +1,5 @@
 /**
- * 🌙 SeverityBadge — icon + label + color 3종 세트
+ * SeverityBadge — icon + label + color 3종 세트
  *
  * WCAG 2.2 AA color-blindness 친화. 색에만 의존하지 않는다.
  * 어디서나 동일한 시그니처로 severity를 표현하기 위해 단일 컴포넌트.

@@ -1,5 +1,5 @@
 /**
- * 🌙 Policy Simulator — 가상 finding 입력 → 어떤 정책 게이트가 차단되나
+ * Policy Simulator — 가상 finding 입력 → 어떤 정책 게이트가 차단되나
  */
 
 import { DeleteOutlined, PlusOutlined, ThunderboltOutlined } from "@ant-design/icons";

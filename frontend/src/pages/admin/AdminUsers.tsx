@@ -1,5 +1,5 @@
 /**
- * 🌙 Admin · Users — 사용자 목록 + Role 변경 (ADMIN 전용)
+ * Admin · Users — 사용자 목록 + Role 변경 (ADMIN 전용)
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
