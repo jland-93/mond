@@ -16,6 +16,9 @@ permissions:
 jobs:
   update_release_draft:
     runs-on: ubuntu-latest
+    # 첫 도입 PR에서는 config가 default branch에 없어 fail이 예상됨.
+    # 머지 후 main에 config 들어가면 정상 동작 → PR 단계에서는 머지 차단하지 않음.
+    continue-on-error: true
     steps:
       - uses: release-drafter/release-drafter@v6
         with:
