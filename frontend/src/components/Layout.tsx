@@ -74,8 +74,12 @@ export default function Layout() {
   ].filter((i) => hasRole(user, i.minRole));
 
   const items = isAdminRoute ? adminItems : userItems;
+  // 정확한 일치 우선 — "/"는 모든 경로에 startsWith 매칭되므로 대시보드가 항상 잡히는 버그 방지.
   const selectedKey =
-    items.find((i) => location.pathname.startsWith(i.key))?.key ?? items[0]?.key ?? "";
+    items.find((i) => location.pathname === i.key)?.key ??
+    items.find((i) => i.key !== "/" && location.pathname.startsWith(i.key + "/"))?.key ??
+    items.find((i) => i.key !== "/" && location.pathname.startsWith(i.key))?.key ??
+    (location.pathname === "/" ? "/" : items[0]?.key ?? "");
 
   const canEnterAdmin = hasRole(user, "reviewer");
 

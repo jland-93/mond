@@ -12,7 +12,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/auth/AuthContext";
-import AIOrbHero from "@/components/AIOrbHero";
+import CrescentMoonHero from "@/components/CrescentMoonHero";
+import Moon3DSafe from "@/components/Moon3DSafe";
 import { useI18n } from "@/i18n";
 import { authApi } from "@/lib/auth-api";
 
@@ -47,13 +48,13 @@ export default function Login() {
 
   const headline =
     locale === "ko"
-      ? ["보안을", "AI에 맡기고", "잠은 푹"]
-      : ["Hand security", "to your AI.", "Sleep well."];
+      ? ["분석은 AI가,", "결정은 사람이."]
+      : ["AI does triage.", "You decide what matters."];
 
   const sub =
     locale === "ko"
-      ? "AI 셀프서비스 DevSecOps — 스캔·분석·승인·기록까지 한 흐름으로. 직원은 신청만, 나머지는 Mond가."
-      : "AI self-service DevSecOps — scan, triage, approve, audit in one flow. Employees just ask; Mond does the rest.";
+      ? "AI 셀프서비스 DevSecOps — 스캔·분석·승인·기록까지 한 흐름에서. 발견은 자동으로, 결정은 담당자에게."
+      : "AI self-service DevSecOps — scan, triage, approve, audit in one flow. Auto-detect, you decide.";
 
   const pillars =
     locale === "ko"
@@ -72,83 +73,70 @@ export default function Login() {
     <div className="login-shell">
       {/* ── 좌측 hero (50%) — AI Orb + 제품 가치 카피 ─────────────── */}
       <div className="login-hero">
-        <div className="login-hero-inner">
-          <div className="login-mark">
-            <img src="/logo.png" alt="Mond" width={28} height={28} />
-            <span style={{ fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17 }}>
-              Mond
-            </span>
-            <span
-              style={{
-                fontSize: 11,
-                color: "var(--accent)",
-                background: "color-mix(in oklch, var(--accent) 10%, transparent)",
-                border: "1px solid var(--accent-dim)",
-                padding: "2px 8px",
-                borderRadius: 999,
-                marginLeft: 4,
-                letterSpacing: "0.04em",
-              }}
-            >
-              AI · DevSecOps
-            </span>
-          </div>
+        {/* mark — 좌상단 고정 */}
+        <div className="login-mark">
+          <img src="/logo.png" alt="Mond" width={26} height={26} />
+          <span style={{ fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17 }}>
+            Mond
+          </span>
+          <span
+            style={{
+              fontSize: 11,
+              color: "var(--accent)",
+              background: "color-mix(in oklch, var(--accent) 10%, transparent)",
+              border: "1px solid var(--accent-dim)",
+              padding: "2px 8px",
+              borderRadius: 999,
+              marginLeft: 4,
+              letterSpacing: "0.04em",
+            }}
+          >
+            AI · DevSecOps
+          </span>
+        </div>
 
-          <div className="login-orb-wrap">
-            <AIOrbHero size={340} />
-          </div>
+        {/* 중앙 vertical group — orb + headline + sub */}
+        <div className="login-hero-center">
+          <Moon3DSafe size={280} fallback={<CrescentMoonHero size={240} />} className="login-orb" />
 
-          <div className="login-headline">
-            <Title
-              level={1}
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: 56,
-                lineHeight: 1.05,
-                margin: 0,
-                color: "var(--fg-primary)",
-                letterSpacing: "-0.025em",
-                fontWeight: 600,
-              }}
-            >
-              {headline[0]}
-              <br />
-              <span
-                style={{
-                  background:
-                    "linear-gradient(120deg, var(--accent) 10%, oklch(72% 0.16 295) 80%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                {headline[1]}
-              </span>
-              <br />
-              {headline[2]}
-            </Title>
-            <Paragraph
-              style={{
-                color: "var(--fg-secondary)",
-                fontSize: 15,
-                marginTop: 18,
-                maxWidth: 420,
-                lineHeight: 1.6,
-              }}
-            >
-              {sub}
-            </Paragraph>
-          </div>
+          <Title
+            level={1}
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: 52,
+              lineHeight: 1.1,
+              margin: 0,
+              color: "var(--fg-primary)",
+              letterSpacing: "-0.035em",
+              fontWeight: 700,
+            }}
+          >
+            {headline[0]}
+            <br />
+            {headline[1]}
+          </Title>
+          <Paragraph
+            style={{
+              color: "var(--fg-secondary)",
+              fontSize: 15,
+              marginTop: 16,
+              marginBottom: 0,
+              maxWidth: 440,
+              lineHeight: 1.6,
+            }}
+          >
+            {sub}
+          </Paragraph>
+        </div>
 
-          {/* 3 pillars — 제품 가치 명시 */}
-          <div className="login-pillars">
-            {pillars.map((p) => (
-              <div className="login-pillar" key={p.kw}>
-                <div className="login-pillar-kw">{p.kw}</div>
-                <div className="login-pillar-desc">{p.desc}</div>
-              </div>
-            ))}
-          </div>
+        {/* 하단 3 pillars */}
+        <div className="login-pillars">
+          {pillars.map((p) => (
+            <div className="login-pillar" key={p.kw}>
+              <div className="login-pillar-kw">{p.kw}</div>
+              <div className="login-pillar-desc">{p.desc}</div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -298,7 +286,10 @@ export default function Login() {
         }
         .login-hero {
           position: relative;
-          padding: 48px 56px 40px;
+          padding: 40px 56px 32px;
+          display: grid;
+          grid-template-rows: auto 1fr auto;
+          row-gap: 24px;
           background:
             radial-gradient(ellipse at 20% 0%, oklch(72% 0.10 200 / 0.18), transparent 55%),
             radial-gradient(ellipse at 100% 30%, oklch(62% 0.14 295 / 0.16), transparent 55%),
@@ -313,26 +304,30 @@ export default function Login() {
           background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.025'/></svg>");
           pointer-events: none;
         }
-        .login-hero-inner {
-          position: relative;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          z-index: 1;
-        }
         .login-mark {
+          position: relative;
+          z-index: 1;
           display: flex; align-items: center; gap: 10px;
           font-size: 17px;
         }
-        .login-orb-wrap {
-          flex: 1;
-          display: flex; align-items: center; justify-content: center;
-          margin: -12px 0 -24px;
+        .login-hero-center {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: center;
+          gap: 28px;
+          max-width: 520px;
         }
-        .login-headline { margin-top: 8px; }
+        .login-orb {
+          margin-left: -28px;       /* 약간 좌측으로 빼서 headline과 흐름 만듦 */
+          margin-bottom: -8px;
+        }
         .login-pillars {
-          margin-top: 32px;
-          padding-top: 24px;
+          position: relative;
+          z-index: 1;
+          padding-top: 20px;
           border-top: 1px solid var(--border);
           display: grid;
           grid-template-columns: repeat(3, 1fr);

@@ -64,7 +64,18 @@ const mondTheme = {
       colorBgContainer: "var(--mond-surface-1)",
       paddingLG: 20,          // 24 → 20 — 정보 밀도
     },
-    Menu: { darkItemBg: "transparent" },
+    Menu: {
+      darkItemBg: "transparent",
+      darkItemColor: "var(--fg-secondary)",
+      darkItemHoverBg: "color-mix(in oklch, var(--accent) 8%, transparent)",
+      darkItemHoverColor: "var(--fg-primary)",
+      darkItemSelectedBg: "color-mix(in oklch, var(--accent) 14%, transparent)",
+      darkItemSelectedColor: "var(--accent)",
+      darkSubMenuItemBg: "transparent",
+      itemSelectedBg: "color-mix(in oklch, var(--accent) 14%, transparent)",
+      itemSelectedColor: "var(--accent)",
+      itemHoverBg: "color-mix(in oklch, var(--accent) 8%, transparent)",
+    },
     Table: {
       cellPaddingBlock: 10,   // 16 → 10 — 행 높이 ↓
       headerBg: "transparent",
