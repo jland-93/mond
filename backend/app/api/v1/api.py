@@ -6,6 +6,7 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     ai,
+    ai_providers,
     assets,
     auth,
     dashboard,
@@ -14,13 +15,16 @@ from app.api.v1.endpoints import (
     iam,
     integrations,
     knowledge,
+    mfa,
     policies,
     policy_sim,
     policy_templates,
     regulations,
     reports,
+    role_requests,
     scans,
     users,
+    webhook_tokens,
     webhooks,
 )
 
@@ -28,6 +32,7 @@ api_router = APIRouter()
 
 api_router.include_router(health.router, tags=["Health"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
+api_router.include_router(mfa.router, prefix="/auth/mfa", tags=["MFA"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 api_router.include_router(assets.router, prefix="/assets", tags=["Assets"])
 api_router.include_router(scans.router, prefix="/scans", tags=["Scans"])
@@ -38,8 +43,11 @@ api_router.include_router(policy_templates.router, prefix="/policy", tags=["Poli
 api_router.include_router(regulations.router, tags=["Regulations"])
 api_router.include_router(reports.router, prefix="/reports", tags=["Reports"])
 api_router.include_router(ai.router, prefix="/ai", tags=["AI"])
+api_router.include_router(ai_providers.router, prefix="/admin/ai-providers", tags=["AI Providers (Admin)"])
 api_router.include_router(integrations.router, prefix="/integrations", tags=["Integrations"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
+api_router.include_router(webhook_tokens.router, prefix="/webhook-tokens", tags=["Webhook Tokens"])
 api_router.include_router(iam.router, prefix="/iam", tags=["IAM Self-Service"])
 api_router.include_router(knowledge.router, prefix="/knowledge", tags=["Knowledge Hub"])
 api_router.include_router(users.router, prefix="/users", tags=["Users (Admin)"])
+api_router.include_router(role_requests.router, tags=["Role Requests"])

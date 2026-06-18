@@ -4,7 +4,16 @@
 
 import { api } from "@/lib/api";
 
-export type IAMSourceKind = "aws" | "gcp" | "azure" | "k8s" | "custom";
+export type IAMSourceKind = "aws" | "gcp" | "azure" | "k8s" | "ldap" | "custom";
+
+export interface IAMCapability {
+  kind: IAMSourceKind;
+  status: "ready" | "demo" | "coming_soon";
+  sync: boolean;
+  grant: boolean;
+  revoke: boolean;
+  note: string;
+}
 export type IdentityType = "user" | "role" | "service_account" | "group";
 export type AccessRequestStatus =
   | "pending_ai_review"
@@ -102,6 +111,7 @@ export interface AccessRequest {
 }
 
 export const iamApi = {
+  capabilities: () => api.get<IAMCapability[]>("/iam/capabilities").then((r) => r.data),
   listSources: () => api.get<IAMSource[]>("/iam/sources").then((r) => r.data),
   createSource: (body: Partial<IAMSource> & { name: string; kind: IAMSourceKind }) =>
     api.post<IAMSource>("/iam/sources", body).then((r) => r.data),

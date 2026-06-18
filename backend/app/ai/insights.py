@@ -10,8 +10,9 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
-from app.ai.client import get_client, is_enabled
-from app.core.config import settings
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.ai.client import complete_json, current_model_label, is_enabled
 from app.core.logging import get_logger
 from app.models.finding import Finding, Severity
 
@@ -53,66 +54,86 @@ class InsightResult:
     output_tokens: int | None = None
 
 
-async def analyze_finding(finding: Finding, *, deep: bool = False) -> InsightResult:
-    """단일 Finding에 대해 AI 인사이트를 생성한다."""
-    if not is_enabled():
+async def analyze_finding(db: AsyncSession, finding: Finding, *, deep: bool = False) -> InsightResult:
+    """단일 Finding에 대해 AI 인사이트를 생성한다 (provider-agnostic)."""
+    if not await is_enabled(db):
         return _fallback(finding)
-
-    model = settings.AI_MODEL_DEEP if deep else settings.AI_MODEL_DEFAULT
-    client = get_client()
-    assert client is not None
 
     user_prompt = _build_user_prompt(finding)
-
-    try:
-        response = await client.messages.create(
-            model=model,
-            max_tokens=settings.AI_MAX_TOKENS,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_prompt}],
-        )
-    except Exception as exc:  # 네트워크/쿼터/모델 거부
-        logger.warning("ai_analyze_failed", finding_id=finding.id, error=str(exc))
+    result = await complete_json(db, SYSTEM_PROMPT, user_prompt, deep=deep)
+    if result is None:
+        logger.warning("ai_analyze_failed_or_disabled", finding_id=finding.id)
         return _fallback(finding)
 
-    text = "".join(block.text for block in response.content if hasattr(block, "text"))
-    parsed = _parse_json(text) or {}
-
+    parsed = _parse_json(result.text) or {}
     return InsightResult(
         summary=parsed.get("summary", "AI 응답 파싱 실패 — 기본 규칙으로 대체.")[:1000],
         confidence=float(parsed.get("confidence", 0.0)),
         recommended_severity=_coerce_severity(parsed.get("recommended_severity"), finding.severity),
         remediation=parsed.get("remediation") or {},
-        model=model,
-        input_tokens=getattr(response.usage, "input_tokens", None),
-        output_tokens=getattr(response.usage, "output_tokens", None),
+        model=f"{result.provider}:{result.model}",
+        input_tokens=result.input_tokens,
+        output_tokens=result.output_tokens,
     )
 
 
-async def route_query(query: str) -> dict:
-    """자연어 쿼리를 받아 의도(scan/list/explain/unknown)를 분류한다."""
-    if not is_enabled():
-        return _heuristic_route(query)
+async def route_query(db: AsyncSession, query: str) -> dict:
+    """자연어 쿼리를 받아 RAG로 Mond 데이터를 검색한 뒤 LLM에 context로 주입.
 
-    client = get_client()
-    assert client is not None
+    응답 형식:
+      {
+        "intent": "scan|list_findings|explain|unknown",
+        "summary": "...",
+        "citations": [{n, kind, title, snippet, url}, ...],
+        "suggested_actions": [...],
+        "model": "provider:model"
+      }
 
-    try:
-        response = await client.messages.create(
-            model=settings.AI_MODEL_DEFAULT,
-            max_tokens=512,
-            system=(
-                "You classify DevSecOps user requests. Return strict JSON: "
-                '{"intent": "scan|list_findings|explain|unknown", '
-                '"summary": "what user wants", "suggested_actions": [{"label": "...", "endpoint": "..."}]}'
-            ),
-            messages=[{"role": "user", "content": query}],
-        )
-        text = "".join(block.text for block in response.content if hasattr(block, "text"))
-        return _parse_json(text) or _heuristic_route(query)
-    except Exception as exc:
-        logger.warning("ai_route_failed", error=str(exc))
-        return _heuristic_route(query)
+    citation 노출: LLM이 답변 중 [1][2] 같은 인용 마커를 사용 → 프론트가 참고 카드로 보여줌.
+    """
+    from app.ai.rag import build_context_block, search
+
+    # 1) Mond DB에서 관련 자료 검색 (RAG retrieve)
+    citations = await search(db, query)
+
+    # 2) AI 비활성 시 — 휴리스틱 + 출처만 노출
+    if not await is_enabled(db):
+        result = _heuristic_route(query)
+        result["citations"] = [c.to_dict() for c in citations]
+        return result
+
+    # 3) LLM에 context 주입
+    context_block = build_context_block(citations)
+    system = (
+        "You are Mond, an AI-powered self-service DevSecOps assistant. "
+        "Classify the user's intent and answer in 1-3 sentences. "
+        "When you reference a known item, cite it inline as [N] using the numbered sources below. "
+        "Return strict JSON: "
+        '{"intent": "scan|list_findings|explain|unknown", '
+        '"summary": "answer text with [N] citations if relevant", '
+        '"suggested_actions": [{"label": "...", "endpoint": "..."}]}'
+    )
+    if context_block:
+        system = f"{system}\n\n{context_block}"
+
+    result = await complete_json(db, system, query, max_tokens=600)
+    if result is None:
+        fallback = _heuristic_route(query)
+        fallback["citations"] = [c.to_dict() for c in citations]
+        return fallback
+    parsed = _parse_json(result.text)
+    if not parsed:
+        fallback = _heuristic_route(query)
+        fallback["citations"] = [c.to_dict() for c in citations]
+        return fallback
+    parsed["model"] = f"{result.provider}:{result.model}"
+    parsed["citations"] = [c.to_dict() for c in citations]
+    return parsed
+
+
+# 하위 호환 — UI 라벨 helper. client.current_model_label은 async라 별도 노출.
+async def current_label(db: AsyncSession) -> str:
+    return await current_model_label(db)
 
 
 def _build_user_prompt(finding: Finding) -> str:
@@ -158,8 +179,9 @@ def _fallback(finding: Finding) -> InsightResult:
     sev_text = finding.severity.value
     summary = (
         f"[기본 규칙] {finding.scanner.title()}가 '{finding.rule_id}' 룰을 위반한 "
-        f"{sev_text} 등급 이슈를 발견했습니다. ANTHROPIC_API_KEY를 설정하면 "
-        f"Claude 기반 상세 분석과 조치 코드 제안을 받을 수 있습니다."
+        f"{sev_text} 등급 이슈를 발견했습니다. AI provider(.env: AI_PROVIDER + 해당 키)를 "
+        f"설정하면 LLM 기반 상세 분석과 조치 코드 제안을 받을 수 있습니다 — "
+        f"Anthropic · OpenAI · AWS Bedrock · Ollama(로컬) 지원."
     )
     return InsightResult(
         summary=summary,
@@ -188,6 +210,10 @@ def _heuristic_route(query: str) -> dict:
         intent = "unknown"
     return {
         "intent": intent,
-        "summary": f"기본 규칙 분류: {intent}. ANTHROPIC_API_KEY 설정 시 Claude가 더 정확하게 의도를 해석합니다.",
+        "summary": (
+            f"기본 규칙 분류: {intent}. AI provider 설정 시 LLM이 더 정확하게 의도를 해석합니다 "
+            f"(Anthropic · OpenAI · Bedrock · Ollama)."
+        ),
         "suggested_actions": [],
+        "model": "rule-based",
     }

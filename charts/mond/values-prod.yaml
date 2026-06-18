@@ -1,0 +1,60 @@
+# 🌙 Mond 운영 예시 values — EKS + RDS + ALB Ingress + Keycloak SSO
+
+image:
+  registry: ghcr.io
+  repository: jland-93/mond
+  tag: "0.1.0"
+
+backend:
+  replicaCount: 3
+  env:
+    ENVIRONMENT: "production"
+    DEBUG: "false"
+    AUTH_MODE: "sso"
+    SESSION_SECURE: "true"
+    SEED_ON_STARTUP: "false"   # 운영은 별도 마이그레이션
+  hpa:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+
+frontend:
+  replicaCount: 3
+  hpa:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:...:certificate/...
+  hosts:
+    - host: mond.your-corp.com
+      paths:
+        - { path: /,    pathType: Prefix, service: frontend }
+        - { path: /api, pathType: Prefix, service: backend  }
+        - { path: /mcp, pathType: Prefix, service: backend  }
+
+# in-cluster DB 끄고 RDS/ElastiCache 사용
+postgresql:
+  enabled: false
+redis:
+  enabled: false
+
+# 운영 시크릿은 ExternalSecret/SealedSecret로 미리 만들어 두는 것을 권장:
+#   secrets:
+#     existingSecret: mond-secrets
+# 아래 인라인 값은 helm install --set-string 으로 주입하거나 git에 절대 커밋하지 말 것
+secrets:
+  existingSecret: mond-secrets
+
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/mond-irsa

@@ -139,4 +139,24 @@ export interface DashboardOverview {
     asset_id: number;
     created_at: string;
   }>;
+  trend_7d: Array<{
+    date: string;
+    scans: number;
+    findings: number;
+    critical: number;
+  }>;
+  top_assets: Array<{
+    id: number;
+    name: string;
+    asset_type: string;
+    open_findings: number;
+  }>;
+  activity: Array<{
+    kind: "scan" | "finding" | "access";
+    id: number;
+    label: string;
+    meta: string;
+    severity: string;
+    at: string;
+  }>;
 }

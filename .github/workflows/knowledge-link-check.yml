@@ -1,0 +1,126 @@
+# 🌙 Knowledge Hub link check — knowledge_seed.py의 모든 refs URL이
+# 실제로 응답하는지 주기 검증. 깨지면 Issue 자동 생성.
+#
+# 1) 월 1회 자동 (매월 1일 03:00 UTC ≈ KST 12:00)
+# 2) knowledge_seed.py가 변경되는 PR 마다
+# 3) 수동 실행 (workflow_dispatch)
+
+name: Knowledge Link Check
+
+on:
+  schedule:
+    - cron: "0 3 1 * *"
+  pull_request:
+    paths:
+      - "backend/app/data/knowledge_seed.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Extract URLs from knowledge_seed.py
+        id: extract
+        run: |
+          python - <<'PY'
+          import ast, json, pathlib, re
+          src = pathlib.Path("backend/app/data/knowledge_seed.py").read_text()
+          # SEED 리스트만 추출 — ast로 안전하게.
+          tree = ast.parse(src)
+          urls = []
+          for node in ast.walk(tree):
+              if isinstance(node, ast.Assign):
+                  for t in node.targets:
+                      if isinstance(t, ast.Name) and t.id == "SEED":
+                          for entry in node.value.elts:
+                              if not isinstance(entry, ast.Dict):
+                                  continue
+                              slug = ""
+                              refs_node = None
+                              for k, v in zip(entry.keys, entry.values):
+                                  if isinstance(k, ast.Constant) and k.value == "slug":
+                                      slug = v.value if isinstance(v, ast.Constant) else ""
+                                  if isinstance(k, ast.Constant) and k.value == "refs":
+                                      refs_node = v
+                              if not isinstance(refs_node, ast.List):
+                                  continue
+                              for item in refs_node.elts:
+                                  if isinstance(item, ast.Constant) and isinstance(item.value, str):
+                                      urls.append((slug, item.value))
+          pathlib.Path("urls.json").write_text(json.dumps(urls))
+          print(f"{len(urls)} URLs collected")
+          PY
+
+      - name: Curl each URL
+        id: check
+        run: |
+          python - <<'PY'
+          import json, pathlib, subprocess
+          urls = json.loads(pathlib.Path("urls.json").read_text())
+          broken = []
+          for slug, url in urls:
+              # -L follow redirects, -A 일반 브라우저 UA, -m timeout 15s
+              r = subprocess.run(
+                  ["curl", "-sL", "-o", "/dev/null", "-w", "%{http_code}",
+                   "-m", "15", "-A", "Mozilla/5.0 (Mond knowledge link check)", url],
+                  capture_output=True, text=True,
+              )
+              code = (r.stdout or "").strip() or "000"
+              ok = code.startswith("2")
+              status = "OK" if ok else "BROKEN"
+              print(f"  {status:6}  {code}  {slug}  {url}")
+              if not ok:
+                  broken.append({"slug": slug, "url": url, "code": code})
+          pathlib.Path("broken.json").write_text(json.dumps(broken))
+          if broken:
+              print(f"::warning::{len(broken)} broken link(s)")
+          PY
+
+      - name: Open issue if broken
+        if: github.event_name != 'pull_request'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const broken = JSON.parse(fs.readFileSync('broken.json', 'utf8'));
+            if (broken.length === 0) {
+              console.log("✅ No broken knowledge links.");
+              return;
+            }
+            const body = [
+              "월간 Knowledge link check에서 응답하지 않는 URL을 발견했습니다.",
+              "",
+              "| 카드 (slug) | URL | HTTP |",
+              "|---|---|---|",
+              ...broken.map(b => `| \`${b.slug}\` | ${b.url} | ${b.code} |`),
+              "",
+              "`backend/app/data/knowledge_seed.py`의 해당 ref를 신뢰할 수 있는 대체 URL로 교체해 주세요.",
+              "",
+              "_이 issue는 `.github/workflows/knowledge-link-check.yml`이 자동 생성했습니다._",
+            ].join("\n");
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              title: `🔗 Knowledge Hub — ${broken.length} broken link(s) detected`,
+              labels: ["knowledge", "broken-link", "automated"],
+              body,
+            });
+
+      - name: Fail PR if broken
+        if: github.event_name == 'pull_request' && steps.check.outcome != 'failure'
+        run: |
+          python - <<'PY'
+          import json, pathlib, sys
+          broken = json.loads(pathlib.Path("broken.json").read_text())
+          if broken:
+              for b in broken:
+                  print(f"::error::broken link in '{b['slug']}': {b['url']} (HTTP {b['code']})")
+              sys.exit(1)
+          print("All knowledge links OK.")
+          PY

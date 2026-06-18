@@ -133,11 +133,14 @@ function FrameworkFilter({
     { value: ALL, label: t.policies.allFrameworks },
     ...frameworks.map((f) => ({
       value: f.id,
-      label: locale === "ko" ? f.name_ko.split(" (")[0] : f.name_en.split(" (")[0],
+      label: f.short_name || (locale === "ko" ? f.name_ko.split(" (")[0] : f.name_en.split(" (")[0]),
+      title: locale === "ko" ? f.name_ko : f.name_en,
     })),
   ];
   return (
-    <Segmented block value={value} onChange={(v) => onChange(v as string)} options={options} />
+    <div style={{ overflowX: "auto", paddingBottom: 4 }}>
+      <Segmented value={value} onChange={(v) => onChange(v as string)} options={options} />
+    </div>
   );
 }
 

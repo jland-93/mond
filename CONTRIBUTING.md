@@ -98,11 +98,10 @@ cd frontend
 npm run build
 ```
 
-### Test Coverage
-- Maintain minimum 80% test coverage
-- Write unit tests for new features
-- Include integration tests for API endpoints
-- Add E2E tests for critical user flows
+### Tests
+- Test contributions are very welcome — current coverage is intentionally light (MVP).
+- New scanner adapters / AI prompts / policy rules should ship with at least one unit test.
+- Integration tests for API endpoints are encouraged for any endpoint that mutates state.
 
 ## 📝 Code Style
 
@@ -135,10 +134,9 @@ npm run format
 - **Responsiveness**: Mobile-first design
 
 ### Component Standards
-- Use Ant Design components as base
-- Follow atomic design methodology
+- Use Ant Design components as a base
 - Implement proper TypeScript interfaces
-- Include Storybook documentation
+- Co-locate components by domain; share common UI in `components/`
 
 ## 🔒 Security Guidelines
 
@@ -247,15 +245,27 @@ Active contributors may be invited to become maintainers based on:
 
 ### Questions?
 - Check existing [GitHub Issues](https://github.com/jland-93/mond/issues)
-- Join our [Slack community](https://slack.mond.dev)
 - Start a [GitHub Discussion](https://github.com/jland-93/mond/discussions)
 
 ### Mentorship
-New contributors can request mentorship through:
-- GitHub Discussions with `mentorship` label
-- Slack `#newcomers` channel
-- Direct message to maintainers
+New contributors can request mentorship by opening a GitHub Discussion with the `mentorship` label.
 
 ---
 
 **Thank you for contributing to Mond! Together, we're illuminating the path to secure DevOps. 🌙**
+
+---
+
+## 🧭 문서 한눈에 · Doc Map
+
+| 문서 | 무엇 |
+|---|---|
+| 🏠 [`README.md`](README.md) | 프로젝트 소개 · 스크린샷 |
+| 🌙 [`docs/ABOUT.md`](docs/ABOUT.md) | 왜 만들었나 · 무엇을 푸는가 · 로드맵 |
+| 🛠️ [`docs/SETUP.md`](docs/SETUP.md) | 설치 · 운영 · 시나리오 가이드 |
+| 🏗️ [`docs/development/architecture.md`](docs/development/architecture.md) | 시스템 구조 |
+| 🤝 [`CONTRIBUTING.md`](CONTRIBUTING.md) (이 문서) | 기여 가이드 |
+| 🔐 [`SECURITY.md`](SECURITY.md) | 취약점 신고 |
+| 📜 [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | 커뮤니티 규범 |
+| 📋 [`CHANGELOG.md`](CHANGELOG.md) | 변경 내역 |
+| ✅ [`PRE_RELEASE_CHECKLIST.md`](PRE_RELEASE_CHECKLIST.md) | 릴리즈 점검 |

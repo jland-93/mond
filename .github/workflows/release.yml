@@ -1,0 +1,102 @@
+# 🌙 Mond Release — 태그 push 시 backend/frontend 이미지를 ghcr.io에 빌드/푸시
+#
+# 사용 예: git tag v0.1.0 && git push --tags
+#         → ghcr.io/jland-93/mond-backend:0.1.0
+#           ghcr.io/jland-93/mond-frontend:0.1.0
+#           oci://ghcr.io/jland-93/charts/mond:0.1.0 (OCI Helm chart)
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  images:
+    name: Build & push images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: backend
+            context: backend
+          - name: frontend
+            context: frontend
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Resolve version
+        id: ver
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/mond-${{ matrix.name }}
+          tags: |
+            type=raw,value=${{ steps.ver.outputs.VERSION }}
+            type=raw,value=latest
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          provenance: false
+          sbom: false
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to:   type=gha,scope=${{ matrix.name }},mode=max
+
+  helm:
+    name: Package & push Helm chart
+    needs: images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Resolve version
+        id: ver
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm login (OCI)
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+      - name: Package
+        run: |
+          helm dep update charts/mond
+          # Helm 4는 의존성을 unpacked 디렉토리로 요구하므로 .tgz를 풀어준다.
+          for tgz in charts/mond/charts/*.tgz; do tar xzf "$tgz" -C charts/mond/charts/; done
+          helm package charts/mond \
+            --app-version "${{ steps.ver.outputs.VERSION }}" \
+            --version "${{ steps.ver.outputs.VERSION }}" \
+            --destination .
+
+      - name: Push to GHCR (OCI)
+        run: |
+          helm push "mond-${{ steps.ver.outputs.VERSION }}.tgz" \
+            "oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts"

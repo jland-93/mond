@@ -27,7 +27,10 @@ SEED: list[dict] = [
         "summary_en": "SAST inspects source for risky patterns; DAST probes the running app; SCA flags known CVEs in dependencies. They are complementary.",
         "ask_ko": "우리 서비스에 SAST/DAST/SCA 중 가장 먼저 적용할 도구는 무엇이 좋을까요?",
         "ask_en": "Of SAST, DAST, and SCA, which should we adopt first in our service?",
-        "refs": [],
+        "refs": [
+            "https://owasp.org/www-community/Source_Code_Analysis_Tools",
+            "https://owasp.org/www-community/Vulnerability_Scanning_Tools",
+        ],
     },
     {
         "slug": "sbom",
@@ -61,7 +64,7 @@ SEED: list[dict] = [
         "summary_en": "Weak algorithms, plaintext storage, or poor key management leading to disclosure. Covers data in transit and at rest.",
         "ask_ko": "지금 운영 중인 서비스의 암호화 점검 체크리스트를 만들어줘.",
         "ask_en": "Give me a checklist for auditing our service's cryptography.",
-        "refs": [],
+        "refs": ["https://owasp.org/Top10/A02_2021-Cryptographic_Failures/"],
     },
     {
         "slug": "owasp-a03",
@@ -72,7 +75,7 @@ SEED: list[dict] = [
         "summary_en": "Untrusted input reaches an interpreter and executes unintended commands. Use parameter binding, escaping, ORMs.",
         "ask_ko": "우리 백엔드 코드에서 SQL Injection 위험 패턴을 어떻게 찾으면 좋을까요?",
         "ask_en": "How can we find SQL injection risk patterns in our backend?",
-        "refs": [],
+        "refs": ["https://owasp.org/Top10/A03_2021-Injection/"],
     },
     {
         "slug": "owasp-a07",
@@ -83,7 +86,9 @@ SEED: list[dict] = [
         "summary_en": "Weak passwords, no brute-force lockout, broken session handling. MFA, rate limiting, expiry are key.",
         "ask_ko": "로그인 보안 강화를 위해 어떤 통제를 추가해야 할까요?",
         "ask_en": "What controls should we add to harden our login security?",
-        "refs": [],
+        "refs": [
+            "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/",
+        ],
     },
     # 국내 규제
     {
@@ -106,7 +111,7 @@ SEED: list[dict] = [
         "summary_en": "Mandatory for large Korean ICT providers; ~80 controls and annual surveillance audits.",
         "ask_ko": "ISMS-P 첫 인증을 받으려면 6개월 안에 무엇부터 해야 할까요?",
         "ask_en": "If we target ISMS-P certification in 6 months, what should we tackle first?",
-        "refs": ["https://isms.kisa.or.kr/"],
+        "refs": ["https://www.kisa.or.kr/"],
     },
     {
         "slug": "kr-efsa",
@@ -117,7 +122,10 @@ SEED: list[dict] = [
         "summary_en": "Network segregation (internal/external), ≥7% security budget, ≥5% security staff, immediate incident reporting with 24h detail.",
         "ask_ko": "우리가 전자금융업 등록을 준비한다면 가장 먼저 갖춰야 할 통제는?",
         "ask_en": "If we apply as a Korean e-finance provider, which controls come first?",
-        "refs": [],
+        "refs": [
+            "https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000220870",
+            "https://www.fsc.go.kr/po010301",
+        ],
     },
     # 글로벌 규제
     {
@@ -151,7 +159,9 @@ SEED: list[dict] = [
         "summary_en": "Built on AICPA Trust Services Criteria. Security is mandatory; others optional. Type I → 12-month operation → Type II.",
         "ask_ko": "SOC 2 Type I을 3개월 안에 받으려면 우선순위 통제는 무엇일까요?",
         "ask_en": "Which controls should we prioritize to get SOC 2 Type I in 3 months?",
-        "refs": [],
+        "refs": [
+            "https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2",
+        ],
     },
     # 베스트 프랙티스
     {
@@ -174,7 +184,10 @@ SEED: list[dict] = [
         "summary_en": "Automate weekly PRs via Dependabot/Renovate, gate by SCA results, and catch regressions with canary releases.",
         "ask_ko": "우리 팀이 매주 안전하게 의존성 업데이트를 흘리려면 어떻게 워크플로를 짤까요?",
         "ask_en": "Design a weekly safe-update workflow for our dependencies.",
-        "refs": [],
+        "refs": [
+            "https://docs.github.com/en/code-security/dependabot",
+            "https://docs.renovatebot.com/",
+        ],
     },
     {
         "slug": "review",
@@ -185,7 +198,7 @@ SEED: list[dict] = [
         "summary_en": "Input validation · missing authorization · secret leak · safe serialization · PII in logs · external-call timeouts.",
         "ask_ko": "이 PR diff에서 위 6가지를 점검해줘. (코드 첨부)",
         "ask_en": "Audit the attached diff against those six checks.",
-        "refs": [],
+        "refs": ["https://owasp.org/www-project-code-review-guide/"],
     },
     # 사고 대응
     {
@@ -197,7 +210,9 @@ SEED: list[dict] = [
         "summary_en": "NIST's 4-phase flow. The key is pre-built runbooks and notification flows (legal, customer, regulator).",
         "ask_ko": "우리가 지금 사고 대응 runbook을 만들어야 한다면 무엇부터?",
         "ask_en": "If we had to build an IR runbook today, where do we start?",
-        "refs": [],
+        "refs": [
+            "https://csrc.nist.gov/publications/detail/sp/800-61/rev-2/final",
+        ],
     },
     {
         "slug": "ir-notify",
@@ -208,7 +223,10 @@ SEED: list[dict] = [
         "summary_en": "PIPA: 72h to KISA + subjects. E-finance: immediate + 24h detail. ICT-network: 24h to KISA.",
         "ask_ko": "사고 유형별로 우리가 지켜야 할 신고 시한을 정리해줘.",
         "ask_en": "Summarize the reporting windows per incident type.",
-        "refs": [],
+        "refs": [
+            "https://www.krcert.or.kr/",
+            "https://www.pipc.go.kr/np/cop/bbs/selectBoardList.do?bbsId=BBSMSTR_000000000168",
+        ],
     },
     {
         "slug": "ir-postmortem",
@@ -219,6 +237,6 @@ SEED: list[dict] = [
         "summary_en": "Timeline · root cause · impact · mitigation · prevention · action items · learnings. Focus on systems, not blame.",
         "ask_ko": "이번 사고의 포스트모템 초안을 작성해줘. (사실 입력)",
         "ask_en": "Draft a postmortem for the latest incident. (Facts attached)",
-        "refs": [],
+        "refs": ["https://sre.google/sre-book/postmortem-culture/"],
     },
 ]

@@ -1,0 +1,149 @@
+# 🌙 Mond — 기본 values.yaml
+#
+# 운영 배포 패턴
+#   - dev:  postgresql.enabled=true, redis.enabled=true (in-cluster)
+#   - prod: 외부 RDS / ElastiCache를 쓰고 두 subchart를 false로 끈 뒤
+#           secrets.databaseUrl / secrets.redisUrl 직접 주입
+
+image:
+  registry: ghcr.io
+  repository: jland-93/mond
+  # backend / frontend는 같은 tag(애플리케이션 버전)를 공유.
+  tag: ""   # 기본은 appVersion 사용 (Chart.yaml)
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+backend:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 500m, memory: 1Gi }
+  podAnnotations: {}
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seccompProfile: { type: RuntimeDefault }
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false   # /tmp 등 일부 라이브러리가 쓰기 필요 → false 유지
+    capabilities: { drop: ["ALL"] }
+  env:
+    APP_NAME: "Mond"
+    ENVIRONMENT: "production"
+    DEBUG: "false"
+    LOG_LEVEL: "INFO"
+    SEED_ON_STARTUP: "true"
+    AUTH_MODE: "sso"
+    DEFAULT_LOCALE: "ko"
+    SESSION_SECURE: "true"
+    SESSION_DAYS: "7"
+    MCP_HTTP_ENABLED: "true"
+    NOTIFY_MIN_SEVERITY: "high"
+  service:
+    type: ClusterIP
+    port: 8000
+  hpa:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+
+frontend:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 50m,  memory: 64Mi }
+    limits:   { cpu: 300m, memory: 256Mi }
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 101            # nginx unprivileged
+    runAsGroup: 101
+    seccompProfile: { type: RuntimeDefault }
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false
+    capabilities: { drop: ["ALL"] }
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  hpa:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: true
+  className: ""            # 예: "alb" (AWS) / "nginx"
+  annotations: {}
+  hosts:
+    - host: mond.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend   # / → frontend
+        - path: /api
+          pathType: Prefix
+          service: backend    # /api → backend
+        - path: /mcp
+          pathType: Prefix
+          service: backend
+  tls: []
+    # - hosts: ["mond.example.com"]
+    #   secretName: mond-tls
+
+# 시크릿: helm install --set 또는 sealed-secrets/external-secrets로 주입 권장
+secrets:
+  # helm install 시 --set secrets.secretKey=... 또는 secrets.existingSecret 사용
+  existingSecret: ""    # 모든 시크릿이 든 이미 존재하는 Secret 이름 (있으면 아래는 무시)
+  secretKey: ""         # SECRET_KEY (32+ 문자, 운영 필수)
+  anthropicApiKey: ""   # 비우면 휴리스틱(기본 규칙) 모드
+  databaseUrl: ""       # postgresql.enabled=false 일 때만 사용
+  redisUrl: ""          # redis.enabled=false 일 때만 사용
+  ssoProviders: ""      # "keycloak,okta"
+  ssoKeycloakIssuer: ""
+  ssoKeycloakClientId: ""
+  ssoKeycloakClientSecret: ""
+  ssoOktaIssuer: ""
+  ssoOktaClientId: ""
+  ssoOktaClientSecret: ""
+  ssoGoogleClientId: ""
+  ssoGoogleClientSecret: ""
+  ssoAdminEmails: ""
+  slackWebhookUrl: ""
+  genericWebhookUrl: ""
+  githubWebhookSecret: ""
+  awsAccessKeyId: ""    # IAM source용
+  awsSecretAccessKey: ""
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}        # 예: eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/mond
+
+# ── 외부에서 끄거나 켤 수 있는 dependencies ──────────────────────
+postgresql:
+  enabled: true          # 운영은 false + secrets.databaseUrl 사용 권장
+  auth:
+    username: mond
+    password: mond
+    database: mond
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+
+redis:
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 1Gi
+
+# Pod 스케줄링
+nodeSelector: {}
+tolerations: []
+affinity: {}

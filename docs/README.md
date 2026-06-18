@@ -28,3 +28,18 @@ Mond 사용/배포/기여에 필요한 자료를 모아둔 디렉토리입니다
 ---
 
 **🌙 Illuminating the path to secure DevOps**
+
+---
+
+## 🧭 문서 한눈에 · Doc Map
+
+| 문서 | 무엇 |
+|---|---|
+| 🏠 [`/README.md`](../README.md) | 프로젝트 소개 · 스크린샷 |
+| 🌙 [`ABOUT.md`](ABOUT.md) | 왜 만들었나 · 무엇을 푸는가 · 로드맵 |
+| 🛠️ [`SETUP.md`](SETUP.md) | 설치 · 운영 · **[Part 0 — 시나리오 선택](SETUP.md#part-0--어느-시나리오인가요)** |
+| 🏗️ [`development/architecture.md`](development/architecture.md) | 시스템 구조 |
+| 🎨 [`assets/brand-guidelines.md`](assets/brand-guidelines.md) | 로고 · 컬러 · 타이포 |
+| 🤝 [`/CONTRIBUTING.md`](../CONTRIBUTING.md) | 기여 가이드 |
+| 🔐 [`/SECURITY.md`](../SECURITY.md) | 취약점 신고 |
+| 📋 [`/CHANGELOG.md`](../CHANGELOG.md) | 변경 내역 |

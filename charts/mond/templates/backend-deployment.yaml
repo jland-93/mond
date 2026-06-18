@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mond.fullname" . }}-backend
+  labels: {{- include "mond.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels: {{- include "mond.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels: {{- include "mond.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: backend
+      {{- with .Values.backend.podAnnotations }}
+      annotations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "mond.serviceAccountName" . }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext: {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
+      containers:
+        - name: backend
+          image: {{ include "mond.backend.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext: {{- toYaml .Values.backend.containerSecurityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            {{- range $key, $val := .Values.backend.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+            - name: SSO_REDIRECT_BASE
+              value: {{ printf "https://%s" (index .Values.ingress.hosts 0).host | quote }}
+            - name: ALLOWED_ORIGINS
+              value: {{ printf "[\"https://%s\"]" (index .Values.ingress.hosts 0).host | quote }}
+          envFrom:
+            - secretRef:
+                name: {{ include "mond.secretName" . }}
+          livenessProbe:
+            httpGet: { path: /api/v1/health, port: http }
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet: { path: /api/v1/health, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources: {{- toYaml .Values.backend.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mond.fullname" . }}-backend
+  labels: {{- include "mond.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  type: {{ .Values.backend.service.type }}
+  selector: {{- include "mond.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+  ports:
+    - name: http
+      port: {{ .Values.backend.service.port }}
+      targetPort: http
+{{- if .Values.backend.hpa.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "mond.fullname" . }}-backend
+  labels: {{- include "mond.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "mond.fullname" . }}-backend
+  minReplicas: {{ .Values.backend.hpa.minReplicas }}
+  maxReplicas: {{ .Values.backend.hpa.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: { type: Utilization, averageUtilization: {{ .Values.backend.hpa.targetCPUUtilizationPercentage }} }
+{{- end }}

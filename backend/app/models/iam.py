@@ -26,6 +26,8 @@ class IAMSourceKind(str, enum.Enum):
     GCP = "gcp"
     AZURE = "azure"
     K8S = "k8s"
+    # 사내 온프레미스 디렉토리 (Active Directory / OpenLDAP / FreeIPA / Samba AD)
+    LDAP = "ldap"
     CUSTOM = "custom"
 
 

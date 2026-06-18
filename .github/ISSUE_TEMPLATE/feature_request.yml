@@ -46,13 +46,16 @@ body:
       label: Component
       description: Which component would this feature affect?
       options:
-        - Tag Recommendation Engine
-        - Security Dashboard
-        - Self-Service Portal
-        - Analytics & Reporting
+        - Dashboard & Reporting
+        - Scanner Adapters / Scans
+        - Findings & Policies (incl. simulator)
+        - AI Engine (triage / NL query / prompts)
+        - Auth / RBAC / MFA / SSO
+        - IAM Self-Service (AWS / K8s / LDAP / GCP / Azure)
+        - MCP Server
         - User Interface
-        - API/Backend
-        - Infrastructure
+        - API / Backend
+        - Helm chart / Docker / Deployment
         - Documentation
         - Other
     validations:

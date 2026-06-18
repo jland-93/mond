@@ -139,10 +139,30 @@ async def seed_if_empty(db: AsyncSession) -> None:
         logger.info("seed_iam", stub=result.stub, identities=len(result.identities), permissions=len(result.permissions))
         await db.commit()
 
-    # Knowledge Hub 초기 시드
-    knowledge_count = (await db.execute(select(func.count(KnowledgeCard.id)))).scalar_one()
-    if knowledge_count == 0:
-        for payload in KNOWLEDGE_SEED:
+    # Knowledge Hub — slug 기준 upsert.
+    # OSS 업스트림에서 refs/summary가 갱신되면 부팅 시 SEED 행만 자동 동기화.
+    # source=AI 또는 사용자가 직접 수정한 카드는 절대 건드리지 않는다.
+    inserted = 0
+    refreshed = 0
+    for payload in KNOWLEDGE_SEED:
+        existing = (
+            await db.execute(select(KnowledgeCard).where(KnowledgeCard.slug == payload["slug"]))
+        ).scalar_one_or_none()
+        if existing is None:
             db.add(KnowledgeCard(**payload, source=KnowledgeSource.SEED, published=True))
-        logger.info("seed_knowledge", count=len(KNOWLEDGE_SEED))
-        await db.commit()
+            inserted += 1
+            continue
+        # 사용자가 손댔거나 AI가 만든 카드는 그대로 둠
+        if existing.source != KnowledgeSource.SEED:
+            continue
+        # SEED 행은 업스트림 값으로 갱신 (refs/title/summary/ask/category)
+        changed = False
+        for key in ("title_ko", "title_en", "summary_ko", "summary_en", "ask_ko", "ask_en", "refs", "category"):
+            new_val = payload.get(key)
+            if new_val is not None and getattr(existing, key) != new_val:
+                setattr(existing, key, new_val)
+                changed = True
+        if changed:
+            refreshed += 1
+    logger.info("seed_knowledge", inserted=inserted, refreshed=refreshed, total=len(KNOWLEDGE_SEED))
+    await db.commit()

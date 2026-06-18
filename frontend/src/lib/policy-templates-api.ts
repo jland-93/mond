@@ -16,6 +16,7 @@ export interface PolicyTemplate {
 
 export interface FrameworkInfo {
   id: string;
+  short_name: string;
   name_ko: string;
   name_en: string;
 }

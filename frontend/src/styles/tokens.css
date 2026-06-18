@@ -1,0 +1,131 @@
+/**
+ * 🌑 Mond Design Tokens v2 — "Dal-Hangari (달항아리)"
+ *
+ * 컨셉: 조선 백자 달항아리의 좌우 비대칭과 절제된 색 정서를 단일 시각 언어로.
+ * AI 디폴트(푸른 검정 + 균일 카드 + 400 weight)에서 정확히 반대 방향.
+ *
+ * 핵심 차별점
+ *  · Surface는 warm-gray(hue 60), 푸른 검정 회피
+ *  · Surface ladder는 좁게(15→24%, Raycast 식)
+ *  · Accent는 단 하나 — 옥색 jade moonlight (Linear 식 단일 acid)
+ *  · Severity는 달 위상 색 (그믐→보름)
+ *  · Font weight는 410 / 510 — 디폴트(400/500) 회피로 즉시 다른 인상
+ */
+
+:root {
+  /* ── Surface — warm-gray, narrow ladder (Raycast 영향) ────────── */
+  --surface-0: oklch(15% 0.006 60);    /* canvas */
+  --surface-1: oklch(18% 0.006 60);    /* card */
+  --surface-2: oklch(21% 0.006 60);    /* elevated (modal, drawer body) */
+  --surface-3: oklch(24% 0.006 60);    /* dialog header / sticky bar */
+
+  /* 하위 호환 별칭 (기존 컴포넌트가 이전 이름을 참조해도 동작) */
+  --mond-surface-0: var(--surface-0);
+  --mond-surface-1: var(--surface-1);
+  --mond-surface-2: var(--surface-2);
+  --mond-bg:        var(--surface-0);
+  --mond-surface:   var(--surface-1);
+
+  /* ── Border (hairline + strong) ────────────────────────────── */
+  --border:        oklch(28% 0.006 60);
+  --border-strong: oklch(38% 0.008 60);
+  --mond-border:        var(--border);
+  --mond-border-strong: var(--border-strong);
+
+  /* ── Text — warm off-white에서 단계 ────────────────────────── */
+  --fg-primary:   oklch(96% 0.005 60);
+  --fg-secondary: oklch(72% 0.006 60);
+  --fg-tertiary:  oklch(54% 0.008 60);
+  --mond-text:       var(--fg-primary);
+  --mond-text-dim:   var(--fg-secondary);
+  --mond-text-muted: var(--fg-tertiary);
+
+  /* ── Single accent — Jade Moonlight (옥색 달빛) ─────────────── */
+  /* 모든 SaaS 다크가 푸른 액센트로 갈 때 우리는 옥색으로. */
+  --accent:       oklch(82% 0.06 180);
+  --accent-hover: oklch(86% 0.07 180);
+  --accent-dim:   oklch(72% 0.05 180);
+  --accent-bg:    oklch(82% 0.06 180 / 0.10);
+  --mond-primary:       var(--accent);
+  --mond-primary-hover: var(--accent-hover);
+  --mond-primary-bg:    var(--accent-bg);
+  --mond-accent:        var(--accent-dim);
+
+  /* ── Severity = 달 위상 색 (그믐→보름) ─────────────────────── */
+  --severity-critical: oklch(64% 0.18 25);   /* 그믐 — 핏빛 달 */
+  --severity-high:     oklch(74% 0.14 60);   /* 상현 — 황금 달 */
+  --severity-medium:   oklch(82% 0.08 100);  /* 반달 — 옅은 노랑 */
+  --severity-low:      oklch(85% 0.04 180);  /* 하현 — 옥색 */
+  --severity-info:     oklch(78% 0.05 220);  /* 부드러운 청 */
+  --severity-healthy:  oklch(92% 0.02 200);  /* 보름 — 백 */
+
+  --severity-critical-bg: oklch(64% 0.18 25 / 0.12);
+  --severity-high-bg:     oklch(74% 0.14 60 / 0.12);
+  --severity-medium-bg:   oklch(82% 0.08 100 / 0.12);
+  --severity-low-bg:      oklch(85% 0.04 180 / 0.12);
+  --severity-info-bg:     oklch(78% 0.05 220 / 0.12);
+
+  /* ── Glow / Aurora (절제, hero에만) ────────────────────────── */
+  --mond-glow:         0 0 24px oklch(82% 0.06 180 / 0.18);
+  --mond-glow-primary: 0 0 32px oklch(82% 0.06 180 / 0.22);
+  --mond-glow-accent:  0 0 24px oklch(82% 0.06 180 / 0.16);
+  /* 시그니처 — 활성 메뉴 left rail의 미세한 옥색 인광 */
+  --rail-glow:         inset 2px 0 0 var(--accent), 4px 0 16px -8px var(--accent);
+
+  /* ── Typography — Sandoll CompSerif (hero) + Pretendard 410 ── */
+  --font-display: "Sandoll CompSerif", "Source Han Serif K", "Noto Serif KR",
+                  "Georgia", "Times New Roman", serif;
+  --font-sans:    "Pretendard Variable", Pretendard, "Inter Tight",
+                  -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+                  "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+  --font-mono:    "JetBrains Mono", "SF Mono", Consolas, "Liberation Mono",
+                  Menlo, monospace;
+
+  /* Text scale — display/hero가 비표준 큰 사이즈 */
+  --text-xs:      12px;
+  --text-sm:      13px;
+  --text-base:    14px;
+  --text-md:      16px;
+  --text-lg:      20px;
+  --text-xl:      28px;
+  --text-2xl:     40px;
+  --text-display: 48px;     /* serif hero headline */
+  --text-hero:    96px;     /* KPI mega number */
+
+  /* ── Spacing — 비표준 단계 (12/72/120 추가) ─────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3: 12px;     /* AI 디폴트 4/8/16에 12를 끼워넣어 grid 깨기 */
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-18: 72px;    /* hero margin */
+  --space-30: 120px;   /* page hero gap */
+
+  /* ── Radius — 카드는 좁고(6), hero/drawer는 크게(14) ────────── */
+  --radius-sm:   6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-pill: 9999px;
+
+  /* ── Motion (Linear easing + moon rise) ─────────────────────── */
+  --motion-fast:     150ms;
+  --motion-normal:   250ms;
+  --motion-slow:     450ms;
+  --motion-hero:    1200ms;
+  --motion-ease:    cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-moonrise:  cubic-bezier(0.22, 0.61, 0.36, 1);
+  --motion-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Elevation — soft shadow는 최소화. inset border가 우선 ──── */
+  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.25);
+  --shadow-md: 0 4px 12px oklch(0% 0 0 / 0.30);
+  --shadow-lg: 0 18px 40px oklch(0% 0 0 / 0.40);
+
+  /* ── Workspace accent (Arc 영향, multi-tenant) ───────────────── */
+  /* 운영 시 ENV로 hue 바꿔서 워크스페이스 시각 정체성 부여 */
+  --workspace-hue: 180;   /* 기본은 옥색 (Mond default workspace) */
+}

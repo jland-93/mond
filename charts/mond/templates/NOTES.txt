@@ -1,0 +1,33 @@
+🌙 Mond {{ .Chart.AppVersion }} 가 설치되었습니다.
+
+릴리스 이름: {{ .Release.Name }}
+네임스페이스: {{ .Release.Namespace }}
+
+{{- if .Values.ingress.enabled }}
+
+접속 URL:
+{{- range .Values.ingress.hosts }}
+  - https://{{ .host }}
+{{- end }}
+
+처음 접속하면 로그인 화면으로 안내됩니다.
+첫 가입자는 자동으로 ADMIN 권한을 받습니다.
+
+{{- else }}
+
+Ingress가 비활성화돼 있습니다. 포트포워딩으로 접속:
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "mond.fullname" . }}-frontend 3000:{{ .Values.frontend.service.port }}
+  open http://localhost:3000
+
+{{- end }}
+
+운영 시 권장 설정:
+  - secrets.secretKey 32자 이상 무작위 값
+  - AUTH_MODE=sso + SSO_PROVIDERS 설정
+  - SESSION_SECURE=true (HTTPS)
+  - postgresql.enabled=false + secrets.databaseUrl 로 RDS 사용
+  - ingress.tls 채우기
+
+다음 단계:
+  kubectl -n {{ .Release.Namespace }} get pods -l app.kubernetes.io/instance={{ .Release.Name }}

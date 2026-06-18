@@ -5,6 +5,9 @@ create_all 호출 전에 모든 모델 모듈이 임포트되어야 메타데이
 """
 
 from app.models.ai_insight import AIInsight, InsightKind
+from app.models.ai_provider import AIProviderConfig
+from app.models.role_request import RoleChangeRequest, RoleRequestStatus
+from app.models.webhook_token import WebhookToken
 from app.models.asset import Asset, AssetType
 from app.models.base import Base
 from app.models.finding import Finding, FindingStatus, Severity
@@ -22,7 +25,15 @@ from app.models.iam import (
 from app.models.knowledge import KnowledgeCard, KnowledgeCategory, KnowledgeSource
 from app.models.policy import Policy, PolicyType
 from app.models.scan import Scan, ScanStatus, ScanTrigger
-from app.models.user import Role, User, UserSession
+from app.models.user import (
+    MfaBackupCode,
+    Role,
+    TotpSecret,
+    User,
+    UserSession,
+    WebAuthnChallenge,
+    WebAuthnCredential,
+)
 
 __all__ = [
     "Base",
@@ -38,6 +49,10 @@ __all__ = [
     "PolicyType",
     "AIInsight",
     "InsightKind",
+    "AIProviderConfig",
+    "WebhookToken",
+    "RoleChangeRequest",
+    "RoleRequestStatus",
     "IAMSource",
     "IAMSourceKind",
     "IAMIdentity",
@@ -53,4 +68,8 @@ __all__ = [
     "User",
     "UserSession",
     "Role",
+    "WebAuthnCredential",
+    "WebAuthnChallenge",
+    "TotpSecret",
+    "MfaBackupCode",
 ]

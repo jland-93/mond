@@ -247,3 +247,8 @@ secrets/
 # Cache
 .cache/
 cache/
+
+# Helm subcharts (CI에서 helm dep build로 받는다)
+charts/*/charts/
+charts/*/Chart.lock
+

@@ -31,6 +31,16 @@ export default function RequireAuth({
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
+  // MFA 강제 대상이지만 미검증 → /mfa로. 단, /mfa·/security 자체는 통과.
+  if (
+    user.mfa_required &&
+    !user.mfa_verified &&
+    location.pathname !== "/mfa" &&
+    location.pathname !== "/security"
+  ) {
+    return <Navigate to="/mfa" replace />;
+  }
+
   if (!hasRole(user, minRole)) {
     return (
       <div style={{ padding: 24 }}>

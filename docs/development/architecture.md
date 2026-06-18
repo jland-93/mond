@@ -90,8 +90,11 @@ Finding 선택 → POST /api/v1/ai/findings/{id}/triage
 
 ## 🛡️ 보안 아키텍처
 
-- **인증 (MVP)** — 단일 사용자 가정. JWT 키만 발급. 멀티유저/RBAC는 로드맵.
-- **시크릿** — `.env` 기반. 운영은 별도 시크릿 매니저(예: Vault, SSM, Doppler) 권장.
+- **인증** — OIDC SSO(Keycloak · Okta · Google) + 서버 세션(opaque token, SHA-256 hash 저장). 즉시 revoke 가능.
+- **MFA** — 패스키(WebAuthn/FIDO2) + TOTP + 일회용 백업 코드. `MFA_REQUIRED_ROLES` ENV로 강제 대상 role 지정 (기본 admin·reviewer).
+- **인가 (RBAC)** — 4-tier 계층: VIEWER < EMPLOYEE < REVIEWER < ADMIN. `require_role(...)` 의존성으로 엔드포인트별 강제.
+- **운영 가드** — `ENVIRONMENT=production` 부팅 시 약한 SECRET_KEY / DEBUG=true / AUTH_MODE=dev / SESSION_SECURE=false 조합을 거부 (config.py `_validate_for_production`).
+- **시크릿** — `.env` 기반. 운영은 별도 시크릿 매니저(Vault · AWS Secrets Manager · GCP Secret Manager · External-Secrets Operator) 권장. Helm 차트는 `secrets.existingSecret`로 외부 주입 지원.
 - **로그** — `structlog` 구조화 JSON. 운영은 외부 수집기(예: Loki, Elastic) 권장.
 - **데이터** — Postgres가 단일 영속 저장소. Redis는 캐시/큐 용도.
 
@@ -154,3 +157,17 @@ GitHub push → /webhooks/github  → Asset 매칭 → trigger_scan
 ---
 
 작은 코어, 명확한 어댑터 경계. 확장은 자유롭게.
+
+---
+
+## 🧭 문서 한눈에 · Doc Map
+
+| 문서 | 무엇 |
+|---|---|
+| 🏠 [`/README.md`](../../README.md) | 프로젝트 소개 · 스크린샷 |
+| 🌙 [`ABOUT.md`](../ABOUT.md) | 왜 만들었나 · 무엇을 푸는가 · 로드맵 |
+| 🛠️ [`SETUP.md`](../SETUP.md) | 설치 · 운영 · 시나리오 가이드 |
+| 🏗️ [`development/architecture.md`](architecture.md) (이 문서) | 시스템 구조 |
+| 🎨 [`assets/brand-guidelines.md`](../assets/brand-guidelines.md) | 로고 · 컬러 · 타이포 |
+| 🤝 [`/CONTRIBUTING.md`](../../CONTRIBUTING.md) | 기여 가이드 |
+| 🔐 [`/SECURITY.md`](../../SECURITY.md) | 취약점 신고 |

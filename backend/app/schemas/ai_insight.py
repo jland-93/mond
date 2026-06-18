@@ -33,3 +33,4 @@ class AnalyzeResponse(BaseModel):
     summary: str
     suggested_actions: list[dict] = Field(default_factory=list)
     model: str
+    citations: list[dict] = Field(default_factory=list)
