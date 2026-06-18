@@ -34,6 +34,7 @@ import { useAuth } from "@/auth/AuthContext";
 import Logo from "@/components/Logo";
 import { useI18n, type Locale } from "@/i18n";
 import { hasRole } from "@/lib/auth-api";
+import { withTransition } from "@/lib/view-transition";
 
 const { Header, Sider, Content } = AntLayout;
 
@@ -108,7 +109,7 @@ export default function Layout() {
           mode="inline"
           selectedKeys={[selectedKey]}
           items={items}
-          onClick={({ key }) => navigate(key)}
+          onClick={({ key }) => withTransition(() => navigate(key))}
           style={{ background: "transparent", borderRight: 0, marginTop: 12 }}
         />
       </Sider>
@@ -132,7 +133,7 @@ export default function Layout() {
                 type={isAdminRoute ? "primary" : "default"}
                 danger={isAdminRoute}
                 icon={isAdminRoute ? <RollbackOutlined /> : <SafetyCertificateOutlined />}
-                onClick={() => navigate(isAdminRoute ? "/" : "/admin/access-review")}
+                onClick={() => withTransition(() => navigate(isAdminRoute ? "/" : "/admin/access-review"))}
               >
                 {isAdminRoute ? t.adminArea.backToApp : t.admin.enter}
               </Button>

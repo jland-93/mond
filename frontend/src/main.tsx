@@ -23,24 +23,66 @@ const queryClient = new QueryClient({
   },
 });
 
+// CSS variables가 단일 진실 원천. antd token은 그걸 참조.
+// cssVar:true → antd 토큰도 CSS variable로 출력, hashed:false → 클래스 해시 제거.
 const mondTheme = {
   algorithm: theme.darkAlgorithm,
+  cssVar: true,
+  hashed: false,
   token: {
-    colorPrimary: "#7c8cff",
-    colorBgBase: "#0d1421",
-    colorBgContainer: "#141c2f",
-    colorBgElevated: "#1e293b",
-    colorBorder: "#293346",
-    colorText: "#f1f5f9",
-    colorTextSecondary: "#94a3b8",
-    borderRadius: 10,
+    colorPrimary: "var(--mond-primary)",
+    colorBgBase: "var(--mond-surface-0)",
+    colorBgContainer: "var(--mond-surface-1)",
+    colorBgElevated: "var(--mond-surface-2)",
+    colorBorder: "var(--mond-border)",
+    colorBorderSecondary: "var(--mond-border)",
+    colorText: "var(--mond-text)",
+    colorTextSecondary: "var(--mond-text-dim)",
+    colorTextTertiary: "var(--mond-text-muted)",
+    colorSuccess: "var(--severity-low)",
+    colorWarning: "var(--severity-high)",
+    colorError: "var(--severity-critical)",
+    colorInfo: "var(--severity-info)",
+    borderRadius: 12,         // 한국 트렌드 — 더 친근하게 둥글게
+    borderRadiusSM: 6,
+    borderRadiusLG: 16,
     fontFamily:
-      "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      '"Pretendard Variable", Pretendard, "Inter Tight", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Malgun Gothic", sans-serif',
+    fontSize: 14,
+    motionDurationFast: "120ms",
+    motionDurationMid: "220ms",
+    motionDurationSlow: "360ms",
+    motionEaseInOut: "cubic-bezier(0.32, 0.72, 0, 1)",
   },
   components: {
-    Layout: { bodyBg: "#0d1421", headerBg: "#141c2f", siderBg: "#0f1626" },
-    Card: { colorBgContainer: "#141c2f" },
-    Menu: { darkItemBg: "#0f1626" },
+    Layout: {
+      bodyBg: "var(--mond-surface-0)",
+      headerBg: "var(--mond-surface-1)",
+      siderBg: "var(--mond-surface-0)",
+    },
+    Card: {
+      colorBgContainer: "var(--mond-surface-1)",
+      paddingLG: 20,          // 24 → 20 — 정보 밀도
+    },
+    Menu: { darkItemBg: "transparent" },
+    Table: {
+      cellPaddingBlock: 10,   // 16 → 10 — 행 높이 ↓
+      headerBg: "transparent",
+    },
+    Statistic: {
+      contentFontSize: 32,    // 24 → 32 — KPI 강조
+      titleFontSize: 13,
+    },
+    Drawer: {
+      colorBgElevated: "var(--mond-surface-2)",
+    },
+    Modal: {
+      contentBg: "var(--mond-surface-2)",
+    },
+    Tag: {
+      defaultBg: "var(--mond-surface-2)",
+      defaultColor: "var(--mond-text-dim)",
+    },
   },
 };
 

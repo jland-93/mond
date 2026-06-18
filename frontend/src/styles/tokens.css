@@ -1,0 +1,100 @@
+/**
+ * 🌙 Mond Design Tokens — single source of truth (2026)
+ *
+ * 색은 OKLCH (CSS Color Module Level 4). Linear · Vercel · Tailwind v4 표준.
+ * 인지명도가 일정해서 다크 모드의 명도 일관성이 깨지지 않는다.
+ *
+ * 폰트는 Pretendard Variable(한국 정부 UI 표준) + Inter Tight + JetBrains Mono.
+ * 폰트 CDN 로드는 index.html에서.
+ */
+
+:root {
+  /* ── Color: Surface (3-tier) — 달빛이 닿는 깊이 ─────────────── */
+  --mond-surface-0: oklch(18% 0.025 265);          /* page bg */
+  --mond-surface-1: oklch(22% 0.030 265);          /* card */
+  --mond-surface-2: oklch(27% 0.035 265);          /* elevated (modal, drawer) */
+
+  /* 하위 호환 별칭 — 기존 코드가 --mond-bg / --mond-surface를 쓰던 것 */
+  --mond-bg:      var(--mond-surface-0);
+  --mond-surface: var(--mond-surface-1);
+
+  /* ── Color: Text (3-tier) ───────────────────────────────────── */
+  --mond-text:       oklch(96% 0.005 265);
+  --mond-text-dim:   oklch(72% 0.020 265);
+  --mond-text-muted: oklch(55% 0.025 265);
+
+  /* ── Color: Border (hairline) ───────────────────────────────── */
+  --mond-border:        oklch(45% 0.030 265 / 0.35);
+  --mond-border-strong: oklch(55% 0.040 265 / 0.6);
+
+  /* ── Color: Brand (달빛 보라) + Accent (오로라 청록) ────────── */
+  --mond-primary:       oklch(72% 0.16 285);
+  --mond-primary-hover: oklch(78% 0.17 285);
+  --mond-primary-bg:    oklch(72% 0.16 285 / 0.12);
+  --mond-accent:        oklch(78% 0.14 200);
+
+  /* ── Color: Severity — 인지명도 통일 (모두 L ≈ 65~78%) ─────── */
+  --severity-critical: oklch(65% 0.22 25);   /* 적 */
+  --severity-high:     oklch(70% 0.18 50);   /* 주황 */
+  --severity-medium:   oklch(78% 0.16 90);   /* 황 — L 낮춰 노란색 튐 제거 */
+  --severity-low:      oklch(72% 0.16 150);  /* 녹 */
+  --severity-info:     oklch(72% 0.14 240);  /* 청 */
+
+  /* severity 배경 (Tag의 부드러운 배경용) */
+  --severity-critical-bg: oklch(65% 0.22 25 / 0.14);
+  --severity-high-bg:     oklch(70% 0.18 50 / 0.14);
+  --severity-medium-bg:   oklch(78% 0.16 90 / 0.14);
+  --severity-low-bg:      oklch(72% 0.16 150 / 0.14);
+  --severity-info-bg:     oklch(72% 0.14 240 / 0.14);
+
+  /* ── Glow / Aurora ──────────────────────────────────────────── */
+  --mond-glow:         0 0 24px oklch(72% 0.16 285 / 0.25);
+  --mond-glow-primary: 0 0 32px oklch(72% 0.16 285 / 0.25);
+  --mond-glow-accent:  0 0 24px oklch(78% 0.14 200 / 0.18);
+
+  /* ── Typography ─────────────────────────────────────────────── */
+  --font-sans: "Pretendard Variable", Pretendard, "Inter Tight",
+               -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+               "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Liberation Mono",
+               Menlo, monospace;
+
+  --text-xs:   12px;
+  --text-sm:   13px;
+  --text-base: 14px;
+  --text-md:   16px;
+  --text-lg:   20px;
+  --text-xl:   28px;
+  --text-2xl:  40px;
+
+  /* ── Spacing (4pt grid — 한국 SaaS 정보 밀도 친화) ─────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Radius (한국 트렌드 — 12~16px) ─────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ── Motion (Apple-ish easing + spring) ─────────────────────── */
+  --motion-fast:   120ms;
+  --motion-normal: 220ms;
+  --motion-slow:   360ms;
+  --motion-ease:   cubic-bezier(0.32, 0.72, 0, 1);
+  --motion-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Elevation ──────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.3);
+  --shadow-md: 0 4px 12px oklch(0% 0 0 / 0.35);
+  --shadow-lg: 0 12px 32px oklch(0% 0 0 / 0.45);
+}
