@@ -19,7 +19,7 @@ async def analyze_and_store(
     kind: InsightKind = InsightKind.TRIAGE,
     deep: bool = False,
 ) -> AIInsight:
-    result = await ai_insights.analyze_finding(finding, deep=deep)
+    result = await ai_insights.analyze_finding(db, finding, deep=deep)
     insight = AIInsight(
         finding_id=finding.id,
         kind=kind,

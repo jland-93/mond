@@ -6,6 +6,7 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     ai,
+    ai_providers,
     assets,
     auth,
     dashboard,
@@ -40,6 +41,7 @@ api_router.include_router(policy_templates.router, prefix="/policy", tags=["Poli
 api_router.include_router(regulations.router, tags=["Regulations"])
 api_router.include_router(reports.router, prefix="/reports", tags=["Reports"])
 api_router.include_router(ai.router, prefix="/ai", tags=["AI"])
+api_router.include_router(ai_providers.router, prefix="/admin/ai-providers", tags=["AI Providers (Admin)"])
 api_router.include_router(integrations.router, prefix="/integrations", tags=["Integrations"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 api_router.include_router(iam.router, prefix="/iam", tags=["IAM Self-Service"])

@@ -1,110 +1,227 @@
 """
-🌙 LLM provider 추상화
+🌙 LLM provider 추상화 — DB 우선 + ENV fallback
 
-OSS 사용자가 자기 환경에 맞는 AI API를 끌어다 쓰게 한다:
-  - anthropic : Anthropic Claude (직접 API)
-  - openai    : OpenAI / Azure OpenAI / OpenAI-compatible gateway
-  - bedrock   : AWS Bedrock (Claude · Llama · Titan, IAM 자격으로)
-  - ollama    : 로컬 LLM (Ollama / vLLM 호환) — 폐쇄망 / 데이터 외부 유출 금지 조직
+런타임 동작
+---------
+1) 관리자가 UI에서 등록한 `AIProviderConfig` 중 `is_default=True, enabled=True` 행이 있으면 그것을 사용.
+2) 없으면 .env의 `AI_PROVIDER` + 해당 키를 사용 (하위 호환).
+3) 둘 다 없으면 기본 규칙(heuristic) 모드.
 
-사용처 (`app/ai/insights.py`, `app/iam/ai_review.py`)는 다음만 알면 된다:
-  - `is_enabled()` — True면 provider가 실제로 호출 가능
-  - `get_provider()` — 'anthropic' / 'openai' / 'bedrock' / 'ollama' / None
-  - `await complete_json(system, user, deep) -> CompletionResult`
-        strict JSON 응답을 받아서 InsightResult/route_query에 그대로 넘긴다.
+지원 provider
+-------------
+- anthropic : Anthropic Claude (직접 API)
+- openai    : OpenAI / Azure OpenAI / OpenAI-compatible gateway
+- bedrock   : AWS Bedrock (Anthropic on Bedrock, IAM 자격으로)
+- ollama    : 로컬 LLM (Ollama / vLLM 호환)
+
+사용처는 다음만 알면 된다:
+- `await is_enabled(db)` — True면 provider가 실제로 호출 가능
+- `await get_provider(db)` — 'anthropic' / 'openai' / 'bedrock' / 'ollama' / None
+- `await complete_json(db, system, user, deep=False) -> CompletionResult | None`
 """
 
 from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from functools import lru_cache
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.ai.secrets import decrypt
 from app.core.config import settings
 from app.core.logging import get_logger
+from app.models.ai_provider import AIProviderConfig
 
 logger = get_logger(__name__)
 
 
 @dataclass
-class CompletionResult:
-    """provider-agnostic 응답. 호출부가 모두 동일하게 사용한다."""
+class ProviderRuntime:
+    """런타임 시점에 합성된 provider 설정 — DB 또는 ENV 출처."""
 
-    text: str               # 모델이 생성한 raw text (JSON 문자열을 기대)
-    provider: str           # 'anthropic' / 'openai' / 'bedrock' / 'ollama'
-    model: str              # 실제 사용한 모델 ID
+    provider: str          # 'anthropic' / 'openai' / 'bedrock' / 'ollama'
+    api_key: str | None
+    base_url: str | None
+    region: str | None
+    model_default: str
+    model_deep: str
+    source: str            # 'db' / 'env' — UI 디버그용
+
+
+@dataclass
+class CompletionResult:
+    """provider-agnostic 응답."""
+
+    text: str
+    provider: str
+    model: str
     input_tokens: int | None = None
     output_tokens: int | None = None
 
 
-def get_provider() -> str | None:
-    """현재 활성화된 provider 이름 반환. 키가 없으면 None."""
-    p = (settings.AI_PROVIDER or "").lower().strip()
-    if p == "anthropic" and settings.ANTHROPIC_API_KEY:
-        return "anthropic"
-    if p == "openai" and settings.OPENAI_API_KEY:
-        return "openai"
-    if p == "bedrock":
-        # IAM role/자격증명은 boto3가 자동 감지 — 사용자가 'bedrock'을 명시했으면 활성으로 간주.
-        return "bedrock"
-    if p == "ollama":
-        return "ollama"
+# ── 런타임 조회 ─────────────────────────────────────────────────
+async def get_runtime(db: AsyncSession) -> ProviderRuntime | None:
+    """DB의 default provider → 없으면 ENV → 둘 다 없으면 None."""
+    # 1) DB 우선
+    row = (
+        await db.execute(
+            select(AIProviderConfig)
+            .where(AIProviderConfig.enabled.is_(True))
+            .where(AIProviderConfig.is_default.is_(True))
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+    if row is not None:
+        rt = _runtime_from_db(row)
+        if _has_credentials(rt):
+            return rt
+        logger.warning("ai_default_provider_missing_credentials", provider=row.provider)
+
+    # 2) ENV fallback
+    return _runtime_from_env()
+
+
+def _runtime_from_db(row: AIProviderConfig) -> ProviderRuntime:
+    api_key = decrypt(row.api_key_encrypted)
+    provider = row.provider
+    return ProviderRuntime(
+        provider=provider,
+        api_key=api_key,
+        base_url=row.base_url,
+        region=row.region or (settings.BEDROCK_REGION if provider == "bedrock" else None),
+        model_default=row.model_default or _env_model_default(provider),
+        model_deep=row.model_deep or _env_model_deep(provider),
+        source="db",
+    )
+
+
+def _runtime_from_env() -> ProviderRuntime | None:
+    provider = (settings.AI_PROVIDER or "").lower().strip()
+    if provider == "anthropic" and settings.ANTHROPIC_API_KEY:
+        return ProviderRuntime(
+            provider="anthropic",
+            api_key=settings.ANTHROPIC_API_KEY,
+            base_url=None,
+            region=None,
+            model_default=settings.AI_MODEL_DEFAULT,
+            model_deep=settings.AI_MODEL_DEEP,
+            source="env",
+        )
+    if provider == "openai" and settings.OPENAI_API_KEY:
+        return ProviderRuntime(
+            provider="openai",
+            api_key=settings.OPENAI_API_KEY,
+            base_url=settings.OPENAI_BASE_URL,
+            region=None,
+            model_default=settings.OPENAI_MODEL_DEFAULT,
+            model_deep=settings.OPENAI_MODEL_DEEP,
+            source="env",
+        )
+    if provider == "bedrock":
+        return ProviderRuntime(
+            provider="bedrock",
+            api_key=None,  # boto3 자격 자동 감지
+            base_url=None,
+            region=settings.BEDROCK_REGION,
+            model_default=settings.BEDROCK_MODEL_DEFAULT,
+            model_deep=settings.BEDROCK_MODEL_DEEP,
+            source="env",
+        )
+    if provider == "ollama":
+        return ProviderRuntime(
+            provider="ollama",
+            api_key=None,
+            base_url=settings.OLLAMA_BASE_URL,
+            region=None,
+            model_default=settings.OLLAMA_MODEL_DEFAULT,
+            model_deep=settings.OLLAMA_MODEL_DEEP,
+            source="env",
+        )
     return None
 
 
-def is_enabled() -> bool:
-    return get_provider() is not None
+def _has_credentials(rt: ProviderRuntime) -> bool:
+    if rt.provider in {"anthropic", "openai"}:
+        return bool(rt.api_key)
+    if rt.provider == "bedrock":
+        # boto3가 IAM 자격을 자동 감지 — region만 있으면 OK
+        return bool(rt.region)
+    if rt.provider == "ollama":
+        return bool(rt.base_url)
+    return False
 
 
-def _resolve_model(deep: bool) -> str:
-    provider = get_provider()
-    if provider == "openai":
-        return settings.OPENAI_MODEL_DEEP if deep else settings.OPENAI_MODEL_DEFAULT
-    if provider == "bedrock":
-        return settings.BEDROCK_MODEL_DEEP if deep else settings.BEDROCK_MODEL_DEFAULT
-    if provider == "ollama":
-        return settings.OLLAMA_MODEL_DEEP if deep else settings.OLLAMA_MODEL_DEFAULT
-    return settings.AI_MODEL_DEEP if deep else settings.AI_MODEL_DEFAULT
+def _env_model_default(provider: str) -> str:
+    return {
+        "anthropic": settings.AI_MODEL_DEFAULT,
+        "openai": settings.OPENAI_MODEL_DEFAULT,
+        "bedrock": settings.BEDROCK_MODEL_DEFAULT,
+        "ollama": settings.OLLAMA_MODEL_DEFAULT,
+    }.get(provider, "")
+
+
+def _env_model_deep(provider: str) -> str:
+    return {
+        "anthropic": settings.AI_MODEL_DEEP,
+        "openai": settings.OPENAI_MODEL_DEEP,
+        "bedrock": settings.BEDROCK_MODEL_DEEP,
+        "ollama": settings.OLLAMA_MODEL_DEEP,
+    }.get(provider, "")
+
+
+# ── 호출부에 노출되는 4개 API ────────────────────────────────────
+async def is_enabled(db: AsyncSession) -> bool:
+    return await get_runtime(db) is not None
+
+
+async def get_provider(db: AsyncSession) -> str | None:
+    rt = await get_runtime(db)
+    return rt.provider if rt else None
+
+
+async def current_model_label(db: AsyncSession) -> str:
+    rt = await get_runtime(db)
+    if rt is None:
+        return "rule-based"
+    return f"{rt.provider}:{rt.model_default}"
 
 
 async def complete_json(
+    db: AsyncSession,
     system: str,
     user: str,
     *,
     deep: bool = False,
     max_tokens: int | None = None,
 ) -> CompletionResult | None:
-    """provider별 LLM 호출. JSON 문자열을 text로 반환. 실패하면 None."""
-    provider = get_provider()
-    if provider is None:
+    """provider별 LLM 호출. 실패하면 None — 호출부는 fallback 처리."""
+    rt = await get_runtime(db)
+    if rt is None:
         return None
-    model = _resolve_model(deep)
+    model = rt.model_deep if deep else rt.model_default
     max_tokens = max_tokens or settings.AI_MAX_TOKENS
 
     try:
-        if provider == "anthropic":
-            return await _call_anthropic(system, user, model, max_tokens)
-        if provider == "openai":
-            return await _call_openai(system, user, model, max_tokens)
-        if provider == "bedrock":
-            return await _call_bedrock(system, user, model, max_tokens)
-        if provider == "ollama":
-            return await _call_ollama(system, user, model, max_tokens)
+        if rt.provider == "anthropic":
+            return await _call_anthropic(rt, system, user, model, max_tokens)
+        if rt.provider == "openai":
+            return await _call_openai(rt, system, user, model, max_tokens)
+        if rt.provider == "bedrock":
+            return await _call_bedrock(rt, system, user, model, max_tokens)
+        if rt.provider == "ollama":
+            return await _call_ollama(rt, system, user, model, max_tokens)
     except Exception as exc:
-        logger.warning("ai_complete_failed", provider=provider, model=model, error=str(exc))
+        logger.warning("ai_complete_failed", provider=rt.provider, model=model, error=str(exc))
         return None
     return None
 
 
 # ── Anthropic ───────────────────────────────────────────────────
-@lru_cache(maxsize=1)
-def _anthropic_client():
+async def _call_anthropic(rt: ProviderRuntime, system: str, user: str, model: str, max_tokens: int) -> CompletionResult:
     from anthropic import AsyncAnthropic
-    return AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
 
-
-async def _call_anthropic(system: str, user: str, model: str, max_tokens: int) -> CompletionResult:
-    client = _anthropic_client()
+    client = AsyncAnthropic(api_key=rt.api_key)
     response = await client.messages.create(
         model=model,
         max_tokens=max_tokens,
@@ -121,18 +238,14 @@ async def _call_anthropic(system: str, user: str, model: str, max_tokens: int) -
     )
 
 
-# ── OpenAI (OpenAI / Azure / 호환 게이트웨이) ────────────────────
-@lru_cache(maxsize=1)
-def _openai_client():
+# ── OpenAI / Azure / 호환 게이트웨이 ───────────────────────────
+async def _call_openai(rt: ProviderRuntime, system: str, user: str, model: str, max_tokens: int) -> CompletionResult:
     from openai import AsyncOpenAI
-    kwargs: dict = {"api_key": settings.OPENAI_API_KEY}
-    if settings.OPENAI_BASE_URL:
-        kwargs["base_url"] = settings.OPENAI_BASE_URL
-    return AsyncOpenAI(**kwargs)
 
-
-async def _call_openai(system: str, user: str, model: str, max_tokens: int) -> CompletionResult:
-    client = _openai_client()
+    kwargs: dict = {"api_key": rt.api_key}
+    if rt.base_url:
+        kwargs["base_url"] = rt.base_url
+    client = AsyncOpenAI(**kwargs)
     response = await client.chat.completions.create(
         model=model,
         max_tokens=max_tokens,
@@ -153,23 +266,16 @@ async def _call_openai(system: str, user: str, model: str, max_tokens: int) -> C
     )
 
 
-# ── AWS Bedrock ─────────────────────────────────────────────────
-@lru_cache(maxsize=1)
-def _bedrock_client():
-    import boto3
-    return boto3.client("bedrock-runtime", region_name=settings.BEDROCK_REGION)
-
-
-async def _call_bedrock(system: str, user: str, model: str, max_tokens: int) -> CompletionResult:
-    """Bedrock 모델은 model id에 따라 invoke body 포맷이 다르다 (Anthropic 계열 vs Llama 등).
-
-    여기서는 Anthropic on Bedrock(`anthropic.claude-*`)만 지원한다 — 한국에서 가장 흔한 조합.
-    """
+# ── AWS Bedrock (Anthropic on Bedrock) ─────────────────────────
+async def _call_bedrock(rt: ProviderRuntime, system: str, user: str, model: str, max_tokens: int) -> CompletionResult:
     if not model.startswith("anthropic."):
         raise ValueError(f"unsupported bedrock model (only anthropic.* supported): {model}")
 
     import asyncio
-    client = _bedrock_client()
+
+    import boto3
+
+    client = boto3.client("bedrock-runtime", region_name=rt.region or "us-east-1")
     body = json.dumps(
         {
             "anthropic_version": "bedrock-2023-05-31",
@@ -178,7 +284,6 @@ async def _call_bedrock(system: str, user: str, model: str, max_tokens: int) -> 
             "messages": [{"role": "user", "content": user}],
         }
     )
-    # boto3는 동기. asyncio.to_thread로 비동기화.
     raw = await asyncio.to_thread(
         client.invoke_model,
         modelId=model,
@@ -199,12 +304,11 @@ async def _call_bedrock(system: str, user: str, model: str, max_tokens: int) -> 
     )
 
 
-# ── Ollama (로컬) ──────────────────────────────────────────────
-async def _call_ollama(system: str, user: str, model: str, max_tokens: int) -> CompletionResult:
-    """Ollama는 OpenAI 호환 chat API + JSON format 모드를 지원한다."""
+# ── Ollama / vLLM (로컬) ───────────────────────────────────────
+async def _call_ollama(rt: ProviderRuntime, system: str, user: str, model: str, max_tokens: int) -> CompletionResult:
     import httpx
 
-    base = settings.OLLAMA_BASE_URL.rstrip("/")
+    base = (rt.base_url or settings.OLLAMA_BASE_URL).rstrip("/")
     payload = {
         "model": model,
         "messages": [
@@ -227,13 +331,3 @@ async def _call_ollama(system: str, user: str, model: str, max_tokens: int) -> C
         input_tokens=data.get("prompt_eval_count"),
         output_tokens=data.get("eval_count"),
     )
-
-
-# ── 하위 호환: 기존 코드가 get_client()를 호출하던 케이스 ─────────
-# iam/ai_review.py 등은 client.messages.create()를 직접 호출하므로,
-# Anthropic provider일 때만 native client를 반환한다. 다른 provider는 None.
-def get_client():
-    """⚠️ 하위 호환용. 새 코드는 `complete_json(...)`을 사용하라."""
-    if get_provider() != "anthropic":
-        return None
-    return _anthropic_client()

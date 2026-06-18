@@ -22,10 +22,11 @@ async def health(db: AsyncSession = Depends(get_db)) -> dict:
         db_ok = True
     except Exception:
         db_ok = False
+    ai_ok = await ai_enabled(db) if db_ok else False
     return {
         "status": "ok" if db_ok else "degraded",
         "db": db_ok,
         "version": settings.VERSION,
         "environment": settings.ENVIRONMENT,
-        "ai_enabled": ai_enabled(),
+        "ai_enabled": ai_ok,
     }

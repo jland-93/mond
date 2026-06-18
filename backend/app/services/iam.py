@@ -156,6 +156,7 @@ async def create_request(db: AsyncSession, payload: AccessRequestCreate) -> Acce
 
     # AI 1차 자율 판단 즉시 실행
     review_result = await ai_review.review(
+        db,
         requester=req.requester,
         reason=req.reason,
         duration_hours=req.duration_hours,

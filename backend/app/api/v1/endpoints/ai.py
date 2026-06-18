@@ -6,8 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai import insights as ai_insights
-from app.ai.client import get_provider as ai_provider
-from app.ai.client import is_enabled as ai_enabled
+from app.ai.client import current_model_label, get_provider as ai_provider, is_enabled as ai_enabled
 from app.auth.deps import current_user
 from app.core.database import get_db
 from app.models.ai_insight import InsightKind
@@ -20,12 +19,12 @@ router = APIRouter()
 
 
 @router.get("/status")
-async def ai_status() -> dict:
+async def ai_status(db: AsyncSession = Depends(get_db)) -> dict:
     """현재 활성화된 AI provider와 모델을 노출. UI가 사용자에게 출처를 명시할 때 사용."""
     return {
-        "enabled": ai_enabled(),
-        "provider": ai_provider(),  # anthropic / openai / bedrock / ollama / null
-        "model": ai_insights.current_model_label(),
+        "enabled": await ai_enabled(db),
+        "provider": await ai_provider(db),  # anthropic / openai / bedrock / ollama / null
+        "model": await current_model_label(db),
     }
 
 
@@ -61,10 +60,10 @@ async def analyze_query(
     _user: User = Depends(current_user),
 ) -> AnalyzeResponse:
     """자연어 쿼리를 분류한다. 'scan' 의도이면 클라이언트가 후속 호출을 만든다."""
-    result = await ai_insights.route_query(payload.query)
+    result = await ai_insights.route_query(db, payload.query)
     return AnalyzeResponse(
         intent=result.get("intent", "unknown"),
         summary=result.get("summary", ""),
         suggested_actions=result.get("suggested_actions", []) or [],
-        model=result.get("model") or ai_insights.current_model_label(),
+        model=result.get("model") or await current_model_label(db),
     )

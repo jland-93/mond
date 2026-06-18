@@ -14,6 +14,8 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.ai.client import complete_json, is_enabled
 from app.core.logging import get_logger
 from app.models.iam import IAMIdentity, Permission
@@ -54,6 +56,7 @@ Output ONLY JSON. No markdown fences.
 
 
 async def review(
+    db: AsyncSession,
     *,
     requester: str,
     reason: str,
@@ -61,7 +64,7 @@ async def review(
     identity: IAMIdentity,
     permission: Permission,
 ) -> ReviewResult:
-    if not is_enabled():
+    if not await is_enabled(db):
         return _heuristic(permission)
 
     user_prompt = json.dumps(
@@ -84,7 +87,7 @@ async def review(
         ensure_ascii=False,
     )
 
-    result = await complete_json(SYSTEM_PROMPT, user_prompt)
+    result = await complete_json(db, SYSTEM_PROMPT, user_prompt)
     if result is None:
         logger.warning("access_review_failed_or_disabled")
         return _heuristic(permission)

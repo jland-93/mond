@@ -10,8 +10,9 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
-from app.ai.client import complete_json, get_provider, is_enabled
-from app.core.config import settings
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.ai.client import complete_json, current_model_label, is_enabled
 from app.core.logging import get_logger
 from app.models.finding import Finding, Severity
 
@@ -53,13 +54,13 @@ class InsightResult:
     output_tokens: int | None = None
 
 
-async def analyze_finding(finding: Finding, *, deep: bool = False) -> InsightResult:
+async def analyze_finding(db: AsyncSession, finding: Finding, *, deep: bool = False) -> InsightResult:
     """단일 Finding에 대해 AI 인사이트를 생성한다 (provider-agnostic)."""
-    if not is_enabled():
+    if not await is_enabled(db):
         return _fallback(finding)
 
     user_prompt = _build_user_prompt(finding)
-    result = await complete_json(SYSTEM_PROMPT, user_prompt, deep=deep)
+    result = await complete_json(db, SYSTEM_PROMPT, user_prompt, deep=deep)
     if result is None:
         logger.warning("ai_analyze_failed_or_disabled", finding_id=finding.id)
         return _fallback(finding)
@@ -76,9 +77,9 @@ async def analyze_finding(finding: Finding, *, deep: bool = False) -> InsightRes
     )
 
 
-async def route_query(query: str) -> dict:
+async def route_query(db: AsyncSession, query: str) -> dict:
     """자연어 쿼리를 받아 의도(scan/list/explain/unknown)를 분류한다."""
-    if not is_enabled():
+    if not await is_enabled(db):
         return _heuristic_route(query)
 
     system = (
@@ -86,7 +87,7 @@ async def route_query(query: str) -> dict:
         '{"intent": "scan|list_findings|explain|unknown", '
         '"summary": "what user wants", "suggested_actions": [{"label": "...", "endpoint": "..."}]}'
     )
-    result = await complete_json(system, query, max_tokens=512)
+    result = await complete_json(db, system, query, max_tokens=512)
     if result is None:
         return _heuristic_route(query)
     parsed = _parse_json(result.text)
@@ -96,18 +97,9 @@ async def route_query(query: str) -> dict:
     return parsed
 
 
-def current_model_label() -> str:
-    """UI 디버그/표시용 — 현재 활성 provider/모델."""
-    provider = get_provider()
-    if provider is None:
-        return "rule-based"
-    if provider == "openai":
-        return f"openai:{settings.OPENAI_MODEL_DEFAULT}"
-    if provider == "bedrock":
-        return f"bedrock:{settings.BEDROCK_MODEL_DEFAULT}"
-    if provider == "ollama":
-        return f"ollama:{settings.OLLAMA_MODEL_DEFAULT}"
-    return f"anthropic:{settings.AI_MODEL_DEFAULT}"
+# 하위 호환 — UI 라벨 helper. client.current_model_label은 async라 별도 노출.
+async def current_label(db: AsyncSession) -> str:
+    return await current_model_label(db)
 
 
 def _build_user_prompt(finding: Finding) -> str:

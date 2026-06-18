@@ -10,8 +10,7 @@ import re
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.ai.client import get_client, is_enabled
-from app.core.config import settings
+from app.ai.client import complete_json, is_enabled
 from app.core.logging import get_logger
 from app.models.knowledge import KnowledgeCard, KnowledgeCategory, KnowledgeSource
 from app.schemas.knowledge import KnowledgeCardCreate, KnowledgeCardUpdate
@@ -95,12 +94,9 @@ async def generate_cards(
     topic_hint: str | None,
     count: int,
 ) -> list[KnowledgeCard]:
-    if not is_enabled():
+    if not await is_enabled(db):
         # AI 비활성 — 사용자에게 명확히 안내하기 위해 빈 리스트 + 경고는 endpoint에서.
         return []
-
-    client = get_client()
-    assert client is not None
 
     user_prompt = json.dumps(
         {
@@ -112,19 +108,11 @@ async def generate_cards(
         ensure_ascii=False,
     )
 
-    try:
-        response = await client.messages.create(
-            model=settings.AI_MODEL_DEFAULT,
-            max_tokens=4096,
-            system=GENERATE_SYSTEM,
-            messages=[{"role": "user", "content": user_prompt}],
-        )
-    except Exception as exc:
-        logger.warning("knowledge_generate_failed", error=str(exc))
+    result = await complete_json(db, GENERATE_SYSTEM, user_prompt, max_tokens=4096)
+    if result is None:
+        logger.warning("knowledge_generate_failed")
         return []
-
-    text = "".join(block.text for block in response.content if hasattr(block, "text"))
-    parsed = _parse_json(text) or {}
+    parsed = _parse_json(result.text) or {}
     raw_cards = parsed.get("cards", []) if isinstance(parsed, dict) else []
 
     created: list[KnowledgeCard] = []

@@ -5,7 +5,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.ai.client import is_enabled as ai_enabled
+from app.ai.client import is_enabled as ai_enabled  # async — db 인자 필요
 from app.auth.deps import current_user, require_role
 from app.core.database import get_db
 from app.models.knowledge import KnowledgeCategory
@@ -81,10 +81,10 @@ async def generate_cards(
     payload: GenerateRequest,
     db: AsyncSession = Depends(get_db),
 ) -> list[KnowledgeCardRead]:
-    if not ai_enabled():
+    if not await ai_enabled(db):
         raise HTTPException(
             status_code=503,
-            detail="ANTHROPIC_API_KEY 미설정 — AI 카드 생성은 키 설정 후 사용 가능합니다.",
+            detail="AI provider 미설정 — 관리자 → 연동 관리에서 AI key를 등록하거나 .env에 설정 후 사용하세요.",
         )
     cards = await knowledge_service.generate_cards(
         db,
