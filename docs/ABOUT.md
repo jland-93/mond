@@ -7,6 +7,40 @@
 
 ---
 
+## ✨ 한눈에 둘러보기
+
+<div align="center">
+  <a href="screenshots/01-dashboard.jpg">
+    <img src="screenshots/01-dashboard.jpg" alt="Dashboard — Moon-phase 보안 점수 · 7일 trend · 활동 피드 · 주의 자산" width="100%"/>
+  </a>
+  <p><em>대시보드</em> — Moon-phase 보안 점수 · 7일 trend · 활동 피드 · 주의 자산 Top 5</p>
+</div>
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <a href="screenshots/05-login-hero.jpg"><img src="screenshots/05-login-hero.jpg" alt="Login Hero"/></a>
+      <p><em>Login Hero</em> — 3D 초승달 + 3 pillars (AI Triage · Self-service · Auto-audit)</p>
+    </td>
+    <td width="50%" align="center">
+      <a href="screenshots/03-ai-insights.jpg"><img src="screenshots/03-ai-insights.jpg" alt="AI Insights"/></a>
+      <p><em>AI 인사이트</em> — 자연어로 자산·발견·정책 질의. 키 없으면 기본 규칙 모드</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <a href="screenshots/02-knowledge-hub.jpg"><img src="screenshots/02-knowledge-hub.jpg" alt="Knowledge Hub"/></a>
+      <p><em>지식 허브</em> — DevSecOps · OWASP · K-PIPA · ISMS-P · PCI DSS · GDPR + AI 연계</p>
+    </td>
+    <td width="50%" align="center">
+      <a href="screenshots/04-iam-explorer.jpg"><img src="screenshots/04-iam-explorer.jpg" alt="IAM Explorer"/></a>
+      <p><em>IAM 탐색</em> — AWS · GCP · Azure · Kubernetes · LDAP/AD 멀티 클라우드 권한 + 위험도</p>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## 🎯 왜 Mond를 만들었나
 
 오늘날의 DevSecOps는 도구가 너무 많고, 발견사항이 너무 많고, 결정은 너무 느립니다.

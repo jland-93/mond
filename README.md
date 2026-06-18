@@ -22,33 +22,32 @@
   [![Helm](https://img.shields.io/badge/Helm-OCI-0F1689.svg)](https://github.com/jland-93/mond/pkgs/container/charts%2Fmond)
 </div>
 
+<br/>
+
+<div align="center">
+  <a href="docs/screenshots/01-dashboard.jpg">
+    <img src="docs/screenshots/01-dashboard.jpg" alt="Mond Dashboard — Moon-phase 보안 점수 · 7일 trend · 활동 피드 · 주의 자산" width="100%"/>
+  </a>
+  <p>
+    <sub>
+      🛠️ <a href="docs/SETUP.md#part-5-관리자-초기-세팅-체크리스트">관리자 초기 세팅 →</a> ·
+      📖 <a href="docs/ABOUT.md#-무엇을-제공하나요">무엇을 제공? →</a> ·
+      🚦 <a href="docs/SETUP.md#part-0--어느-시나리오인가요">내 시나리오 고르기 →</a>
+    </sub>
+  </p>
+</div>
+
 ---
 
-## 🌒 화면 미리보기 · Preview
+## 🌒 더 많은 화면 · More previews
 
 <table>
   <tr>
-    <td width="50%">
-      <a href="docs/screenshots/01-dashboard.jpg"><img src="docs/screenshots/01-dashboard.jpg" alt="Mond Dashboard — 보안 점수 + 7일 trend + 활동 피드"/></a>
-      <p align="center">
-        <strong>대시보드</strong> · Moon-phase 보안 점수, 7일 trend, 활동 피드, 주의 자산<br/>
-        <sub>🛠️ <a href="docs/SETUP.md#part-5-관리자-초기-세팅-체크리스트">관리자 초기 세팅 →</a> · 📖 <a href="docs/ABOUT.md#-무엇을-제공하나요">무엇을 제공? →</a></sub>
-      </p>
-    </td>
     <td width="50%">
       <a href="docs/screenshots/05-login-hero.jpg"><img src="docs/screenshots/05-login-hero.jpg" alt="Login Hero — 3D Moon + AI Triage / Self-service / Auto-audit"/></a>
       <p align="center">
         <strong>Login Hero</strong> · 3D 초승달 · 3 pillars (AI Triage · Self-service · Auto-audit)<br/>
         <sub>🔐 <a href="docs/SETUP.md#part-4-로그인--dev--sso--mfa">로그인 · SSO · MFA 설정 →</a></sub>
-      </p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <a href="docs/screenshots/02-knowledge-hub.jpg"><img src="docs/screenshots/02-knowledge-hub.jpg" alt="Knowledge Hub — DevSecOps + 규제 카드 + AI 연계"/></a>
-      <p align="center">
-        <strong>지식 허브</strong> · DevSecOps 기초, OWASP, K-PIPA, ISMS-P, PCI DSS, GDPR — AI에 바로 이어 묻기<br/>
-        <sub>📖 <a href="docs/ABOUT.md#3-한국-규제-매핑-부재--regulations-guide--정책-템플릿">한국 규제 매핑 →</a></sub>
       </p>
     </td>
     <td width="50%">
@@ -60,11 +59,18 @@
     </td>
   </tr>
   <tr>
-    <td colspan="2">
+    <td width="50%">
+      <a href="docs/screenshots/02-knowledge-hub.jpg"><img src="docs/screenshots/02-knowledge-hub.jpg" alt="Knowledge Hub — DevSecOps + 규제 카드 + AI 연계"/></a>
+      <p align="center">
+        <strong>지식 허브</strong> · DevSecOps · OWASP · K-PIPA · ISMS-P · PCI DSS · GDPR — AI에 바로 이어 묻기<br/>
+        <sub>📖 <a href="docs/ABOUT.md#3-한국-규제-매핑-부재--regulations-guide--정책-템플릿">한국 규제 매핑 →</a></sub>
+      </p>
+    </td>
+    <td width="50%">
       <a href="docs/screenshots/04-iam-explorer.jpg"><img src="docs/screenshots/04-iam-explorer.jpg" alt="IAM Explorer — AWS / GCP / Azure / K8s / LDAP 통합 권한 탐색"/></a>
       <p align="center">
-        <strong>IAM 탐색</strong> · AWS · GCP · Azure · Kubernetes · LDAP/AD — 멀티 클라우드 권한 한눈에 + 위험도 라벨<br/>
-        <sub>🔗 <a href="docs/SETUP.md#-4-iam-source-연동-admin--connections">IAM Source 연동 (Admin → Connections) →</a></sub>
+        <strong>IAM 탐색</strong> · AWS · GCP · Azure · Kubernetes · LDAP/AD 멀티 클라우드 권한 + 위험도<br/>
+        <sub>🔗 <a href="docs/SETUP.md#-4-iam-source-연동-admin--connections">IAM Source 연동 →</a></sub>
       </p>
     </td>
   </tr>
