@@ -135,6 +135,13 @@ export const en: Dict = {
     threshold: "Threshold",
     compliance: "Compliance",
     desc: "Policies applied to scanner results. Each is SAST / SCA / IaC / DAST / Container / Secrets / Compliance and blocks the deployment pipeline when severity exceeds the threshold.",
+    openCatalog: "Regulation template catalog",
+    catalogTitle: "Policy Template Catalog",
+    catalogDesc:
+      "One-click apply for policies mapped to Korean and global regulations — ISMS-P, K-EFSA, CSAP, PIPA, ISO 27001, OWASP, CIS, etc.",
+    installSelected: "Install selected",
+    searchPlaceholder: "Search — e.g. secrets, encryption, ISMS-P-2.7",
+    allFrameworks: "All",
   },
 
   policySim: {

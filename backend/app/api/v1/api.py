@@ -16,6 +16,7 @@ from app.api.v1.endpoints import (
     knowledge,
     policies,
     policy_sim,
+    policy_templates,
     regulations,
     reports,
     scans,
@@ -32,6 +33,7 @@ api_router.include_router(scans.router, prefix="/scans", tags=["Scans"])
 api_router.include_router(findings.router, prefix="/findings", tags=["Findings"])
 api_router.include_router(policies.router, prefix="/policies", tags=["Policies"])
 api_router.include_router(policy_sim.router, prefix="/policy", tags=["Policy Simulation"])
+api_router.include_router(policy_templates.router, prefix="/policy", tags=["Policy Templates"])
 api_router.include_router(regulations.router, tags=["Regulations"])
 api_router.include_router(reports.router, prefix="/reports", tags=["Reports"])
 api_router.include_router(ai.router, prefix="/ai", tags=["AI"])
