@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai import insights as ai_insights
+from app.ai.client import get_provider as ai_provider
 from app.ai.client import is_enabled as ai_enabled
 from app.auth.deps import current_user
 from app.core.database import get_db
@@ -20,7 +21,12 @@ router = APIRouter()
 
 @router.get("/status")
 async def ai_status() -> dict:
-    return {"enabled": ai_enabled()}
+    """현재 활성화된 AI provider와 모델을 노출. UI가 사용자에게 출처를 명시할 때 사용."""
+    return {
+        "enabled": ai_enabled(),
+        "provider": ai_provider(),  # anthropic / openai / bedrock / ollama / null
+        "model": ai_insights.current_model_label(),
+    }
 
 
 @router.post("/findings/{finding_id}/triage", response_model=AIInsightRead)
@@ -60,5 +66,5 @@ async def analyze_query(
         intent=result.get("intent", "unknown"),
         summary=result.get("summary", ""),
         suggested_actions=result.get("suggested_actions", []) or [],
-        model="claude-haiku-4-5-20251001" if ai_enabled() else "heuristic",
+        model=result.get("model") or ai_insights.current_model_label(),
     )

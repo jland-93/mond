@@ -14,8 +14,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
-from app.ai.client import get_client, is_enabled
-from app.core.config import settings
+from app.ai.client import complete_json, is_enabled
 from app.core.logging import get_logger
 from app.models.iam import IAMIdentity, Permission
 
@@ -65,9 +64,6 @@ async def review(
     if not is_enabled():
         return _heuristic(permission)
 
-    client = get_client()
-    assert client is not None
-
     user_prompt = json.dumps(
         {
             "requester": requester,
@@ -88,19 +84,12 @@ async def review(
         ensure_ascii=False,
     )
 
-    try:
-        response = await client.messages.create(
-            model=settings.AI_MODEL_DEFAULT,
-            max_tokens=settings.AI_MAX_TOKENS,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_prompt}],
-        )
-    except Exception as exc:
-        logger.warning("access_review_failed", error=str(exc))
+    result = await complete_json(SYSTEM_PROMPT, user_prompt)
+    if result is None:
+        logger.warning("access_review_failed_or_disabled")
         return _heuristic(permission)
 
-    text = "".join(block.text for block in response.content if hasattr(block, "text"))
-    parsed = _parse(text) or {}
+    parsed = _parse(result.text) or {}
     decision = parsed.get("decision", "needs_human")
     if decision not in {"auto_approve", "needs_human", "deny"}:
         decision = "needs_human"
@@ -109,7 +98,7 @@ async def review(
         decision=decision,
         risk_level=str(parsed.get("risk_level", "medium")),
         reason=str(parsed.get("reason", "AI 응답 파싱 실패 — 담당자 검토로 안내"))[:1000],
-        model=settings.AI_MODEL_DEFAULT,
+        model=f"{result.provider}:{result.model}",
         confidence=float(parsed.get("confidence", 0.0)),
     )
 

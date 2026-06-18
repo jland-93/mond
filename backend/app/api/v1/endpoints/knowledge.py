@@ -74,7 +74,8 @@ async def delete_card(card_id: int, db: AsyncSession = Depends(get_db)) -> None:
 @router.post(
     "/cards/generate",
     response_model=list[KnowledgeCardRead],
-    dependencies=[Depends(require_role(Role.REVIEWER))],
+    # AI 생성 카드는 검토 없이 사내 지식으로 노출되므로 ADMIN으로 좁힌다.
+    dependencies=[Depends(require_role(Role.ADMIN))],
 )
 async def generate_cards(
     payload: GenerateRequest,

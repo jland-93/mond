@@ -54,11 +54,33 @@ class Settings(BaseSettings):
     # CORS
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173"]
 
-    # LLM (Anthropic Claude)
+    # ── LLM provider 추상화 ─────────────────────────────────────
+    # 사용자가 자기 환경의 AI API를 끌어다 쓰게 한다.
+    # 지원: anthropic / openai / bedrock / ollama
+    # 빈 값이면 휴리스틱(기본 규칙) 모드로 자동 폴백.
+    AI_PROVIDER: str = "anthropic"  # 또는 "openai" / "bedrock" / "ollama"
+
+    # Anthropic Claude
     ANTHROPIC_API_KEY: Optional[str] = None
     AI_MODEL_DEFAULT: str = "claude-haiku-4-5-20251001"
     AI_MODEL_DEEP: str = "claude-sonnet-4-6"
     AI_MAX_TOKENS: int = 2048
+
+    # OpenAI (GPT-4o, GPT-5, GPT-4 turbo 등)
+    OPENAI_API_KEY: Optional[str] = None
+    OPENAI_BASE_URL: Optional[str] = None      # Azure OpenAI 호환 또는 사내 게이트웨이
+    OPENAI_MODEL_DEFAULT: str = "gpt-4o-mini"
+    OPENAI_MODEL_DEEP: str = "gpt-4o"
+
+    # AWS Bedrock (boto3 자격으로 Claude / Llama / Titan 호출)
+    BEDROCK_REGION: str = "us-east-1"
+    BEDROCK_MODEL_DEFAULT: str = "anthropic.claude-3-5-haiku-20241022-v1:0"
+    BEDROCK_MODEL_DEEP: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+
+    # Ollama / vLLM (로컬 LLM — 폐쇄망/데이터 외부 유출 금지 환경)
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    OLLAMA_MODEL_DEFAULT: str = "llama3.1:8b"
+    OLLAMA_MODEL_DEEP: str = "llama3.1:70b"
 
     # 스캐너 통합 토글 (없으면 stub 모드로 동작)
     SCANNER_TRIVY_BIN: Optional[str] = "trivy"

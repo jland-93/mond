@@ -2,9 +2,9 @@
  * 🌙 Reports — SBOM / Compliance 다운로드
  */
 
-import { DownloadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, ExperimentOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Col, Row, Select, Space, Typography } from "antd";
+import { Alert, Button, Card, Col, Row, Select, Space, Tag, Typography } from "antd";
 import { useState } from "react";
 
 import { useI18n } from "@/i18n";
@@ -46,7 +46,26 @@ export default function Reports() {
 
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
-          <Card title={t.reports.sbom}>
+          <Card
+            title={
+              <Space>
+                <span>{t.reports.sbom}</span>
+                <Tag color="orange" icon={<ExperimentOutlined />}>
+                  experimental
+                </Tag>
+              </Space>
+            }
+          >
+            <Alert
+              type="warning"
+              showIcon
+              style={{ marginBottom: 12 }}
+              message={
+                locale === "ko"
+                  ? "SBOM은 현재 CycloneDX-lite stub입니다. 실제 의존성 추출 (package.json·go.mod·Dockerfile 파싱)은 v0.2 로드맵."
+                  : "SBOM is a CycloneDX-lite stub. Real dependency extraction (package.json · go.mod · Dockerfile) is on the v0.2 roadmap."
+              }
+            />
             <Paragraph type="secondary">{t.reports.sbomDesc}</Paragraph>
             <Space direction="vertical" style={{ width: "100%" }}>
               <Select

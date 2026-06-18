@@ -6,6 +6,16 @@
 
 ## [Unreleased]
 
+### Added
+- **AI provider 추상화** — Anthropic · OpenAI / Azure OpenAI · AWS Bedrock · Ollama(로컬) 4종을 `AI_PROVIDER` 한 줄로 전환. 폐쇄망/데이터 외부 유출 금지 조직도 사용 가능.
+- IAM Explorer 페이지에 IAM source kind별 capability 배지(Ready / Demo only / Coming soon) 노출.
+- Reports 페이지 SBOM 섹션에 "experimental" 배지 + 디스클레이머.
+
+### Changed
+- Knowledge Hub AI 카드 생성은 REVIEWER → **ADMIN** 권한으로 좁힘 (검토되지 않은 AI 콘텐츠가 사내 지식으로 노출되는 것을 막기 위함).
+- 사이드바에서 `Integrations` 메뉴 항목 제거 (Admin → Connections로 통합됨, 라우트는 유지).
+- README — v0.2 로드맵과 Known Limitations 섹션 정직화.
+
 ## [0.1.0] — 2025-12
 
 첫 OSS 공개 릴리스.

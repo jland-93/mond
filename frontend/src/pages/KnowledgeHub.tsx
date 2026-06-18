@@ -22,6 +22,7 @@ import {
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "@/auth/AuthContext";
 import { useI18n } from "@/i18n";
 import {
   knowledgeApi,
@@ -45,6 +46,7 @@ const SOURCE_COLOR: Record<string, string> = { seed: "default", ai: "purple", ma
 
 export default function KnowledgeHub() {
   const { t, locale } = useI18n();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [category, setCategory] = useState<KnowledgeCategory | typeof ALL>(ALL);
@@ -89,19 +91,23 @@ export default function KnowledgeHub() {
     navigate(`/ai-insights?q=${encodeURIComponent(t_(card, "ask"))}`);
   };
 
+  const isAdmin = user?.role === "admin";
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
         <Title level={2} style={{ margin: 0 }}>
           {t.knowledge.title}
         </Title>
-        <Button
-          type="primary"
-          icon={<ThunderboltOutlined />}
-          onClick={() => setGenOpen(true)}
-        >
-          {t.knowledge.aiGenerate}
-        </Button>
+        {isAdmin && (
+          <Button
+            type="primary"
+            icon={<ThunderboltOutlined />}
+            onClick={() => setGenOpen(true)}
+          >
+            {t.knowledge.aiGenerate}
+          </Button>
+        )}
       </div>
       <Paragraph type="secondary">{t.knowledge.desc}</Paragraph>
 

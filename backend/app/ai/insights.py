@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
-from app.ai.client import get_client, is_enabled
+from app.ai.client import complete_json, get_provider, is_enabled
 from app.core.config import settings
 from app.core.logging import get_logger
 from app.models.finding import Finding, Severity
@@ -54,38 +54,25 @@ class InsightResult:
 
 
 async def analyze_finding(finding: Finding, *, deep: bool = False) -> InsightResult:
-    """단일 Finding에 대해 AI 인사이트를 생성한다."""
+    """단일 Finding에 대해 AI 인사이트를 생성한다 (provider-agnostic)."""
     if not is_enabled():
         return _fallback(finding)
 
-    model = settings.AI_MODEL_DEEP if deep else settings.AI_MODEL_DEFAULT
-    client = get_client()
-    assert client is not None
-
     user_prompt = _build_user_prompt(finding)
-
-    try:
-        response = await client.messages.create(
-            model=model,
-            max_tokens=settings.AI_MAX_TOKENS,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_prompt}],
-        )
-    except Exception as exc:  # 네트워크/쿼터/모델 거부
-        logger.warning("ai_analyze_failed", finding_id=finding.id, error=str(exc))
+    result = await complete_json(SYSTEM_PROMPT, user_prompt, deep=deep)
+    if result is None:
+        logger.warning("ai_analyze_failed_or_disabled", finding_id=finding.id)
         return _fallback(finding)
 
-    text = "".join(block.text for block in response.content if hasattr(block, "text"))
-    parsed = _parse_json(text) or {}
-
+    parsed = _parse_json(result.text) or {}
     return InsightResult(
         summary=parsed.get("summary", "AI 응답 파싱 실패 — 기본 규칙으로 대체.")[:1000],
         confidence=float(parsed.get("confidence", 0.0)),
         recommended_severity=_coerce_severity(parsed.get("recommended_severity"), finding.severity),
         remediation=parsed.get("remediation") or {},
-        model=model,
-        input_tokens=getattr(response.usage, "input_tokens", None),
-        output_tokens=getattr(response.usage, "output_tokens", None),
+        model=f"{result.provider}:{result.model}",
+        input_tokens=result.input_tokens,
+        output_tokens=result.output_tokens,
     )
 
 
@@ -94,25 +81,33 @@ async def route_query(query: str) -> dict:
     if not is_enabled():
         return _heuristic_route(query)
 
-    client = get_client()
-    assert client is not None
-
-    try:
-        response = await client.messages.create(
-            model=settings.AI_MODEL_DEFAULT,
-            max_tokens=512,
-            system=(
-                "You classify DevSecOps user requests. Return strict JSON: "
-                '{"intent": "scan|list_findings|explain|unknown", '
-                '"summary": "what user wants", "suggested_actions": [{"label": "...", "endpoint": "..."}]}'
-            ),
-            messages=[{"role": "user", "content": query}],
-        )
-        text = "".join(block.text for block in response.content if hasattr(block, "text"))
-        return _parse_json(text) or _heuristic_route(query)
-    except Exception as exc:
-        logger.warning("ai_route_failed", error=str(exc))
+    system = (
+        "You classify DevSecOps user requests. Return strict JSON: "
+        '{"intent": "scan|list_findings|explain|unknown", '
+        '"summary": "what user wants", "suggested_actions": [{"label": "...", "endpoint": "..."}]}'
+    )
+    result = await complete_json(system, query, max_tokens=512)
+    if result is None:
         return _heuristic_route(query)
+    parsed = _parse_json(result.text)
+    if not parsed:
+        return _heuristic_route(query)
+    parsed["model"] = f"{result.provider}:{result.model}"
+    return parsed
+
+
+def current_model_label() -> str:
+    """UI 디버그/표시용 — 현재 활성 provider/모델."""
+    provider = get_provider()
+    if provider is None:
+        return "rule-based"
+    if provider == "openai":
+        return f"openai:{settings.OPENAI_MODEL_DEFAULT}"
+    if provider == "bedrock":
+        return f"bedrock:{settings.BEDROCK_MODEL_DEFAULT}"
+    if provider == "ollama":
+        return f"ollama:{settings.OLLAMA_MODEL_DEFAULT}"
+    return f"anthropic:{settings.AI_MODEL_DEFAULT}"
 
 
 def _build_user_prompt(finding: Finding) -> str:
@@ -158,8 +153,9 @@ def _fallback(finding: Finding) -> InsightResult:
     sev_text = finding.severity.value
     summary = (
         f"[기본 규칙] {finding.scanner.title()}가 '{finding.rule_id}' 룰을 위반한 "
-        f"{sev_text} 등급 이슈를 발견했습니다. ANTHROPIC_API_KEY를 설정하면 "
-        f"Claude 기반 상세 분석과 조치 코드 제안을 받을 수 있습니다."
+        f"{sev_text} 등급 이슈를 발견했습니다. AI provider(.env: AI_PROVIDER + 해당 키)를 "
+        f"설정하면 LLM 기반 상세 분석과 조치 코드 제안을 받을 수 있습니다 — "
+        f"Anthropic · OpenAI · AWS Bedrock · Ollama(로컬) 지원."
     )
     return InsightResult(
         summary=summary,
@@ -188,6 +184,10 @@ def _heuristic_route(query: str) -> dict:
         intent = "unknown"
     return {
         "intent": intent,
-        "summary": f"기본 규칙 분류: {intent}. ANTHROPIC_API_KEY 설정 시 Claude가 더 정확하게 의도를 해석합니다.",
+        "summary": (
+            f"기본 규칙 분류: {intent}. AI provider 설정 시 LLM이 더 정확하게 의도를 해석합니다 "
+            f"(Anthropic · OpenAI · Bedrock · Ollama)."
+        ),
         "suggested_actions": [],
+        "model": "rule-based",
     }

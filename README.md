@@ -168,15 +168,28 @@ helm install mond oci://ghcr.io/jland-93/charts/mond \
 
 ## 🤖 AI 동작 방식
 
-API 키가 없으면 **기본 규칙 fallback**이 동작하므로 OSS 사용자가 처음부터 UI를 둘러볼 수 있습니다. 키를 설정하면:
+**자기 환경의 AI API를 직접 끌어다 씁니다.** 모든 provider가 같은 추상화 layer를 통해 호출되며, `.env`에서 한 줄로 전환됩니다.
 
-| 동작 | 모델 | 트리거 |
-|---|---|---|
-| **Finding 분석** | `claude-haiku-4-5-20251001` (기본) | UI에서 "Run AI analysis" 클릭 |
-| **심층 분석** | `claude-sonnet-4-6` | `?deep=true` 쿼리 |
-| **자연어 쿼리** | `claude-haiku-4-5-20251001` | `/ai/analyze` 호출 |
+| Provider | ENV | 모델 예시 | 한국에서 의미 |
+|---|---|---|---|
+| **Anthropic** (직접) | `AI_PROVIDER=anthropic` + `ANTHROPIC_API_KEY` | `claude-haiku-4-5-20251001` | 기본값 |
+| **OpenAI / Azure OpenAI** | `AI_PROVIDER=openai` + `OPENAI_API_KEY` (+ `OPENAI_BASE_URL` for Azure) | `gpt-4o-mini` / `gpt-4o` | GPT 라이선스가 있는 조직 |
+| **AWS Bedrock** | `AI_PROVIDER=bedrock` + IAM 자격 | `anthropic.claude-3-5-sonnet-20241022-v2:0` | AWS 비용·정책 통합 |
+| **Ollama / vLLM (로컬)** | `AI_PROVIDER=ollama` + `OLLAMA_BASE_URL` | `llama3.1:8b` / `llama3.1:70b` | 폐쇄망·금융·공공·병원 — **데이터 외부 유출 금지** 조직 |
 
-Claude는 항상 strict JSON으로만 응답하며, 응답 토큰 사용량이 DB에 기록됩니다.
+키를 설정하지 않으면 **기본 규칙 fallback**으로 모든 UI가 작동합니다. 응답에는 항상 `{provider}:{model}` 라벨이 함께 기록되어 출처 추적이 가능합니다.
+
+```bash
+# 예) GPT를 쓰는 조직
+AI_PROVIDER=openai
+OPENAI_API_KEY=sk-proj-...
+OPENAI_MODEL_DEFAULT=gpt-4o-mini
+
+# 예) 사내 폐쇄망에서 Ollama로
+AI_PROVIDER=ollama
+OLLAMA_BASE_URL=http://ollama.internal:11434
+OLLAMA_MODEL_DEFAULT=llama3.1:8b
+```
 
 ---
 
@@ -218,10 +231,30 @@ class MyAdapter(ScannerAdapter):
 - [x] MFA — 패스키(WebAuthn/FIDO2) + TOTP + 백업 코드
 - [x] IAM 셀프서비스 — AWS · Kubernetes · LDAP/AD · GCP · Azure (5종 어댑터)
 - [x] Helm 차트 (charts/mond) + 운영용 멀티스테이지 Docker 이미지
+- [x] AI provider 추상화 — Anthropic · OpenAI · AWS Bedrock · Ollama(로컬)
+
+### v0.2 로드맵
+- [ ] SBOM 실 의존성 추출 (package.json · go.mod · Dockerfile 파싱)
+- [ ] AI Insights RAG — 조직 문서/정책을 검색해 응답 근거화
+- [ ] 비동기 스캔 큐 (Celery) — 인라인 실행 대체
 - [ ] OPA Rego 정책 평가
-- [ ] CI 통합 패키지 (GitHub Actions / GitLab CI)
+- [ ] 자산 자동 동기화 (Kubernetes / AWS Auto-scaling / GitHub org)
+- [ ] Webhook push 이벤트 → diff 분석 후 적절한 스캐너 선택
+- [ ] CI 통합 패키지 (GitHub Actions / GitLab CI step)
 - [ ] Rate limiting / abuse protection
 - [ ] AI 프롬프트 E2E 암호화 (고객 코드 포함 시)
+- [ ] GCP / Azure IAM 어댑터 권한 부여(grant) 완성도 보강
+
+## 🧪 Known Limitations (v0.1.0)
+
+신뢰성 측면에서 정직하게 밝혀둡니다.
+
+- **SBOM** — 현재 CycloneDX-lite stub. 실 의존성 추출은 v0.2 (UI에 experimental 배지 표시)
+- **스캐너** — 동기 인라인 실행. 대용량/장시간 스캔은 타임아웃 위험. 큐 도입은 v0.2
+- **AI Insights** — provider 호출은 동작하지만 응답에 RAG(조직 문서 검색)는 미적용 — hallucination 위험을 인지하고 인간 검토와 함께 사용 권장. AI 생성 카드는 ADMIN 전용
+- **IAM 어댑터** — AWS · K8s · LDAP/AD는 권한 부여/회수 완성. GCP · Azure는 보강 중 (capability API가 `ready`/`coming_soon`/`demo`를 정직하게 노출)
+- **테스트 커버리지** — 의도적으로 낮음 (MVP). 기여 환영
+- **정책 템플릿의 규제 매핑** — 참고용 출발점이며 법적 자문이 아닙니다
 
 ---
 

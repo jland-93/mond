@@ -57,7 +57,8 @@ export default function Layout() {
     { key: "/knowledge", icon: <BookOutlined />, label: t.menu.knowledge, minRole: "viewer" as const },
     { key: "/regulations", icon: <AuditOutlined />, label: t.menu.regulations, minRole: "viewer" as const },
     { key: "/reports", icon: <FileTextOutlined />, label: t.menu.reports, minRole: "viewer" as const },
-    { key: "/integrations", icon: <ApiOutlined />, label: t.menu.integrations, minRole: "viewer" as const },
+    // Integrations 메타 페이지는 Admin → Connections로 통합되어 일반 메뉴에서 제외.
+    // (라우트는 유지되어 기존 링크는 살아 있음)
     { key: "/iam-explorer", icon: <TeamOutlined />, label: t.menu.iamExplorer, minRole: "employee" as const },
     { key: "/access-center", icon: <KeyOutlined />, label: t.menu.accessCenter, minRole: "employee" as const },
     { key: "/settings", icon: <SettingOutlined />, label: t.menu.settings, minRole: "viewer" as const },
