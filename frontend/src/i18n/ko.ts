@@ -28,6 +28,38 @@ export const ko = {
     badge: "ADMIN",
   },
 
+  adminArea: {
+    home: "관리자 홈",
+    backToApp: "일반 모드로 복귀",
+    menuAccessReview: "권한 검토",
+    menuConnections: "연동 관리",
+    menuPolicies: "정책 관리",
+    menuUsers: "사용자·역할",
+    connectionsTitle: "연동 관리",
+    connectionsDesc:
+      "클라우드 IAM 소스, SSO IdP, 외부 Webhook 같은 외부 시스템 연동을 한 곳에서 관리합니다. ADMIN 권한이 필요합니다.",
+    iamSources: "IAM 소스 (클라우드 연동)",
+    ssoTitle: "SSO / IdP 연동",
+    ssoDesc:
+      "OIDC 기반 SSO 상태를 확인하고, 운영 환경 변수로 추가 활성화할 수 있습니다. 기본값은 Dev Login.",
+    ssoMode: "현재 모드",
+    ssoActive: "활성 IdP",
+    ssoEnvHint: "운영 환경 ENV 예시 (.env)",
+    webhookTitle: "GitHub Webhook",
+    webhookDesc:
+      "GitHub push 이벤트를 받아 매칭되는 레포 자산을 자동 스캔합니다. 운영 secret을 ENV의 GITHUB_WEBHOOK_SECRET과 동일하게 맞추세요.",
+    policyMgmtTitle: "정책 관리",
+    policyMgmtDesc:
+      "스캐너 결과 게이트가 되는 정책을 보안 담당자만 수정할 수 있습니다. 활성화/임계치 조정/삭제 + 규제 템플릿 일괄 적용을 지원합니다.",
+    usersTitle: "사용자·역할",
+    usersDesc:
+      "전체 사용자 목록과 역할을 한눈에 보고 ADMIN이 직접 변경할 수 있습니다. 본인의 ADMIN 권한은 잠금 방지를 위해 직접 낮출 수 없습니다.",
+    user: "사용자",
+    role: "역할",
+    ssoProvider: "SSO 출처",
+    lastLogin: "최근 로그인",
+  },
+
   auth: {
     loginTitle: "로그인",
     ssoLogin: "회사 계정으로 로그인 (SSO)",

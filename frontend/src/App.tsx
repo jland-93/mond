@@ -1,8 +1,8 @@
 /**
- * 🌙 Mond — 라우팅 (인증 가드 포함)
+ * 🌙 Mond — 라우팅 (인증 가드 + 관리자 영역 포함)
  */
 
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import RequireAuth from "@/auth/RequireAuth";
 import Layout from "@/components/Layout";
@@ -22,6 +22,9 @@ import Regulations from "@/pages/Regulations";
 import Reports from "@/pages/Reports";
 import Scans from "@/pages/Scans";
 import Settings from "@/pages/Settings";
+import AdminConnections from "@/pages/admin/AdminConnections";
+import AdminPolicies from "@/pages/admin/AdminPolicies";
+import AdminUsers from "@/pages/admin/AdminUsers";
 
 export default function App() {
   return (
@@ -34,6 +37,7 @@ export default function App() {
           </RequireAuth>
         }
       >
+        {/* 일반 영역 */}
         <Route index element={<Dashboard />} />
         <Route path="assets" element={<Assets />} />
         <Route
@@ -75,15 +79,45 @@ export default function App() {
             </RequireAuth>
           }
         />
+        <Route path="settings" element={<Settings />} />
+
+        {/* 관리자 영역 */}
+        <Route path="admin" element={<Navigate to="/admin/access-review" replace />} />
         <Route
-          path="access-review"
+          path="admin/access-review"
           element={
             <RequireAuth minRole="reviewer">
               <AccessReview />
             </RequireAuth>
           }
         />
-        <Route path="settings" element={<Settings />} />
+        <Route
+          path="admin/policies"
+          element={
+            <RequireAuth minRole="reviewer">
+              <AdminPolicies />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="admin/connections"
+          element={
+            <RequireAuth minRole="admin">
+              <AdminConnections />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="admin/users"
+          element={
+            <RequireAuth minRole="admin">
+              <AdminUsers />
+            </RequireAuth>
+          }
+        />
+
+        {/* 구 경로 호환 */}
+        <Route path="access-review" element={<Navigate to="/admin/access-review" replace />} />
       </Route>
     </Routes>
   );
