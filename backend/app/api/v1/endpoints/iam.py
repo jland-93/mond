@@ -113,6 +113,48 @@ async def create_request(
     return AccessRequestRead.model_validate(req)
 
 
+@router.post("/access-requests/preview")
+async def preview_request(
+    payload: AccessRequestCreate,
+    _user: User = Depends(current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """저장 없이 AI 1차 평가만 미리 보여줌 — AccessCenter UI 사전 미리보기용."""
+    from app.iam import ai_review
+    from app.models.iam import IAMIdentity, Permission
+    from sqlalchemy import select as _select
+
+    identity = (
+        await db.execute(_select(IAMIdentity).where(IAMIdentity.id == payload.target_identity_id))
+    ).scalar_one_or_none()
+    permission = (
+        await db.execute(_select(Permission).where(Permission.id == payload.permission_id))
+    ).scalar_one_or_none()
+    if identity is None or permission is None:
+        raise HTTPException(status_code=400, detail="identity/permission not found")
+
+    review = await ai_review.review(
+        db,
+        requester=payload.requester,
+        reason=payload.reason,
+        duration_hours=payload.duration_hours,
+        identity=identity,
+        permission=permission,
+    )
+    return {
+        "decision": review.decision,
+        "risk_level": review.risk_level,
+        "reason": review.reason,
+        "model": review.model,
+        "confidence": review.confidence,
+        "expected_status": (
+            "granted" if review.decision == "auto_approve"
+            else "needs_human_review" if review.decision == "needs_human"
+            else "denied"
+        ),
+    }
+
+
 @router.post(
     "/access-requests/{request_id}/human-decision",
     response_model=AccessRequestRead,
