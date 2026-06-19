@@ -28,12 +28,16 @@ RUN npm run build
 # ── 2) 런타임 스테이지 (nginx unprivileged) ────────────────────
 FROM nginxinc/nginx-unprivileged:${NGINX_VERSION} AS runtime
 
-# nginx-unprivileged는 기본 8080 포트 + nginx user
+# nginx-unprivileged는 기본 8080 포트 + nginx user.
+# nginx.conf는 templates/로 두면 표준 entrypoint(20-envsubst-on-templates.sh)가
+# ${MOND_API_UPSTREAM} 등을 ENV로 치환해 /etc/nginx/conf.d/default.conf로 작성한다.
 USER root
 RUN rm -f /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
 USER nginx
+
+ENV MOND_API_UPSTREAM=http://backend:8000
 
 EXPOSE 8080
 
