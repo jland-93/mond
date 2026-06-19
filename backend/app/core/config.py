@@ -98,6 +98,8 @@ class Settings(BaseSettings):
     SLACK_WEBHOOK_URL: Optional[str] = None
     GENERIC_WEBHOOK_URL: Optional[str] = None
     NOTIFY_MIN_SEVERITY: str = "high"  # critical / high / medium / low / info
+    # Daily Digest 전용 채널. 비우면 SLACK_WEBHOOK_URL을 fallback.
+    DIGEST_SLACK_WEBHOOK_URL: Optional[str] = None
 
     # 외부 통합 — GitHub Webhook 검증용 (없으면 검증 생략, 개발 편의)
     GITHUB_WEBHOOK_SECRET: Optional[str] = None

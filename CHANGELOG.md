@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- **Daily Security Digest** — 어제 일어난 일(신규 finding severity별 · 스캔 실행/실패 · 권한 요청 흐름)을 Slack 카드 한 장으로. Admin → Connections에 카드 + `지금 전송` 버튼. 자동 실행은 외부 cron(k8s CronJob 예시 포함)이 `POST /api/v1/admin/digest/send` 호출. 미리보기 `GET /api/v1/admin/digest/preview` (Reviewer+). 전용 채널 ENV `DIGEST_SLACK_WEBHOOK_URL` (없으면 `SLACK_WEBHOOK_URL` fallback).
 - **My Mond** (`/me`) — 임직원 진입 페이지. 본인 자산 · 받은 발견사항 · 진행중 권한 요청 · 만료 임박(7일) 4 KPI + 4 list card. 사이드바 "한눈에" 그룹 최상단에 노출. 백엔드 `GET /api/v1/me/overview` 신설.
 - **Findings 일괄 처리(Bulk Triage)** — Findings 테이블 row 체크박스 + 일괄 액션(Resolved / Suppressed / False-positive). 매주 발견사항 100개+ 처리하는 보안 담당자 시간을 1/10로. 백엔드 `PATCH /api/v1/findings/bulk/status` 신설 (REVIEWER+).
 - **AI provider 추상화** — Anthropic · OpenAI / Azure OpenAI · AWS Bedrock · Ollama(로컬) 4종을 `AI_PROVIDER` 한 줄로 전환. 폐쇄망/데이터 외부 유출 금지 조직도 사용 가능.
