@@ -160,3 +160,52 @@ export interface DashboardOverview {
     at: string;
   }>;
 }
+
+export interface MeOverview {
+  user: { email: string; name: string | null; role: string };
+  summary: {
+    my_assets_total: number;
+    open_findings_total: number;
+    open_by_severity: Record<string, number>;
+    active_requests: number;
+    expiring_soon: number;
+  };
+  my_assets: Array<{
+    id: number;
+    name: string;
+    asset_type: string;
+    environment: string | null;
+    open_findings_count: number;
+    last_scanned_at_str: string | null;
+  }>;
+  recent_findings: Array<{
+    id: number;
+    title: string;
+    severity: Severity;
+    status: string;
+    asset_id: number;
+    created_at: string;
+  }>;
+  my_requests: Array<{
+    id: number;
+    permission_name: string;
+    status: string;
+    expires_at: string | null;
+    revoked_at: string | null;
+    created_at: string;
+  }>;
+  expiring_soon: Array<{
+    id: number;
+    permission_name: string;
+    expires_at: string | null;
+    days_left: number | null;
+  }>;
+  recent_scans: Array<{
+    id: number;
+    asset_id: number;
+    scanner: string;
+    status: ScanStatus;
+    findings_count: number;
+    created_at: string;
+  }>;
+}

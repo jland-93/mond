@@ -6,6 +6,7 @@ export const ko = {
   language: { ko: "한국어", en: "English" },
 
   menu: {
+    myMond: "내 페이지",
     dashboard: "대시보드",
     assets: "자산",
     scans: "스캔",

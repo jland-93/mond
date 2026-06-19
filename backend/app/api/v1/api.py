@@ -15,6 +15,7 @@ from app.api.v1.endpoints import (
     iam,
     integrations,
     knowledge,
+    me,
     mfa,
     policies,
     policy_sim,
@@ -34,6 +35,7 @@ api_router.include_router(health.router, tags=["Health"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 api_router.include_router(mfa.router, prefix="/auth/mfa", tags=["MFA"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
+api_router.include_router(me.router, prefix="/me", tags=["My Mond"])
 api_router.include_router(assets.router, prefix="/assets", tags=["Assets"])
 api_router.include_router(scans.router, prefix="/scans", tags=["Scans"])
 api_router.include_router(findings.router, prefix="/findings", tags=["Findings"])

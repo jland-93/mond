@@ -15,6 +15,7 @@ import Findings from "@/pages/Findings";
 import IAMExplorer from "@/pages/IAMExplorer";
 import KnowledgeHub from "@/pages/KnowledgeHub";
 import Login from "@/pages/Login";
+import MyMond from "@/pages/MyMond";
 import MfaChallenge from "@/pages/MfaChallenge";
 import Policies from "@/pages/Policies";
 import SecuritySettings from "@/pages/SecuritySettings";
@@ -48,6 +49,7 @@ export default function App() {
       >
         {/* 일반 영역 */}
         <Route index element={<Dashboard />} />
+        <Route path="me" element={<MyMond />} />
         <Route path="assets" element={<Assets />} />
         <Route
           path="scans"
