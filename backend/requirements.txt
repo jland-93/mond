@@ -39,7 +39,7 @@ openai==1.59.7
 boto3==1.43.32
 
 # Kubernetes RBAC 통합 (kubeconfig 또는 in-cluster ServiceAccount, 없으면 stub)
-kubernetes==31.0.0
+kubernetes==36.0.2
 
 # 온프레미스 디렉토리 (Active Directory / OpenLDAP / FreeIPA / Samba AD)
 ldap3==2.9.1
