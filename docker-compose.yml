@@ -60,6 +60,7 @@ services:
       GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET:-}
       DEFAULT_LOCALE: ${DEFAULT_LOCALE:-ko}
       MCP_HTTP_ENABLED: ${MCP_HTTP_ENABLED:-false}
+      SCAN_QUEUE_ENABLED: ${SCAN_QUEUE_ENABLED:-false}
       AUTH_MODE: ${AUTH_MODE:-dev}
       SSO_PROVIDERS: ${SSO_PROVIDERS:-}
       SSO_KEYCLOAK_ISSUER: ${SSO_KEYCLOAK_ISSUER:-}
@@ -84,6 +85,33 @@ services:
         condition: service_healthy
     networks: [mond-network]
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+  # Celery worker — SCAN_QUEUE_ENABLED=true 일 때만 의미 있음.
+  # 기본 인라인 모드에서는 컨테이너가 idle하게 떠있을 뿐 영향 없음.
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mond-worker
+    environment:
+      DATABASE_URL: postgresql+asyncpg://mond:mond@postgres:5432/mond
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-development-secret-change-me}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SCAN_QUEUE_ENABLED: ${SCAN_QUEUE_ENABLED:-false}
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+      GENERIC_WEBHOOK_URL: ${GENERIC_WEBHOOK_URL:-}
+      NOTIFY_MIN_SEVERITY: ${NOTIFY_MIN_SEVERITY:-high}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [mond-network]
+    command: celery -A app.celery_app:celery_app worker --loglevel=info --concurrency=2
     volumes:
       - ./backend:/app
     restart: unless-stopped

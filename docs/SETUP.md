@@ -706,6 +706,28 @@ GitHub repo Settings → Webhooks:
 
 **Skip 옵션**: 수동 스캔으로 충분하면 webhook 없이도 OK.
 
+### 8-1) 스캔 큐 (Celery) — 운영 안정성
+
+기본은 인라인 동기 실행. 대용량/장시간 스캔에서 backend 타임아웃이 문제라면 비동기 큐로 전환.
+
+```bash
+# .env 또는 compose env
+SCAN_QUEUE_ENABLED=true
+# broker는 REDIS_URL을 기본 사용. 분리하려면:
+# CELERY_BROKER_URL=redis://redis:6379/1
+```
+
+docker compose:
+```bash
+docker compose up -d backend worker
+# worker 로그
+docker compose logs -f worker
+```
+
+scan 트리거 시 backend가 즉시 `PENDING` Scan을 반환하고, worker가 `mond.run_scan` task로 실제 스캐너를 실행합니다. 결과는 DB에 기록되고 UI는 status를 폴링.
+
+운영 (Helm) — 별도 Deployment로 worker를 띄우고 `replicaCount`로 동시 처리량 조절. concurrency는 `command: celery -A app.celery_app:celery_app worker --concurrency=N`로 worker 인스턴스 안에서 조절.
+
 ### 9) 데모 시드 끄기
 
 ```bash

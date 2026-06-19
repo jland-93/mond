@@ -51,6 +51,13 @@ class Settings(BaseSettings):
     # Redis (Celery broker + 캐시)
     REDIS_URL: str = "redis://localhost:6379/0"
 
+    # 스캔 큐 (Celery) — 기본 false. 인라인 동기 실행.
+    # 운영에서 대용량/장시간 스캔의 backend 타임아웃을 피하려면 true + 별도 worker.
+    SCAN_QUEUE_ENABLED: bool = False
+    # broker/result backend는 REDIS_URL을 기본 사용. 분리하려면 ENV로 override.
+    CELERY_BROKER_URL: Optional[str] = None
+    CELERY_RESULT_BACKEND: Optional[str] = None
+
     # CORS
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173"]
 
