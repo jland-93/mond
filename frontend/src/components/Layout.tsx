@@ -58,7 +58,7 @@ export default function Layout() {
     { key: "/scans", icon: <ScanOutlined />, label: t.menu.scans, minRole: "employee" as const },
     { key: "/findings", icon: <SafetyOutlined />, label: t.menu.findings, minRole: "viewer" as const },
     { key: "/policies", icon: <ExperimentOutlined />, label: t.menu.policies, minRole: "viewer" as const },
-    { key: "/policy-sim", icon: <ThunderboltOutlined />, label: t.menu.policySim, minRole: "employee" as const },
+    { key: "/policy-sim", icon: <ThunderboltOutlined />, label: t.menu.policySim, minRole: "reviewer" as const },
     { key: "/ai-insights", icon: <BulbOutlined />, label: t.menu.aiInsights, minRole: "viewer" as const },
   ].filter((i) => hasRole(user, i.minRole));
 

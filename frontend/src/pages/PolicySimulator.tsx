@@ -36,7 +36,7 @@ interface SimResponse {
 }
 
 export default function PolicySimulator() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [rows, setRows] = useState<SimRow[]>([
     { rule_id: "CVE-2024-EXAMPLE", severity: "high" },
   ]);
@@ -53,9 +53,19 @@ export default function PolicySimulator() {
   return (
     <div>
       <Title level={2} style={{ marginBottom: 8 }}>
-        {t.policySim.title}
+        {t.policySim.title} <Tag color="orange" style={{ verticalAlign: "middle", marginLeft: 8 }}>EXPERIMENTAL</Tag>
       </Title>
       <Paragraph type="secondary">{t.policySim.desc}</Paragraph>
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 12 }}
+        message={
+          locale === "ko"
+            ? "이 화면은 정책 변경 영향만 가상으로 보여줍니다. 실제 자산·발견에 적용하지 않습니다."
+            : "Simulation only — does not modify real assets or findings."
+        }
+      />
 
       <Card style={{ marginTop: 12 }}>
         <Space direction="vertical" style={{ width: "100%" }}>

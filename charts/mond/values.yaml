@@ -38,7 +38,7 @@ backend:
     DEFAULT_LOCALE: "ko"
     SESSION_SECURE: "true"
     SESSION_DAYS: "7"
-    MCP_HTTP_ENABLED: "true"
+    MCP_HTTP_ENABLED: "false"
     NOTIFY_MIN_SEVERITY: "high"
   service:
     type: ClusterIP

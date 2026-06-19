@@ -106,7 +106,8 @@ class Settings(BaseSettings):
     DEFAULT_LOCALE: str = "ko"
 
     # MCP HTTP 마운트 — Streamable HTTP > SSE 순서로 시도. mcp 패키지가 둘 다 실패해도 backend는 정상.
-    MCP_HTTP_ENABLED: bool = True
+    # 기본 false. Claude Desktop / Code 등 외부 에이전트에서 Mond를 도구로 쓸 때만 true.
+    MCP_HTTP_ENABLED: bool = False
 
     # ── SSO / RBAC ──────────────────────────────────────────────
     # 인증 모드: "sso" (실제 IdP) / "dev" (이메일 입력만, OSS 데모용)
