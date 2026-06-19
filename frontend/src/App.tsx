@@ -13,7 +13,6 @@ import Assets from "@/pages/Assets";
 import Dashboard from "@/pages/Dashboard";
 import Findings from "@/pages/Findings";
 import IAMExplorer from "@/pages/IAMExplorer";
-import Integrations from "@/pages/Integrations";
 import KnowledgeHub from "@/pages/KnowledgeHub";
 import Login from "@/pages/Login";
 import MfaChallenge from "@/pages/MfaChallenge";
@@ -63,7 +62,7 @@ export default function App() {
         <Route
           path="policy-sim"
           element={
-            <RequireAuth minRole="employee">
+            <RequireAuth minRole="reviewer">
               <PolicySimulator />
             </RequireAuth>
           }
@@ -72,7 +71,6 @@ export default function App() {
         <Route path="knowledge" element={<KnowledgeHub />} />
         <Route path="regulations" element={<Regulations />} />
         <Route path="reports" element={<Reports />} />
-        <Route path="integrations" element={<Integrations />} />
         <Route
           path="iam-explorer"
           element={

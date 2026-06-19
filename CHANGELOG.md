@@ -15,6 +15,11 @@
 - Knowledge Hub AI 카드 생성은 REVIEWER → **ADMIN** 권한으로 좁힘 (검토되지 않은 AI 콘텐츠가 사내 지식으로 노출되는 것을 막기 위함).
 - 사이드바에서 `Integrations` 메뉴 항목 제거 (Admin → Connections로 통합됨, 라우트는 유지).
 - README — v0.2 로드맵과 Known Limitations 섹션 정직화.
+- **Policy Simulator** — `EXPERIMENTAL` 배지 + 실제 변경 안 일어남을 명시. 메뉴 노출 권한을 employee → **reviewer** 이상으로 격하.
+- **MCP HTTP/SSE 기본값 변경** — `MCP_HTTP_ENABLED` 기본 `true` → `false`. Claude Desktop / Code 등 외부 에이전트에서 도구로 쓸 때만 켜기. `.env.example` · `docker-compose.yml` · `charts/mond/values.yaml` 모두 정렬.
+
+### Removed
+- `/integrations` 라우트와 `Integrations.tsx` 페이지 제거. Admin → Connections로 일원화된 뒤 dead code였음. 외부 링크가 있던 경우 `/admin/connections`로 이동.
 
 ## [0.1.0] — 2025-12
 
