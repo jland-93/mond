@@ -103,6 +103,9 @@ class Settings(BaseSettings):
 
     # 외부 통합 — GitHub Webhook 검증용 (없으면 검증 생략, 개발 편의)
     GITHUB_WEBHOOK_SECRET: Optional[str] = None
+    # GitHub API 토큰 — PR comment 작성 + 사설 repo raw fetch 시 사용 (선택).
+    # 없으면 SBOM diff는 public repo만 동작하고 PR comment는 skip.
+    GITHUB_TOKEN: Optional[str] = None
 
     # i18n 기본 언어 (UI 초기 로드 시 사용)
     DEFAULT_LOCALE: str = "ko"
