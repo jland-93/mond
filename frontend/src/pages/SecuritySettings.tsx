@@ -12,6 +12,7 @@ import { useI18n } from "@/i18n";
 import { mfaApi } from "@/lib/mfa-api";
 
 import BackupCodesCard from "./security/BackupCodesCard";
+import MySlackDmCard from "./security/MySlackDmCard";
 import PasskeysCard from "./security/PasskeysCard";
 import PersonalWebhookTokensCard from "./security/PersonalWebhookTokensCard";
 import RoleChangeRequestCard from "./security/RoleChangeRequestCard";
@@ -43,6 +44,7 @@ export default function SecuritySettings() {
       <TOTPCard />
       <BackupCodesCard />
 
+      <MySlackDmCard />
       <PersonalWebhookTokensCard />
       <RoleChangeRequestCard />
     </div>
