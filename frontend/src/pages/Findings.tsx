@@ -2,12 +2,13 @@
  * Findings — 발견된 보안 이슈 + 상태 변경 + AI 분석
  */
 
-import { BulbOutlined } from "@ant-design/icons";
+import { BulbOutlined, CheckOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
   Button,
   Drawer,
+  Popconfirm,
   Select,
   Space,
   Table,
@@ -58,9 +59,10 @@ async function fetchInsights(findingId: number): Promise<AIInsight[]> {
 }
 
 export default function Findings() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<Finding | null>(null);
+  const [checked, setChecked] = useState<number[]>([]);
 
   const { data, isLoading } = useQuery({ queryKey: ["findings"], queryFn: fetchFindings });
 
@@ -85,16 +87,69 @@ export default function Findings() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["findings"] }),
   });
 
+  const bulkUpdate = useMutation({
+    mutationFn: (status: FindingStatus) =>
+      api.patch<{ updated: number }>("/findings/bulk/status", {
+        finding_ids: checked,
+        status,
+      }),
+    onSuccess: (r) => {
+      message.success(
+        locale === "ko"
+          ? `${r.data.updated}개 발견사항 상태 변경됨`
+          : `${r.data.updated} findings updated`,
+      );
+      setChecked([]);
+      qc.invalidateQueries({ queryKey: ["findings"] });
+    },
+    onError: (err: Error) => message.error(err.message),
+  });
+
   return (
     <div>
       <Title level={2} style={{ marginBottom: 16 }}>
         {t.findings.title}
       </Title>
 
+      {checked.length > 0 && (
+        <Space style={{ marginBottom: 12 }} wrap>
+          <Tag color="blue" style={{ fontSize: 13, padding: "4px 10px" }}>
+            {locale === "ko" ? `${checked.length}개 선택됨` : `${checked.length} selected`}
+          </Tag>
+          <Popconfirm
+            title={locale === "ko" ? "선택한 발견을 해결로 표시할까요?" : "Mark selected as resolved?"}
+            onConfirm={() => bulkUpdate.mutate("resolved")}
+          >
+            <Button size="small" icon={<CheckOutlined />}>
+              {locale === "ko" ? "일괄: 해결" : "Bulk: Resolved"}
+            </Button>
+          </Popconfirm>
+          <Popconfirm
+            title={locale === "ko" ? "선택한 발견을 억제(무시)할까요?" : "Suppress selected?"}
+            onConfirm={() => bulkUpdate.mutate("suppressed")}
+          >
+            <Button size="small">{locale === "ko" ? "일괄: 억제" : "Bulk: Suppress"}</Button>
+          </Popconfirm>
+          <Popconfirm
+            title={locale === "ko" ? "선택한 발견을 false-positive로 표시할까요?" : "Mark as false-positive?"}
+            onConfirm={() => bulkUpdate.mutate("false_positive")}
+          >
+            <Button size="small">{locale === "ko" ? "일괄: False positive" : "Bulk: FP"}</Button>
+          </Popconfirm>
+          <Button size="small" type="text" onClick={() => setChecked([])}>
+            {locale === "ko" ? "선택 해제" : "Clear"}
+          </Button>
+        </Space>
+      )}
+
       <Table
         loading={isLoading}
         dataSource={data?.items ?? []}
         rowKey="id"
+        rowSelection={{
+          selectedRowKeys: checked,
+          onChange: (keys) => setChecked(keys as number[]),
+        }}
         onRow={(record) => ({ onClick: () => setSelected(record), style: { cursor: "pointer" } })}
         columns={[
           { title: "ID", dataIndex: "id", width: 70 },

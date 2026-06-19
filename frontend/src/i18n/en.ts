@@ -8,6 +8,7 @@ export const en: Dict = {
   language: { ko: "한국어", en: "English" },
 
   menu: {
+    myMond: "My Mond",
     dashboard: "Dashboard",
     assets: "Assets",
     scans: "Scans",

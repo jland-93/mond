@@ -11,6 +11,7 @@ import {
   BookOutlined,
   BulbOutlined,
   DashboardOutlined,
+  HomeOutlined,
   ExperimentOutlined,
   FileTextOutlined,
   GlobalOutlined,
@@ -50,6 +51,7 @@ export default function Layout() {
   // 사이드바 정보 위계 — 4그룹으로 미니멀 분할 (OVERVIEW / OPS / KNOWLEDGE / ACCESS).
   // 평탄 14개를 그룹으로 묶어 시각 노이즈를 낮추고 카테고리 navigation 가능.
   const overviewItems = [
+    { key: "/me", icon: <HomeOutlined />, label: t.menu.myMond, minRole: "viewer" as const },
     { key: "/", icon: <DashboardOutlined />, label: t.menu.dashboard, minRole: "viewer" as const },
   ].filter((i) => hasRole(user, i.minRole));
 
