@@ -48,6 +48,8 @@ __all__ = [
     "Severity",
     "Policy",
     "PolicyType",
+    "SlackChannel",
+    "SlackPurpose",
     "AIInsight",
     "InsightKind",
     "AIProviderConfig",
