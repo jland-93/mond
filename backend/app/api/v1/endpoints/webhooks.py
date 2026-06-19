@@ -23,6 +23,7 @@ from app.auth.deps import require_role
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.logging import get_logger
+from app.core.rate_limit import RateLimiter
 from app.models.asset import Asset, AssetType
 from app.models.scan import ScanTrigger
 from app.models.user import Role
@@ -53,7 +54,7 @@ def _verify_github(signature: str | None, body: bytes) -> bool:
     return hmac.compare_digest(expected, signature)
 
 
-@router.post("/github")
+@router.post("/github", dependencies=[Depends(RateLimiter("webhook_github", 120, 60, "ip"))])
 async def github_webhook(
     request: Request,
     x_github_event: str | None = Header(default=None),
@@ -143,7 +144,7 @@ async def github_webhook(
     }
 
 
-@router.post("/personal")
+@router.post("/personal", dependencies=[Depends(RateLimiter("webhook_personal", 30, 60, "ip"))])
 async def personal_webhook(
     request: Request,
     payload: dict = Body(...),

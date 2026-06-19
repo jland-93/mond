@@ -746,6 +746,28 @@ scan 트리거 시 backend가 즉시 `PENDING` Scan을 반환하고, worker가 `
 
 운영 (Helm) — 별도 Deployment로 worker를 띄우고 `replicaCount`로 동시 처리량 조절. concurrency는 `command: celery -A app.celery_app:celery_app worker --concurrency=N`로 worker 인스턴스 안에서 조절.
 
+### 8-2) Rate limit (abuse 보호)
+
+기본 활성. Redis 기반 fixed-window counter로 OSS 공개 인스턴스의 brute-force/스크래핑을 막는다.
+
+```bash
+RATE_LIMIT_ENABLED=true     # 기본. false로 끄면 모든 버킷 통과 (test/CI 편의)
+```
+
+기본 한도(분당):
+
+| 버킷 | 한도 | scope | 대상 |
+|------|------|-------|------|
+| `login` | 10 | IP | `POST /auth/dev-login` |
+| `ai_analyze` | 20 | user | `POST /ai/analyze` |
+| `webhook_github` | 120 | IP | `POST /webhooks/github` |
+| `webhook_personal` | 30 | IP | `POST /webhooks/personal` |
+| `github_sync` | 5 | user | `POST /admin/github-sync/run` |
+
+응답 헤더 — `X-RateLimit-Limit` / `X-RateLimit-Remaining` / `X-RateLimit-Reset`. 초과 시 HTTP 429 + `Retry-After`.
+
+Redis 다운 시 fail open(가용성 우선) — `rate_limit_redis_down` 경고 로그를 남기고 요청은 통과. 보안 critical 환경이면 monitor에서 이 로그를 알림으로 연결할 것.
+
 ### 9) 데모 시드 끄기
 
 ```bash

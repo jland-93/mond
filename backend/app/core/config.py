@@ -116,6 +116,10 @@ class Settings(BaseSettings):
     # 자산 자동 동기화 대상 org. 비우면 admin UI에서 매번 입력.
     GITHUB_ORG: Optional[str] = None
 
+    # Rate limit — Redis 기반 fixed window. 끄면 모든 버킷 통과 (test/CI 편의).
+    # 기본 true — 운영에서 abuse 보호. Redis 다운 시 fail open(가용성 우선).
+    RATE_LIMIT_ENABLED: bool = True
+
     # i18n 기본 언어 (UI 초기 로드 시 사용)
     DEFAULT_LOCALE: str = "ko"
 

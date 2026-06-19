@@ -16,6 +16,7 @@ from app.auth.session import clear_cookie, create_session, resolve_session, revo
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.logging import get_logger
+from app.core.rate_limit import RateLimiter
 from app.models.user import Role
 from app.services import user as user_service
 
@@ -73,7 +74,11 @@ class DevLoginIn(BaseModel):
     name: str | None = None
 
 
-@router.post("/dev-login", response_model=MeOut)
+@router.post(
+    "/dev-login",
+    response_model=MeOut,
+    dependencies=[Depends(RateLimiter("login", 10, 60, "ip"))],
+)
 async def dev_login(
     payload: DevLoginIn,
     response: Response,

@@ -410,7 +410,7 @@ class MyAdapter(ScannerAdapter):
 - [x] 자산 자동 동기화 — GitHub org (Kubernetes / AWS Auto-scaling는 v0.3)
 - [ ] Webhook push 이벤트 → diff 분석 후 적절한 스캐너 선택
 - [ ] CI 통합 패키지 (GitHub Actions / GitLab CI step)
-- [ ] Rate limiting / abuse protection
+- [x] Rate limiting / abuse protection (login · AI · webhook · github-sync)
 - [ ] AI 프롬프트 E2E 암호화 (고객 코드 포함 시)
 - [ ] GCP / Azure IAM 어댑터 권한 부여(grant) 완성도 보강
 
