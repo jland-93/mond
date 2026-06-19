@@ -120,6 +120,11 @@ class Settings(BaseSettings):
     # 기본 true — 운영에서 abuse 보호. Redis 다운 시 fail open(가용성 우선).
     RATE_LIMIT_ENABLED: bool = True
 
+    # AI 프롬프트 PII redaction — 외부 LLM provider 호출 전 이메일/전화/주민번호/
+    # AWS키/토큰 등을 마스킹. 자체 호스팅이라도 provider로 보내는 순간 그 정책에
+    # 노출되므로 사전 마스킹은 privacy-by-default. 기본 true.
+    AI_PROMPT_REDACT_PII: bool = True
+
     # i18n 기본 언어 (UI 초기 로드 시 사용)
     DEFAULT_LOCALE: str = "ko"
 

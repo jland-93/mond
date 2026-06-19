@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- **AI 프롬프트 PII redaction** — 외부 LLM provider(Anthropic/OpenAI/Bedrock/Ollama 등)로 사용자 쿼리를 보내기 전 이메일·한국 전화번호·주민등록번호·AWS access/secret key·GitHub token·일반 API token(`sk-`/`pat_`)·JWT·Luhn 통과 신용카드 번호를 자동 마스킹. 마스킹된 종류와 건수는 응답 `redactions` 필드로 노출되고 AI Insights UI에 `redacted email:N` 같은 chip으로 표시. `AI_PROMPT_REDACT_PII=false`로 끌 수 있음(기본 켜짐). RAG는 원본으로 검색하고 LLM에는 마스킹본만 전달.
 - **Rate limit (abuse 보호)** — Redis 기반 fixed-window counter. `POST /auth/dev-login` 10/min/IP · `POST /ai/analyze` 20/min/user · `POST /webhooks/github` 120/min/IP · `POST /webhooks/personal` 30/min/IP · `POST /admin/github-sync/run` 5/min/user. 응답에 `X-RateLimit-Limit/Remaining/Reset` 헤더, 초과 시 429 + `Retry-After`. Redis 다운 시 fail open(가용성 우선). `RATE_LIMIT_ENABLED=false`로 전체 끄기 가능(test/CI 편의). SETUP.md에 표.
 - **GitHub org 자산 자동 동기화** — Admin → Connections에 "GitHub Org Asset Sync" 카드. org 또는 user 이름 입력 → 미리보기/동기화 버튼으로 해당 org의 모든 repo를 `https://github.com/{owner}/{repo}` URI의 REPOSITORY 자산으로 일괄 등록. 동일 URI는 라벨(language/private/archived/default_branch)만 갱신하고 사용자가 수정한 owner/environment는 보존. `GITHUB_TOKEN` 있으면 private repo 포함 + rate limit 5000/h, 없으면 public 60/h. `GITHUB_ORG` 환경변수로 기본값 채울 수 있음. 백엔드 `POST /api/v1/admin/github-sync/run` 신설(Admin 전용).
 - **GitHub Actions composite action** — `.github/actions/mond-scan/action.yml`. 사용자 repo의 workflow에서 `uses: jland-93/mond/.github/actions/mond-scan@main` 한 줄로 Mond 스캔 트리거. 입력: `mond_host` · `webhook_token` · `asset_id` · `scanner`. 출력: `scan_id` · `status`. backend의 기존 `POST /api/v1/webhooks/personal` 사용. README에 사용 예시 추가.

@@ -34,3 +34,5 @@ class AnalyzeResponse(BaseModel):
     suggested_actions: list[dict] = Field(default_factory=list)
     model: str
     citations: list[dict] = Field(default_factory=list)
+    # 외부 LLM provider로 보내기 전 redaction한 PII kind→count. 비어 있으면 마스킹 없음.
+    redactions: dict[str, int] = Field(default_factory=dict)

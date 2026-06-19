@@ -746,6 +746,31 @@ scan 트리거 시 backend가 즉시 `PENDING` Scan을 반환하고, worker가 `
 
 운영 (Helm) — 별도 Deployment로 worker를 띄우고 `replicaCount`로 동시 처리량 조절. concurrency는 `command: celery -A app.celery_app:celery_app worker --concurrency=N`로 worker 인스턴스 안에서 조절.
 
+### 8-3) AI 프롬프트 PII redaction
+
+기본 활성. 사용자 쿼리가 외부 LLM provider로 가기 직전에 PII와 시크릿을 placeholder로 치환한다.
+
+```bash
+AI_PROMPT_REDACT_PII=true     # 기본
+```
+
+마스킹 대상:
+
+| 종류 | 예 | placeholder |
+|------|----|-------------|
+| 이메일 | `kim@example.com` | `[REDACTED_EMAIL]` |
+| 한국 전화번호 | `010-1234-5678` | `[REDACTED_PHONE]` |
+| 국제 전화 | `+82-10-...` | `[REDACTED_PHONE]` |
+| 주민등록번호 | `900101-1234567` | `[REDACTED_RRN]` |
+| AWS Access Key ID | `AKIA...` | `[REDACTED_AWS_KEY]` |
+| AWS Secret (40-char) | base64 패턴 | `[REDACTED_AWS_SECRET]` |
+| GitHub token | `ghp_...` | `[REDACTED_TOKEN]` |
+| 일반 API token | `sk-...` / `pat_...` | `[REDACTED_TOKEN]` |
+| JWT | `eyJ...` | `[REDACTED_JWT]` |
+| 신용카드 (Luhn 통과) | `4111 1111 ...` | `[REDACTED_CC]` |
+
+RAG retrieve는 원본 쿼리로 진행하고, LLM에 보내는 user message만 마스킹본을 사용. AI Insights 응답의 `redactions` 필드(`{kind: count}`)와 UI의 `redacted email:1` chip으로 무엇이 가려졌는지 즉시 확인.
+
 ### 8-2) Rate limit (abuse 보호)
 
 기본 활성. Redis 기반 fixed-window counter로 OSS 공개 인스턴스의 brute-force/스크래핑을 막는다.

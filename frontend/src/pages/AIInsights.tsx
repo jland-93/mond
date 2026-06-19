@@ -28,6 +28,7 @@ interface AnalyzeResponse {
   suggested_actions: Array<{ label: string; endpoint?: string }>;
   model: string;
   citations?: Citation[];
+  redactions?: Record<string, number>;
 }
 
 const KIND_COLOR: Record<string, string> = {
@@ -173,6 +174,20 @@ export default function AIInsights() {
                     {locale === "ko" ? "출처" : "Sources"} {analyze.data.citations!.length}
                   </Tag>
                 )}
+                {Object.entries(analyze.data.redactions ?? {}).map(([kind, n]) => (
+                  <Tooltip
+                    key={kind}
+                    title={
+                      locale === "ko"
+                        ? `외부 LLM 호출 전 ${kind} ${n}건을 자동 마스킹 처리했습니다.`
+                        : `Masked ${n} ${kind} before sending to external LLM.`
+                    }
+                  >
+                    <Tag color="gold">
+                      redacted {kind}:{n}
+                    </Tag>
+                  </Tooltip>
+                ))}
               </Space>
               <Paragraph style={{ whiteSpace: "pre-wrap" }}>
                 {renderSummaryWithCitations(

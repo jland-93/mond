@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.client import complete_json, current_model_label, is_enabled
+from app.ai.redaction import redact_prompt
+from app.core.config import settings
 from app.core.logging import get_logger
 from app.models.finding import Finding, Severity
 
@@ -93,16 +95,27 @@ async def route_query(db: AsyncSession, query: str) -> dict:
     """
     from app.ai.rag import build_context_block, search
 
-    # 1) Mond DB에서 관련 자료 검색 (RAG retrieve)
+    # 1) Mond DB에서 관련 자료 검색 (RAG retrieve) — 원본 query로 검색
+    #    (redaction은 외부 provider로 보낼 텍스트만 적용)
     citations = await search(db, query)
 
-    # 2) AI 비활성 시 — 휴리스틱 + 출처만 노출
+    # 2) AI 비활성 시 — 휴리스틱 + 출처만 노출 (외부 호출 없음 → redaction 불필요)
     if not await is_enabled(db):
         result = _heuristic_route(query)
         result["citations"] = [c.to_dict() for c in citations]
         return result
 
-    # 3) LLM에 context 주입
+    # 3) PII redaction — 외부 LLM provider로 가기 직전 마스킹
+    user_prompt = query
+    redaction_summary: dict[str, int] = {}
+    if settings.AI_PROMPT_REDACT_PII:
+        r = redact_prompt(query)
+        user_prompt = r.text
+        redaction_summary = r.counts
+        if r.total > 0:
+            logger.info("ai_prompt_redacted", total=r.total, kinds=list(r.counts.keys()))
+
+    # 4) LLM에 context 주입
     context_block = build_context_block(citations)
     system = (
         "You are Mond, an AI-powered self-service DevSecOps assistant. "
@@ -116,18 +129,21 @@ async def route_query(db: AsyncSession, query: str) -> dict:
     if context_block:
         system = f"{system}\n\n{context_block}"
 
-    result = await complete_json(db, system, query, max_tokens=600)
+    result = await complete_json(db, system, user_prompt, max_tokens=600)
     if result is None:
         fallback = _heuristic_route(query)
         fallback["citations"] = [c.to_dict() for c in citations]
+        fallback["redactions"] = redaction_summary
         return fallback
     parsed = _parse_json(result.text)
     if not parsed:
         fallback = _heuristic_route(query)
         fallback["citations"] = [c.to_dict() for c in citations]
+        fallback["redactions"] = redaction_summary
         return fallback
     parsed["model"] = f"{result.provider}:{result.model}"
     parsed["citations"] = [c.to_dict() for c in citations]
+    parsed["redactions"] = redaction_summary
     return parsed
 
 
