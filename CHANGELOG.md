@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- **SBOM 실 의존성 추출** — `package.json` / `package-lock.json` / `requirements.txt` / `go.mod` / Dockerfile 5종 파서. 백엔드 `POST /api/v1/reports/sbom/parse` (filename + content → ecosystem 감지 + 패키지 리스트). Reports 페이지에 "SBOM 파일 파싱" 카드 추가 (붙여넣기 → 추출 → 테이블). 기존 finding 기반 lightweight SBOM은 유지하되 stub Alert 톤을 정직화.
 - **사용자별 Slack 알림 설정** — Security Settings의 "내 Slack 알림" 카드. 본인 DM webhook URL과 Slack user ID(@mention용)를 등록할 수 있고, 본인이 owner인 자산의 신규 finding 발생 시 organization 채널에 @mention + 본인 DM(설정 시) 발송. 별도 테이블 `user_slack_preferences`로 운영 중 환경에서도 schema migration 없이 자동 추가.
 - **Slack 연동 별도 페이지** — `/admin/slack` (Admin). 워크스페이스의 Incoming Webhook URL을 5종 purpose(`default` · `digest` · `finding` · `access_request` · `role_request`) 채널에 매핑하고, 카드별로 테스트 메시지 전송. DB에 저장된 채널이 ENV(`SLACK_WEBHOOK_URL` · `DIGEST_SLACK_WEBHOOK_URL`)보다 우선. `notifications` · `digest` 둘 다 `slack.resolve_webhook(purpose)`로 라우팅 일원화.
 - **권한 만료 임박 + 1-click 갱신** — My Mond (`/me`)의 "만료 임박" 카드 각 항목에 `갱신 요청` 버튼. 백엔드 `POST /api/v1/me/access-requests/{id}/renew`가 같은 identity·permission으로 새 AccessRequest를 만들어 AI 1차 검토 흐름에 태움. Daily Digest에도 3일 내 만료 권한 수가 추가됨.
