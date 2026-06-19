@@ -16,7 +16,7 @@ const { TextArea } = Input;
 
 interface Citation {
   n: number;
-  kind: "finding" | "policy" | "knowledge" | string;
+  kind: "asset" | "finding" | "policy" | "knowledge" | string;
   title: string;
   snippet: string;
   url?: string | null;
@@ -31,6 +31,7 @@ interface AnalyzeResponse {
 }
 
 const KIND_COLOR: Record<string, string> = {
+  asset: "green",
   finding: "red",
   policy: "purple",
   knowledge: "blue",

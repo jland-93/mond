@@ -2,12 +2,12 @@
 RAG MVP — Mond 데이터를 검색해 LLM에 context로 주입
 
 검색 대상 (모두 사용자가 등록·시드한 자체 데이터):
+  - Asset     : 이름·URI·설명 매칭 + open_findings 가중
   - Finding   : 최근 미해결 finding (severity 가중)
   - Policy    : 활성 정책
   - Knowledge : 카드 (title / summary 매칭)
-  - Regulation: 시나리오/규제 가이드 (정적 데이터)
 
-알고리즘 — MVP는 PostgreSQL ILIKE 매칭 (벡터 임베딩은 v0.2).
+알고리즘 — PostgreSQL ILIKE 매칭. 벡터 임베딩(pgvector / 외부 모델)은 v0.3.
 한국어 토큰화는 simple split (정확도보다 invariant).
 각 결과를 `[N]` 번호로 인용해 LLM에 넘기고, frontend가 카드로 출처 노출.
 """
@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.asset import Asset
 from app.models.finding import Finding, FindingStatus, Severity
 from app.models.knowledge import KnowledgeCard
 from app.models.policy import Policy
@@ -53,7 +54,35 @@ async def search(db: AsyncSession, query: str, *, limit_per_source: int = 3) -> 
     citations: list[Citation] = []
     n = 1
 
-    # 1) Finding — title/description 매칭 + 미해결 우선
+    # 1) Asset — 이름/URI/설명 매칭. "우리 nginx 자산" 같은 질문 시 자산을 짚어준다.
+    a_conditions = [
+        Asset.name.ilike(f"%{t}%")
+        | Asset.uri.ilike(f"%{t}%")
+        | Asset.description.ilike(f"%{t}%")
+        for t in toks
+    ]
+    a_stmt = (
+        select(Asset)
+        .where(or_(*a_conditions))
+        .order_by(Asset.open_findings_count.desc().nullslast(), Asset.id.desc())
+        .limit(limit_per_source)
+    )
+    for a in (await db.execute(a_stmt)).scalars().all():
+        bits = [a.asset_type.value]
+        if a.environment:
+            bits.append(a.environment)
+        if a.open_findings_count:
+            bits.append(f"미해결 {a.open_findings_count}")
+        snippet = (a.description or " · ".join(bits))[:120]
+        citations.append(Citation(
+            n=n, kind="asset",
+            title=a.name,
+            snippet=snippet,
+            url=f"/assets?focus={a.id}",
+        ))
+        n += 1
+
+    # 2) Finding — title/description 매칭 + 미해결 우선
     f_conditions = [Finding.title.ilike(f"%{t}%") | Finding.description.ilike(f"%{t}%") for t in toks]
     f_stmt = (
         select(Finding)
