@@ -9,6 +9,7 @@ from app.ai import insights as ai_insights
 from app.ai.client import current_model_label, get_provider as ai_provider, is_enabled as ai_enabled
 from app.auth.deps import current_user
 from app.core.database import get_db
+from app.core.rate_limit import RateLimiter
 from app.models.ai_insight import InsightKind
 from app.models.user import User
 from app.schemas.ai_insight import AIInsightRead, AnalyzeRequest, AnalyzeResponse
@@ -54,7 +55,11 @@ async def list_finding_insights(
     return [AIInsightRead.model_validate(i) for i in items]
 
 
-@router.post("/analyze", response_model=AnalyzeResponse)
+@router.post(
+    "/analyze",
+    response_model=AnalyzeResponse,
+    dependencies=[Depends(RateLimiter("ai_analyze", 20, 60, "user"))],
+)
 async def analyze_query(
     payload: AnalyzeRequest,
     _user: User = Depends(current_user),

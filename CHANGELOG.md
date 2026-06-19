@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- **Rate limit (abuse 보호)** — Redis 기반 fixed-window counter. `POST /auth/dev-login` 10/min/IP · `POST /ai/analyze` 20/min/user · `POST /webhooks/github` 120/min/IP · `POST /webhooks/personal` 30/min/IP · `POST /admin/github-sync/run` 5/min/user. 응답에 `X-RateLimit-Limit/Remaining/Reset` 헤더, 초과 시 429 + `Retry-After`. Redis 다운 시 fail open(가용성 우선). `RATE_LIMIT_ENABLED=false`로 전체 끄기 가능(test/CI 편의). SETUP.md에 표.
 - **GitHub org 자산 자동 동기화** — Admin → Connections에 "GitHub Org Asset Sync" 카드. org 또는 user 이름 입력 → 미리보기/동기화 버튼으로 해당 org의 모든 repo를 `https://github.com/{owner}/{repo}` URI의 REPOSITORY 자산으로 일괄 등록. 동일 URI는 라벨(language/private/archived/default_branch)만 갱신하고 사용자가 수정한 owner/environment는 보존. `GITHUB_TOKEN` 있으면 private repo 포함 + rate limit 5000/h, 없으면 public 60/h. `GITHUB_ORG` 환경변수로 기본값 채울 수 있음. 백엔드 `POST /api/v1/admin/github-sync/run` 신설(Admin 전용).
 - **GitHub Actions composite action** — `.github/actions/mond-scan/action.yml`. 사용자 repo의 workflow에서 `uses: jland-93/mond/.github/actions/mond-scan@main` 한 줄로 Mond 스캔 트리거. 입력: `mond_host` · `webhook_token` · `asset_id` · `scanner`. 출력: `scan_id` · `status`. backend의 기존 `POST /api/v1/webhooks/personal` 사용. README에 사용 예시 추가.
 - **AI Insights RAG에 Asset 소스 추가** — 자연어 질의 시 RAG가 Asset(이름·URI·설명)도 함께 검색. "우리 nginx 자산" 같은 질문에 자산을 직접 짚어주고, citations에 kind=`asset`(녹색 chip)으로 노출. open_findings 수로 가중 정렬. 기존 Finding · Policy · Knowledge에 더해 4 소스 RAG.

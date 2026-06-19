@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.deps import require_role
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.rate_limit import RateLimiter
 from app.models.user import Role
 from app.services import github_sync
 
@@ -17,7 +18,7 @@ async def status() -> dict:
     return github_sync.status_payload()
 
 
-@router.post("/run")
+@router.post("/run", dependencies=[Depends(RateLimiter("github_sync", 5, 60, "user"))])
 async def run(
     payload: dict = Body(...),
     db: AsyncSession = Depends(get_db),
