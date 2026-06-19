@@ -26,8 +26,9 @@ from app.core.logging import get_logger
 from app.models.asset import Asset, AssetType
 from app.models.scan import ScanTrigger
 from app.models.user import Role
+from app.models.slack import SlackPurpose
 from app.models.webhook_token import WebhookToken
-from app.services import scan as scan_service
+from app.services import sbom_diff, scan as scan_service, slack as slack_service
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -65,6 +66,49 @@ async def github_webhook(
         raise HTTPException(status_code=401, detail="invalid signature")
 
     payload = await request.json()
+
+    # pull_request opened/synchronize → 의존성 diff + Slack + (선택) PR comment
+    if x_github_event == "pull_request":
+        action = payload.get("action")
+        if action not in ("opened", "synchronize", "reopened"):
+            return {"ignored": f"pull_request.{action}"}
+        pr = payload.get("pull_request") or {}
+        repo = payload.get("repository") or {}
+        full_name = repo.get("full_name") or ""
+        if "/" not in full_name:
+            return {"ignored": "missing repository full_name"}
+        owner, name = full_name.split("/", 1)
+        pr_number = pr.get("number")
+        base_sha = (pr.get("base") or {}).get("sha")
+        head_sha = (pr.get("head") or {}).get("sha")
+        if not (pr_number and base_sha and head_sha):
+            return {"ignored": "missing PR sha"}
+
+        diffs = await sbom_diff.diff_for_pr(owner, name, pr_number, base_sha, head_sha)
+        commented = False
+        if diffs:
+            commented = await sbom_diff.post_pr_comment(
+                owner, name, pr_number, sbom_diff.format_pr_comment(diffs)
+            )
+            # Slack 알림 (FINDING purpose)
+            slack_url = await slack_service.resolve_webhook(db, SlackPurpose.FINDING)
+            if slack_url:
+                import httpx
+
+                msg = sbom_diff.format_slack(owner, name, pr_number, diffs)
+                try:
+                    async with httpx.AsyncClient(timeout=10) as client:
+                        await client.post(slack_url, json=msg)
+                except Exception as exc:
+                    logger.warning("sbom_diff_slack_failed", error=str(exc))
+        return {
+            "kind": "pull_request",
+            "repository": full_name,
+            "pr": pr_number,
+            "diff_count": len(diffs),
+            "pr_comment_posted": commented,
+        }
+
     if x_github_event != "push":
         return {"ignored": x_github_event}
 

@@ -684,22 +684,27 @@ spec:
 
 **미리보기 (Reviewer+):** `GET /api/v1/admin/digest/preview` — 전송 없이 집계와 Slack 메시지 포맷 확인.
 
-### 8) GitHub Webhook 자동 스캔 (선택)
-
-push마다 자동 스캔하려면:
+### 8) GitHub Webhook 자동 스캔 + SBOM Diff on PR (선택)
 
 ```bash
 GITHUB_WEBHOOK_SECRET=<random-secret>
 # python -c 'import secrets;print(secrets.token_urlsafe(32))'
+
+# PR에 SBOM diff comment를 달려면 추가 (선택):
+GITHUB_TOKEN=ghp_xxxx   # PR comment 작성 권한 PAT 또는 App token
 ```
 
 GitHub repo Settings → Webhooks:
 - **Payload URL**: `https://mond.your-corp.com/api/v1/webhooks/github`
 - **Content type**: `application/json`
 - **Secret**: 위 secret과 동일
-- **Events**: `push` (선택) + `pull_request` (권장)
+- **Events**: `push` + `pull_request` 둘 다 체크
 
-**Skip 옵션 옵션**: 수동 스캔 화면에서 충분하면 webhook 없이도 OK.
+#### 동작
+- `push` 이벤트 — 매칭 자산이 있으면 Trivy 스캔 자동 트리거
+- `pull_request` (opened / synchronize / reopened) — 변경된 의존성 파일(`package.json` / `package-lock.json` / `requirements.txt` / `go.mod` / `Dockerfile`)에서 before/after를 파싱해 **신규 / 제거 / 버전 변경**을 추출. `GITHUB_TOKEN`이 있으면 PR에 comment를 달고, FINDING purpose의 Slack 채널이 설정되어 있으면 Slack에도 알림.
+
+**Skip 옵션**: 수동 스캔으로 충분하면 webhook 없이도 OK.
 
 ### 9) 데모 시드 끄기
 

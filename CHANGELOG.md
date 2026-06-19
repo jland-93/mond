@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- **SBOM Diff on PR** — GitHub `pull_request` (opened / synchronize / reopened) webhook 이벤트에 변경된 의존성 파일을 감지해 before/after 파싱, 신규/제거/버전 변경을 정리. `GITHUB_TOKEN`이 설정되면 PR에 comment를 달고, FINDING purpose의 Slack 채널이 있으면 Slack에도 알림. 공개 repo는 토큰 없어도 raw fetch 가능.
 - **SBOM 실 의존성 추출** — `package.json` / `package-lock.json` / `requirements.txt` / `go.mod` / Dockerfile 5종 파서. 백엔드 `POST /api/v1/reports/sbom/parse` (filename + content → ecosystem 감지 + 패키지 리스트). Reports 페이지에 "SBOM 파일 파싱" 카드 추가 (붙여넣기 → 추출 → 테이블). 기존 finding 기반 lightweight SBOM은 유지하되 stub Alert 톤을 정직화.
 - **사용자별 Slack 알림 설정** — Security Settings의 "내 Slack 알림" 카드. 본인 DM webhook URL과 Slack user ID(@mention용)를 등록할 수 있고, 본인이 owner인 자산의 신규 finding 발생 시 organization 채널에 @mention + 본인 DM(설정 시) 발송. 별도 테이블 `user_slack_preferences`로 운영 중 환경에서도 schema migration 없이 자동 추가.
 - **Slack 연동 별도 페이지** — `/admin/slack` (Admin). 워크스페이스의 Incoming Webhook URL을 5종 purpose(`default` · `digest` · `finding` · `access_request` · `role_request`) 채널에 매핑하고, 카드별로 테스트 메시지 전송. DB에 저장된 채널이 ENV(`SLACK_WEBHOOK_URL` · `DIGEST_SLACK_WEBHOOK_URL`)보다 우선. `notifications` · `digest` 둘 다 `slack.resolve_webhook(purpose)`로 라우팅 일원화.
