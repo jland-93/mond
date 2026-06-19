@@ -16,6 +16,8 @@ from app.core.logging import get_logger
 from app.models.finding import Finding, Severity
 from app.models.iam import AccessRequest, AccessRequestStatus
 from app.models.scan import Scan, ScanStatus
+from app.models.slack import SlackPurpose
+from app.services import slack as slack_service
 
 logger = get_logger(__name__)
 
@@ -133,7 +135,8 @@ async def send_daily_digest(
 ) -> dict:
     digest = await build_daily_digest(session)
 
-    slack_url = slack_webhook_url or settings.DIGEST_SLACK_WEBHOOK_URL or settings.SLACK_WEBHOOK_URL
+    # 우선순위: 인자 → DB(DIGEST → DEFAULT) → ENV.
+    slack_url = slack_webhook_url or await slack_service.resolve_webhook(session, SlackPurpose.DIGEST)
     generic_url = generic_webhook_url or settings.GENERIC_WEBHOOK_URL
 
     sent: list[str] = []

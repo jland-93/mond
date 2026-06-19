@@ -613,6 +613,22 @@ NOTIFY_MIN_SEVERITY=high   # critical / high / medium / low / info (threshold)
 - 보안팀 전담 채널 — `medium`
 - 데모 — `critical`만
 
+#### 7-0) Slack 연동 페이지 (Admin → Slack 연동)
+
+ENV에 single webhook을 박는 대신 UI에서 purpose별 채널을 등록하고 싶을 때:
+
+1. Slack workspace → Apps → **Incoming Webhooks** → 채널 선택 → URL 복사
+2. Mond에서 `Admin → Slack 연동`(`/admin/slack`) 진입
+3. 5종 purpose 카드에 webhook URL 등록
+   - `default` — purpose가 더 구체적으로 잡히지 않을 때 fallback
+   - `digest` — Daily Digest
+   - `finding` — severity 임계 이상 신규 발견
+   - `access_request` — 권한 요청 / 검토
+   - `role_request` — 역할 변경 요청
+4. 카드별 `테스트` 버튼으로 실제 메시지 발송 확인
+
+DB에 등록된 채널이 ENV(`SLACK_WEBHOOK_URL` · `DIGEST_SLACK_WEBHOOK_URL`)보다 우선합니다. ENV는 그대로 fallback으로 남아 OSS 초기 설치도 매끄럽게.
+
 <a id="daily-digest"></a>
 #### 7-1) Daily Security Digest — 매일 아침 어제 일어난 일 요약
 

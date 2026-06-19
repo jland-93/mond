@@ -95,6 +95,7 @@ export default function Layout() {
     { key: "/admin/access-review", icon: <SolutionOutlined />, label: t.adminArea.menuAccessReview, minRole: "reviewer" as const },
     { key: "/admin/policies", icon: <ExperimentOutlined />, label: t.adminArea.menuPolicies, minRole: "reviewer" as const },
     { key: "/admin/connections", icon: <ApiOutlined />, label: t.adminArea.menuConnections, minRole: "admin" as const },
+    { key: "/admin/slack", icon: <BulbOutlined />, label: t.adminArea.menuSlack, minRole: "admin" as const },
     { key: "/admin/users", icon: <TeamOutlined />, label: t.adminArea.menuUsers, minRole: "admin" as const },
   ].filter((i) => hasRole(user, i.minRole));
 

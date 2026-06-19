@@ -44,6 +44,7 @@ export const en: Dict = {
     backToApp: "Back to app",
     menuAccessReview: "Access Review",
     menuConnections: "Connections",
+    menuSlack: "Slack Integration",
     menuPolicies: "Policy Management",
     menuUsers: "Users & Roles",
     connectionsTitle: "Connections",
