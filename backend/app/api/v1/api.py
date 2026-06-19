@@ -10,6 +10,7 @@ from app.api.v1.endpoints import (
     assets,
     auth,
     dashboard,
+    digest,
     findings,
     health,
     iam,
@@ -46,6 +47,7 @@ api_router.include_router(regulations.router, tags=["Regulations"])
 api_router.include_router(reports.router, prefix="/reports", tags=["Reports"])
 api_router.include_router(ai.router, prefix="/ai", tags=["AI"])
 api_router.include_router(ai_providers.router, prefix="/admin/ai-providers", tags=["AI Providers (Admin)"])
+api_router.include_router(digest.router, prefix="/admin/digest", tags=["Daily Digest (Admin)"])
 api_router.include_router(integrations.router, prefix="/integrations", tags=["Integrations"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 api_router.include_router(webhook_tokens.router, prefix="/webhook-tokens", tags=["Webhook Tokens"])

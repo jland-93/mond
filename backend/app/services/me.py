@@ -69,7 +69,7 @@ async def get_me_overview(session: AsyncSession, user: User) -> dict:
         .where(
             and_(
                 AccessRequest.requester == user.email,
-                AccessRequest.status == AccessRequestStatus.APPROVED,
+                AccessRequest.status == AccessRequestStatus.GRANTED,
                 AccessRequest.revoked_at.is_(None),
                 AccessRequest.expires_at.is_not(None),
                 AccessRequest.expires_at <= soon,
@@ -100,7 +100,12 @@ async def get_me_overview(session: AsyncSession, user: User) -> dict:
             "my_assets_total": len(my_assets),
             "open_findings_total": open_findings_total,
             "open_by_severity": open_by_severity,
-            "active_requests": sum(1 for r in my_requests if r.status == AccessRequestStatus.PENDING),
+            "active_requests": sum(
+                1
+                for r in my_requests
+                if r.status
+                in {AccessRequestStatus.PENDING_AI_REVIEW, AccessRequestStatus.NEEDS_HUMAN_REVIEW}
+            ),
             "expiring_soon": len(expiring),
         },
         "my_assets": [

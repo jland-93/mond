@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useI18n } from "@/i18n";
 
 import AIProvidersCard from "./connections/AIProvidersCard";
+import DailyDigestCard from "./connections/DailyDigestCard";
 import IAMSourceCard from "./connections/IAMSourceCard";
 import IAMSourceModal from "./connections/IAMSourceModal";
 import SSOCard from "./connections/SSOCard";
@@ -36,6 +37,7 @@ export default function AdminConnections() {
       <IAMSourceCard onAdd={() => setModalOpen(true)} />
       <SSOCard />
       <AIProvidersCard />
+      <DailyDigestCard />
       <WebhookCard />
 
       <IAMSourceModal open={modalOpen} onClose={() => setModalOpen(false)} />

@@ -613,6 +613,61 @@ NOTIFY_MIN_SEVERITY=high   # critical / high / medium / low / info (threshold)
 - 보안팀 전담 채널 — `medium`
 - 데모 — `critical`만
 
+<a id="daily-digest"></a>
+#### 7-1) Daily Security Digest — 매일 아침 어제 일어난 일 요약
+
+화면 5개 돌아다닐 필요 없이 Slack 카드 한 장으로 어제를 본다.
+
+**ENV:**
+```bash
+# Daily Digest 전용 채널 (없으면 SLACK_WEBHOOK_URL fallback).
+# 보안팀 채널을 finding 알림과 분리하고 싶을 때.
+DIGEST_SLACK_WEBHOOK_URL=https://hooks.slack.com/services/.../digest
+```
+
+**수동 발송:** Admin → Connections 페이지의 "Daily Security Digest" 카드에서 `지금 전송` 클릭.
+
+**자동 발송 (운영):** 외부 cron이 매일 한 번 다음 endpoint를 호출.
+```
+POST /api/v1/admin/digest/send
+```
+인증은 admin webhook token 또는 admin 세션 cookie 필요.
+
+**Kubernetes CronJob 예시 (매일 09:00 KST):**
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mond-daily-digest
+  namespace: mond
+spec:
+  schedule: "0 0 * * *"   # 00:00 UTC = 09:00 KST
+  timeZone: UTC
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: caller
+              image: curlimages/curl:8.10.1
+              command:
+                - sh
+                - -c
+                - |
+                  curl -fsS -X POST \
+                    -H "Authorization: Bearer $MOND_ADMIN_TOKEN" \
+                    http://mond-backend.mond.svc.cluster.local:8000/api/v1/admin/digest/send
+              env:
+                - name: MOND_ADMIN_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: mond-secrets
+                      key: ADMIN_DIGEST_TOKEN
+```
+
+**미리보기 (Reviewer+):** `GET /api/v1/admin/digest/preview` — 전송 없이 집계와 Slack 메시지 포맷 확인.
+
 ### 8) GitHub Webhook 자동 스캔 (선택)
 
 push마다 자동 스캔하려면:
