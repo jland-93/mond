@@ -93,8 +93,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: mond-frontend
+    # nginx-unprivileged는 컨테이너 안에서 8080을 listen. host 3000 → container 8080.
     ports:
-      - "3000:3000"
+      - "3000:8080"
     environment:
       VITE_API_URL: http://localhost:8000
     depends_on:
