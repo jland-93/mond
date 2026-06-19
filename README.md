@@ -407,7 +407,7 @@ class MyAdapter(ScannerAdapter):
 - [ ] AI Insights RAG — 조직 문서/정책을 검색해 응답 근거화
 - [ ] 비동기 스캔 큐 (Celery) — 인라인 실행 대체
 - [ ] OPA Rego 정책 평가
-- [ ] 자산 자동 동기화 (Kubernetes / AWS Auto-scaling / GitHub org)
+- [x] 자산 자동 동기화 — GitHub org (Kubernetes / AWS Auto-scaling는 v0.3)
 - [ ] Webhook push 이벤트 → diff 분석 후 적절한 스캐너 선택
 - [ ] CI 통합 패키지 (GitHub Actions / GitLab CI step)
 - [ ] Rate limiting / abuse protection
