@@ -7,9 +7,12 @@
 ## [Unreleased]
 
 ### Added
+- **My Mond** (`/me`) — 임직원 진입 페이지. 본인 자산 · 받은 발견사항 · 진행중 권한 요청 · 만료 임박(7일) 4 KPI + 4 list card. 사이드바 "한눈에" 그룹 최상단에 노출. 백엔드 `GET /api/v1/me/overview` 신설.
+- **Findings 일괄 처리(Bulk Triage)** — Findings 테이블 row 체크박스 + 일괄 액션(Resolved / Suppressed / False-positive). 매주 발견사항 100개+ 처리하는 보안 담당자 시간을 1/10로. 백엔드 `PATCH /api/v1/findings/bulk/status` 신설 (REVIEWER+).
 - **AI provider 추상화** — Anthropic · OpenAI / Azure OpenAI · AWS Bedrock · Ollama(로컬) 4종을 `AI_PROVIDER` 한 줄로 전환. 폐쇄망/데이터 외부 유출 금지 조직도 사용 가능.
 - IAM Explorer 페이지에 IAM source kind별 capability 배지(Ready / Demo only / Coming soon) 노출.
 - Reports 페이지 SBOM 섹션에 "experimental" 배지 + 디스클레이머.
+- **OSS 운영 표준 도입** — `.github/CODEOWNERS` · Issue 템플릿 3종 + Discussions 동선 · Dependabot(weekly, 4 ecosystem) · CodeQL(Python + TypeScript) · Release Drafter + PR auto-label.
 
 ### Changed
 - Knowledge Hub AI 카드 생성은 REVIEWER → **ADMIN** 권한으로 좁힘 (검토되지 않은 AI 콘텐츠가 사내 지식으로 노출되는 것을 막기 위함).
@@ -20,6 +23,15 @@
 
 ### Removed
 - `/integrations` 라우트와 `Integrations.tsx` 페이지 제거. Admin → Connections로 일원화된 뒤 dead code였음. 외부 링크가 있던 경우 `/admin/connections`로 이동.
+
+### Fixed
+- `frontend/Dockerfile`: nginx-unprivileged 1.27이 `/etc/nginx/conf.d`를 read-only로 만들어 발생한 envsubst 실패를 표준 `templates/` 패턴으로 해결. `docker-compose` 포트 매핑도 `3000:8080`으로 정렬.
+- `backend/app/services/me.py`: unused `sqlalchemy.func` / `or_` import 제거 (ruff F401).
+
+### Refactored
+- `backend/app/iam/providers.py` 1,154줄을 패키지로 분해 — `base.py` + provider별 5 파일(`aws/k8s/ldap/gcp/azure`) + `registry.py`. 공개 import path는 그대로.
+- `frontend/src/pages/admin/AdminConnections.tsx` 797줄 → 44줄 orchestrator + 6 sub-component (`connections/`).
+- `frontend/src/pages/SecuritySettings.tsx` 773줄 → 47줄 orchestrator + 6 sub-component (`security/`).
 
 ## [0.1.0] — 2025-12
 
