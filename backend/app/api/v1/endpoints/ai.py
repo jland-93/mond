@@ -73,4 +73,5 @@ async def analyze_query(
         suggested_actions=result.get("suggested_actions", []) or [],
         model=result.get("model") or await current_model_label(db),
         citations=result.get("citations") or [],
+        redactions=result.get("redactions") or {},
     )
