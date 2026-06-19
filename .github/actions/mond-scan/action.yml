@@ -1,0 +1,83 @@
+name: Mond Scan
+description: Trigger a Mond security scan on a registered asset using a personal webhook token.
+author: jland-93
+
+inputs:
+  mond_host:
+    description: Mond 인스턴스 호스트 (예 mond.your-corp.com). 스킴은 자동으로 https://를 붙입니다.
+    required: true
+  webhook_token:
+    description: Mond에서 발급한 webhook token (mond_xxx로 시작). repository secret 사용 권장.
+    required: true
+  asset_id:
+    description: 스캔 대상 자산 ID (Mond UI의 Assets 페이지에서 확인).
+    required: true
+  scanner:
+    description: trivy | semgrep | nuclei. 자산 타입과 매칭되는 스캐너여야 함.
+    required: false
+    default: trivy
+  fail_on_error:
+    description: backend가 오류를 반환할 때 step을 실패시킬지. false면 step은 통과하고 로그만 남김.
+    required: false
+    default: "true"
+
+outputs:
+  scan_id:
+    description: 생성된 Scan의 ID.
+    value: ${{ steps.trigger.outputs.scan_id }}
+  status:
+    description: PENDING / RUNNING / COMPLETED / FAILED 중 하나.
+    value: ${{ steps.trigger.outputs.status }}
+
+runs:
+  using: composite
+  steps:
+    - name: Trigger Mond scan
+      id: trigger
+      shell: bash
+      env:
+        MOND_HOST: ${{ inputs.mond_host }}
+        MOND_TOKEN: ${{ inputs.webhook_token }}
+        ASSET_ID: ${{ inputs.asset_id }}
+        SCANNER: ${{ inputs.scanner }}
+        FAIL_ON_ERROR: ${{ inputs.fail_on_error }}
+      run: |
+        set -u
+        if [ -z "$MOND_TOKEN" ] || [ -z "$MOND_HOST" ] || [ -z "$ASSET_ID" ]; then
+          echo "::error::mond_host · webhook_token · asset_id 필수"
+          exit 1
+        fi
+
+        url="https://${MOND_HOST}/api/v1/webhooks/personal"
+        body=$(printf '{"asset_id":%s,"scanner":"%s"}' "$ASSET_ID" "$SCANNER")
+
+        response=$(curl -sS -w "\n%{http_code}" -X POST "$url" \
+          -H "Authorization: Bearer $MOND_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "$body")
+        http_code=$(echo "$response" | tail -n1)
+        body_json=$(echo "$response" | sed '$d')
+
+        echo "Mond response ($http_code):"
+        echo "$body_json"
+
+        if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+          if [ "$FAIL_ON_ERROR" = "true" ]; then
+            echo "::error::Mond returned $http_code"
+            exit 1
+          else
+            echo "::warning::Mond returned $http_code — continuing (fail_on_error=false)"
+            exit 0
+          fi
+        fi
+
+        # JSON에서 scan_id · status 추출 — jq가 없을 수 있어 sed/grep 조합.
+        scan_id=$(echo "$body_json" | sed -n 's/.*"scan_id":[[:space:]]*\([0-9]*\).*/\1/p' | head -n1)
+        status=$(echo "$body_json" | sed -n 's/.*"status":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)
+        echo "scan_id=${scan_id}" >> "$GITHUB_OUTPUT"
+        echo "status=${status}" >> "$GITHUB_OUTPUT"
+        echo "Mond scan #${scan_id} status=${status}"
+
+branding:
+  icon: shield
+  color: blue

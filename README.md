@@ -126,6 +126,22 @@ helm install mond oci://ghcr.io/jland-93/charts/mond \
 
 > 🛠️ SSO · MFA · AI provider 전환 · 관리자 초기 세팅 → **[docs/SETUP.md](docs/SETUP.md)**
 
+### 🤖 GitHub Actions — 한 줄 통합
+
+CI/CD에서 push 또는 PR마다 Mond 스캔을 자동 트리거. Security Settings에서 webhook 토큰 발급 → repo secrets에 등록 → workflow에 다음 step 한 줄.
+
+```yaml
+- name: Mond scan
+  uses: jland-93/mond/.github/actions/mond-scan@main
+  with:
+    mond_host: mond.your-corp.com
+    webhook_token: ${{ secrets.MOND_WEBHOOK_TOKEN }}
+    asset_id: 42          # Mond UI Assets 페이지에서 ID 확인
+    scanner: trivy        # trivy | semgrep | nuclei
+```
+
+자동 생성된 YAML은 Mond `Security Settings → Personal Webhook Tokens → CI 스니펫 생성`에서도 받을 수 있습니다.
+
 ---
 
 ## 📋 Overview
