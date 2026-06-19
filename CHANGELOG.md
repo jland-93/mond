@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- **Slack 연동 별도 페이지** — `/admin/slack` (Admin). 워크스페이스의 Incoming Webhook URL을 5종 purpose(`default` · `digest` · `finding` · `access_request` · `role_request`) 채널에 매핑하고, 카드별로 테스트 메시지 전송. DB에 저장된 채널이 ENV(`SLACK_WEBHOOK_URL` · `DIGEST_SLACK_WEBHOOK_URL`)보다 우선. `notifications` · `digest` 둘 다 `slack.resolve_webhook(purpose)`로 라우팅 일원화.
 - **권한 만료 임박 + 1-click 갱신** — My Mond (`/me`)의 "만료 임박" 카드 각 항목에 `갱신 요청` 버튼. 백엔드 `POST /api/v1/me/access-requests/{id}/renew`가 같은 identity·permission으로 새 AccessRequest를 만들어 AI 1차 검토 흐름에 태움. Daily Digest에도 3일 내 만료 권한 수가 추가됨.
 - **Daily Security Digest** — 어제 일어난 일(신규 finding severity별 · 스캔 실행/실패 · 권한 요청 흐름)을 Slack 카드 한 장으로. Admin → Connections에 카드 + `지금 전송` 버튼. 자동 실행은 외부 cron(k8s CronJob 예시 포함)이 `POST /api/v1/admin/digest/send` 호출. 미리보기 `GET /api/v1/admin/digest/preview` (Reviewer+). 전용 채널 ENV `DIGEST_SLACK_WEBHOOK_URL` (없으면 `SLACK_WEBHOOK_URL` fallback).
 - **My Mond** (`/me`) — 임직원 진입 페이지. 본인 자산 · 받은 발견사항 · 진행중 권한 요청 · 만료 임박(7일) 4 KPI + 4 list card. 사이드바 "한눈에" 그룹 최상단에 노출. 백엔드 `GET /api/v1/me/overview` 신설.

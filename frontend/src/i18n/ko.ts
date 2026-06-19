@@ -42,6 +42,7 @@ export const ko = {
     backToApp: "일반 모드로 복귀",
     menuAccessReview: "권한 검토",
     menuConnections: "연동 관리",
+    menuSlack: "Slack 연동",
     menuPolicies: "정책 관리",
     menuUsers: "사용자·역할",
     connectionsTitle: "연동 관리",

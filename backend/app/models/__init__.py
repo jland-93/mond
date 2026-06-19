@@ -25,6 +25,7 @@ from app.models.iam import (
 from app.models.knowledge import KnowledgeCard, KnowledgeCategory, KnowledgeSource
 from app.models.policy import Policy, PolicyType
 from app.models.scan import Scan, ScanStatus, ScanTrigger
+from app.models.slack import SlackChannel, SlackPurpose
 from app.models.user import (
     MfaBackupCode,
     Role,

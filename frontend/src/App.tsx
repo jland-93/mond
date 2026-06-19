@@ -26,6 +26,7 @@ import Scans from "@/pages/Scans";
 import Settings from "@/pages/Settings";
 import AdminConnections from "@/pages/admin/AdminConnections";
 import AdminPolicies from "@/pages/admin/AdminPolicies";
+import AdminSlack from "@/pages/admin/AdminSlack";
 import AdminUsers from "@/pages/admin/AdminUsers";
 
 export default function App() {
@@ -115,6 +116,14 @@ export default function App() {
           element={
             <RequireAuth minRole="admin">
               <AdminConnections />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="admin/slack"
+          element={
+            <RequireAuth minRole="admin">
+              <AdminSlack />
             </RequireAuth>
           }
         />
