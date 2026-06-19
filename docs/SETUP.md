@@ -706,6 +706,24 @@ GitHub repo Settings → Webhooks:
 
 **Skip 옵션**: 수동 스캔으로 충분하면 webhook 없이도 OK.
 
+#### GitHub org 자산 자동 동기화
+
+수십~수백 개 repo를 손으로 자산 등록하는 대신, org 단위로 한 번에 가져온다.
+
+```bash
+GITHUB_TOKEN=ghp_xxxx       # 위와 동일하게 재사용
+GITHUB_ORG=your-org         # 선택, admin UI에 기본값으로 채워짐
+```
+
+Admin → **Connections → GitHub Org Asset Sync** 카드에서:
+1. org 또는 user 이름 입력 (`jland-93`, `your-corp` 등)
+2. **미리보기**(dry-run)로 등록 예정 목록 확인
+3. **동기화** 클릭 → 신규 자산 자동 등록 + 라벨 갱신
+
+동일 URI(`https://github.com/{owner}/{repo}`)는 라벨만 갱신하므로 반복 실행이 안전. `owner`/`environment` 필드는 사용자가 손으로 채운 값 그대로 유지.
+
+API 직접 호출: `POST /api/v1/admin/github-sync/run` body `{"org":"...","dry_run":false,"include_archived":false}`.
+
 ### 8-1) 스캔 큐 (Celery) — 운영 안정성
 
 기본은 인라인 동기 실행. 대용량/장시간 스캔에서 backend 타임아웃이 문제라면 비동기 큐로 전환.

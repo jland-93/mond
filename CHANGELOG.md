@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- **GitHub org 자산 자동 동기화** — Admin → Connections에 "GitHub Org Asset Sync" 카드. org 또는 user 이름 입력 → 미리보기/동기화 버튼으로 해당 org의 모든 repo를 `https://github.com/{owner}/{repo}` URI의 REPOSITORY 자산으로 일괄 등록. 동일 URI는 라벨(language/private/archived/default_branch)만 갱신하고 사용자가 수정한 owner/environment는 보존. `GITHUB_TOKEN` 있으면 private repo 포함 + rate limit 5000/h, 없으면 public 60/h. `GITHUB_ORG` 환경변수로 기본값 채울 수 있음. 백엔드 `POST /api/v1/admin/github-sync/run` 신설(Admin 전용).
 - **GitHub Actions composite action** — `.github/actions/mond-scan/action.yml`. 사용자 repo의 workflow에서 `uses: jland-93/mond/.github/actions/mond-scan@main` 한 줄로 Mond 스캔 트리거. 입력: `mond_host` · `webhook_token` · `asset_id` · `scanner`. 출력: `scan_id` · `status`. backend의 기존 `POST /api/v1/webhooks/personal` 사용. README에 사용 예시 추가.
 - **AI Insights RAG에 Asset 소스 추가** — 자연어 질의 시 RAG가 Asset(이름·URI·설명)도 함께 검색. "우리 nginx 자산" 같은 질문에 자산을 직접 짚어주고, citations에 kind=`asset`(녹색 chip)으로 노출. open_findings 수로 가중 정렬. 기존 Finding · Policy · Knowledge에 더해 4 소스 RAG.
 - **Celery 비동기 스캔 큐** — `SCAN_QUEUE_ENABLED=true`로 켜면 인라인 동기 실행 대신 PENDING Scan 생성 + Celery 큐에 enqueue. 별도 worker(`mond.run_scan` task)가 비동기 실행하고 결과를 DB 업데이트. 대용량/장시간 스캔에서 backend 타임아웃 회피. 기본은 인라인(false)이라 OSS 첫 설치 영향 없음. `docker-compose.yml`에 `worker` 서비스 추가, Helm/Compose 모두 동일 패턴.

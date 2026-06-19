@@ -113,6 +113,8 @@ class Settings(BaseSettings):
     # GitHub API 토큰 — PR comment 작성 + 사설 repo raw fetch 시 사용 (선택).
     # 없으면 SBOM diff는 public repo만 동작하고 PR comment는 skip.
     GITHUB_TOKEN: Optional[str] = None
+    # 자산 자동 동기화 대상 org. 비우면 admin UI에서 매번 입력.
+    GITHUB_ORG: Optional[str] = None
 
     # i18n 기본 언어 (UI 초기 로드 시 사용)
     DEFAULT_LOCALE: str = "ko"
