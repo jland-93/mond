@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- **AI Insights RAG에 Asset 소스 추가** — 자연어 질의 시 RAG가 Asset(이름·URI·설명)도 함께 검색. "우리 nginx 자산" 같은 질문에 자산을 직접 짚어주고, citations에 kind=`asset`(녹색 chip)으로 노출. open_findings 수로 가중 정렬. 기존 Finding · Policy · Knowledge에 더해 4 소스 RAG.
 - **Celery 비동기 스캔 큐** — `SCAN_QUEUE_ENABLED=true`로 켜면 인라인 동기 실행 대신 PENDING Scan 생성 + Celery 큐에 enqueue. 별도 worker(`mond.run_scan` task)가 비동기 실행하고 결과를 DB 업데이트. 대용량/장시간 스캔에서 backend 타임아웃 회피. 기본은 인라인(false)이라 OSS 첫 설치 영향 없음. `docker-compose.yml`에 `worker` 서비스 추가, Helm/Compose 모두 동일 패턴.
 - **SBOM Diff on PR** — GitHub `pull_request` (opened / synchronize / reopened) webhook 이벤트에 변경된 의존성 파일을 감지해 before/after 파싱, 신규/제거/버전 변경을 정리. `GITHUB_TOKEN`이 설정되면 PR에 comment를 달고, FINDING purpose의 Slack 채널이 있으면 Slack에도 알림. 공개 repo는 토큰 없어도 raw fetch 가능.
 - **SBOM 실 의존성 추출** — `package.json` / `package-lock.json` / `requirements.txt` / `go.mod` / Dockerfile 5종 파서. 백엔드 `POST /api/v1/reports/sbom/parse` (filename + content → ecosystem 감지 + 패키지 리스트). Reports 페이지에 "SBOM 파일 파싱" 카드 추가 (붙여넣기 → 추출 → 테이블). 기존 finding 기반 lightweight SBOM은 유지하되 stub Alert 톤을 정직화.
