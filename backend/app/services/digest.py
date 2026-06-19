@@ -71,6 +71,18 @@ async def build_daily_digest(
         + req_count.get(AccessRequestStatus.NEEDS_HUMAN_REVIEW.value, 0)
     )
 
+    # 만료 임박 — 향후 3일 이내 expires_at, 아직 revoke 안 됨, granted 상태.
+    expiring_until = until + timedelta(days=3)
+    expiring_count = int((await session.execute(
+        select(func.count(AccessRequest.id)).where(
+            AccessRequest.status == AccessRequestStatus.GRANTED,
+            AccessRequest.revoked_at.is_(None),
+            AccessRequest.expires_at.is_not(None),
+            AccessRequest.expires_at <= expiring_until,
+            AccessRequest.expires_at >= until,
+        )
+    )).scalar_one() or 0)
+
     return {
         "period": {"since": since.isoformat(), "until": until.isoformat()},
         "findings": {"total": findings_total, "by_severity": by_sev},
@@ -80,6 +92,7 @@ async def build_daily_digest(
             "granted": req_granted,
             "denied": req_denied,
             "pending": req_pending,
+            "expiring_3d": expiring_count,
         },
     }
 
@@ -108,6 +121,8 @@ def format_slack_message(digest: dict) -> dict:
         f"*Scans* — 실행 {s['total']}건, 실패 {s['failed']}건",
         f"*Access Requests* — 신규 {a['total']}건, 승인 {a['granted']}, 거부 {a['denied']}, 대기 {a['pending']}",
     ]
+    if a.get("expiring_3d"):
+        lines.append(f"⏰ 3일 내 만료 권한 {a['expiring_3d']}건 — /me에서 갱신 가능")
     return {"text": "\n".join(lines)}
 
 

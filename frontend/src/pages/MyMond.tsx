@@ -5,8 +5,8 @@
  * 임직원은 한 화면에서 본인 자산·발견·권한·만료 임박을 본다.
  */
 
-import { useQuery } from "@tanstack/react-query";
-import { Card, Col, Empty, List, Row, Space, Tag, Typography } from "antd";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button, Card, Col, Empty, List, Row, Space, Tag, Typography, message } from "antd";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "@/auth/AuthContext";
@@ -31,10 +31,21 @@ async function fetchMe(): Promise<MeOverview> {
 export default function MyMond() {
   const { locale } = useI18n();
   const { user } = useAuth();
+  const qc = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["me-overview"],
     queryFn: fetchMe,
     refetchInterval: 30_000,
+  });
+
+  const renew = useMutation({
+    mutationFn: (requestId: number) => api.post(`/me/access-requests/${requestId}/renew`, {}),
+    onSuccess: () => {
+      message.success(locale === "ko" ? "갱신 요청 제출됨" : "Renewal submitted");
+      qc.invalidateQueries({ queryKey: ["me-overview"] });
+    },
+    onError: (e: Error & { response?: { data?: { detail?: string } } }) =>
+      message.error(e.response?.data?.detail ?? e.message),
   });
 
   const summary = data?.summary;
@@ -187,7 +198,19 @@ export default function MyMond() {
                 size="small"
                 dataSource={data?.expiring_soon ?? []}
                 renderItem={(p) => (
-                  <List.Item>
+                  <List.Item
+                    actions={[
+                      <Button
+                        key="renew"
+                        size="small"
+                        type="link"
+                        loading={renew.isPending && renew.variables === p.id}
+                        onClick={() => renew.mutate(p.id)}
+                      >
+                        {locale === "ko" ? "갱신 요청" : "Renew"}
+                      </Button>,
+                    ]}
+                  >
                     <Space style={{ width: "100%", justifyContent: "space-between" }}>
                       <Text>{p.permission_name}</Text>
                       <Tag color={p.days_left !== null && p.days_left <= 2 ? "red" : "orange"}>
