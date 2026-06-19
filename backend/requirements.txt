@@ -1,42 +1,42 @@
 # 🌙 Mond Backend 의존성
 
 # 웹 프레임워크
-fastapi==0.115.5
-uvicorn[standard]==0.32.1
+fastapi==0.137.2
+uvicorn[standard]==0.49.0
 
 # 데이터베이스
-sqlalchemy[asyncio]==2.0.36
-asyncpg==0.30.0
-alembic==1.14.0
+sqlalchemy[asyncio]==2.0.51
+asyncpg==0.31.0
+alembic==1.18.4
 
 # 백그라운드 작업 & 캐시
-celery==5.4.0
+celery==5.6.3
 redis==5.2.1
 
 # 인증 / 보안
-python-jose[cryptography]==3.3.0
+python-jose[cryptography]==3.5.0
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.20
+python-multipart==0.0.32
 
 # OIDC SSO (Okta · Keycloak · Google · Azure AD …)
-authlib==1.4.1
+authlib==1.7.2
 itsdangerous==2.2.0
-email-validator==2.2.0
+email-validator==2.3.0
 
 # 설정 / 검증
-pydantic==2.10.3
-pydantic-settings==2.7.0
-python-dotenv==1.0.1
+pydantic==2.13.4
+pydantic-settings==2.14.1
+python-dotenv==1.2.2
 
 # HTTP 클라이언트 (스캐너 API 통신 등)
 httpx==0.28.1
 
 # LLM (AI Insights 엔진)
-anthropic==0.42.0
+anthropic==0.109.2
 openai==1.59.7
 
 # AWS IAM 통합 (자격증명 미설정 시 stub 모드로 동작)
-boto3==1.35.71
+boto3==1.43.32
 
 # Kubernetes RBAC 통합 (kubeconfig 또는 in-cluster ServiceAccount, 없으면 stub)
 kubernetes==31.0.0
@@ -45,17 +45,17 @@ kubernetes==31.0.0
 ldap3==2.9.1
 
 # Google Cloud IAM (프로젝트 IAM policy get/set, predefined/custom roles)
-google-cloud-resource-manager==1.13.1
-google-cloud-iam==2.16.1
+google-cloud-resource-manager==1.17.0
+google-cloud-iam==2.23.0
 
 # Azure RBAC (subscription 단위 roleAssignments + roleDefinitions)
-azure-identity==1.19.0
+azure-identity==1.25.3
 azure-mgmt-authorization==4.0.0
 
 # MFA — 패스키(WebAuthn/FIDO2) + TOTP + 백업 코드
-webauthn==2.5.2
-pyotp==2.9.0
-qrcode[pil]==8.0
+webauthn==2.8.0
+pyotp==2.10.0
+qrcode[pil]==8.2
 
 # Model Context Protocol — Claude Desktop/Code 통합
 # FastMCP가 정식 포함된 1.2.0+ 사용
@@ -63,10 +63,10 @@ mcp>=1.2.0,<2.0.0
 
 # 관측성
 structlog==24.4.0
-prometheus-client==0.21.1
+prometheus-client==0.25.0
 
 # 개발 / 테스트
 pytest==8.3.4
 pytest-asyncio==0.24.0
 black==24.10.0
-ruff==0.8.4
+ruff==0.15.17
