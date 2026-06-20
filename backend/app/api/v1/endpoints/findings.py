@@ -21,6 +21,16 @@ from app.services import finding as finding_service
 router = APIRouter()
 
 
+def _to_read(f: Finding) -> FindingRead:
+    """Finding ORM → FindingRead. nested asset 정보까지 응답에 노출."""
+    payload = FindingRead.model_validate(f).model_dump()
+    if f.asset:
+        payload["asset_name"] = f.asset.name
+        payload["asset_type"] = f.asset.asset_type.value
+        payload["asset_environment"] = f.asset.environment
+    return FindingRead.model_validate(payload)
+
+
 @router.get("", response_model=Page[FindingRead])
 async def list_findings(
     limit: int = Query(50, ge=1, le=500),
@@ -42,7 +52,7 @@ async def list_findings(
         scanner=scanner,
     )
     return Page(
-        items=[FindingRead.model_validate(i) for i in items],
+        items=[_to_read(i) for i in items],
         total=total,
         limit=limit,
         offset=offset,
@@ -58,7 +68,7 @@ async def get_finding(
     f = await finding_service.get_finding(db, finding_id)
     if not f:
         raise HTTPException(status_code=404, detail="Finding not found")
-    return FindingRead.model_validate(f)
+    return _to_read(f)
 
 
 @router.patch(
@@ -75,7 +85,7 @@ async def update_finding(
     if not f:
         raise HTTPException(status_code=404, detail="Finding not found")
     updated = await finding_service.update_finding(db, f, payload)
-    return FindingRead.model_validate(updated)
+    return _to_read(updated)
 
 
 @router.patch(
