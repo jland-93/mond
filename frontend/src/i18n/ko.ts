@@ -93,7 +93,7 @@ export const ko = {
     title: "지식 허브",
     desc: "DevSecOps와 보안 규제의 핵심을 카드로 빠르게 익히고, 더 깊은 질문은 바로 Mond AI에게 이어 던지세요. 새 주제는 카드를 자동 생성해 확장됩니다.",
     all: "전체",
-    searchPlaceholder: "검색 — 예: SBOM, GDPR, 시크릿",
+    searchPlaceholder: "검색 — 예: ISMS-P, OWASP A01, SBOM, K-PIPA, 시크릿",
     askAi: "AI에 더 묻기",
     openRef: "참고 자료",
     empty: "조건에 맞는 카드가 없습니다. 카테고리 필터나 검색어를 바꿔보세요.",
