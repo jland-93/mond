@@ -521,7 +521,18 @@ export default function AccessCenter() {
             {
               title: t.iam.fields.identity,
               dataIndex: "target_identity_id",
-              render: (id: number) => identities?.find((x) => x.id === id)?.name ?? id,
+              render: (id: number) => {
+                const i = identities?.find((x) => x.id === id);
+                if (!i) return id;
+                const d = identityDisplay(i);
+                const src = sourceById.get(i.source_id);
+                return (
+                  <Space size={4} wrap>
+                    <Text strong>{d.primary}</Text>
+                    {src && <Tag style={{ marginInlineEnd: 0, fontSize: 11 }}>{src.kind.toUpperCase()}</Tag>}
+                  </Space>
+                );
+              },
             },
             {
               title: t.iam.fields.permission,
@@ -529,14 +540,17 @@ export default function AccessCenter() {
               render: (id: number) => {
                 const p = permissions?.find((x) => x.id === id);
                 if (!p) return id;
+                const d = permissionDisplay(p);
+                const src = sourceById.get(p.source_id);
                 return (
-                  <Space size={4}>
+                  <Space size={4} wrap>
                     {p.risk_hint && (
-                      <Tag color={RISK_COLOR[p.risk_hint]} style={{ marginRight: 0 }}>
-                        {p.risk_hint}
+                      <Tag color={RISK_COLOR[p.risk_hint]} style={{ marginInlineEnd: 0 }}>
+                        {p.risk_hint.toUpperCase()}
                       </Tag>
                     )}
-                    <span>{p.name}</span>
+                    <Text strong>{d.primary}</Text>
+                    {src && <Tag style={{ marginInlineEnd: 0, fontSize: 11 }}>{src.kind.toUpperCase()}</Tag>}
                   </Space>
                 );
               },
