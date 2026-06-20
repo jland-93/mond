@@ -22,7 +22,8 @@ import {
   Typography,
   message,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { useAuth } from "@/auth/AuthContext";
 import { useI18n } from "@/i18n";
@@ -55,6 +56,21 @@ export default function Assets() {
     queryKey: ["assets"],
     queryFn: fetchAssets,
   });
+
+  // AI Insights citation에서 진입 시 ?focus=N → row highlight + scroll
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [focusId, setFocusId] = useState<number | null>(null);
+  useEffect(() => {
+    const id = Number(searchParams.get("focus"));
+    if (!id || !data?.items) return;
+    if (data.items.some((x) => x.id === id)) {
+      setFocusId(id);
+      setSearchParams({}, { replace: true });
+      // 8초 후 highlight 해제
+      const timer = setTimeout(() => setFocusId(null), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [data?.items, searchParams, setSearchParams]);
 
   const create = useMutation({
     mutationFn: (payload: Partial<Asset>) => api.post<Asset>("/assets", payload),
@@ -100,6 +116,7 @@ export default function Assets() {
         loading={isLoading}
         dataSource={data?.items ?? []}
         rowKey="id"
+        rowClassName={(r) => (focusId === r.id ? "mond-row-focus" : "")}
         columns={[
           { title: "ID", dataIndex: "id", width: 70 },
           { title: t.common.name, dataIndex: "name" },

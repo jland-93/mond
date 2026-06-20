@@ -24,7 +24,8 @@ import {
   Typography,
   message,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import {
   api,
@@ -73,6 +74,18 @@ export default function Findings() {
   const [checked, setChecked] = useState<number[]>([]);
 
   const { data, isLoading } = useQuery({ queryKey: ["findings"], queryFn: fetchFindings });
+
+  // AI Insights citation에서 진입할 때 ?focus=N으로 해당 finding drawer 자동 오픈
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const id = Number(searchParams.get("focus"));
+    if (!id || !data?.items) return;
+    const f = data.items.find((x) => x.id === id);
+    if (f) {
+      setSelected(f);
+      setSearchParams({}, { replace: true });
+    }
+  }, [data?.items, searchParams, setSearchParams]);
 
   const { data: insights, refetch: refetchInsights } = useQuery({
     queryKey: ["finding-insights", selected?.id],
