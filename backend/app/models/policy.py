@@ -37,6 +37,10 @@ class Policy(Base, TimestampMixin):
     # 차단 임계치 (이 이상의 severity가 발견되면 게이트 실패)
     severity_threshold: Mapped[str] = mapped_column(String(16), default="medium", nullable=False)
 
+    # 평가 엔진 — "builtin"(severity threshold) 또는 "opa"(Rego).
+    # opa면 definition.rego에 Rego 코드, definition.query에 평가 쿼리(기본 data.mond.deny).
+    engine: Mapped[str] = mapped_column(String(16), default="builtin", nullable=False)
+
     # 정책 정의 — OPA Rego, JSON Schema, semgrep config 등 어댑터가 해석한다.
     definition: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
 

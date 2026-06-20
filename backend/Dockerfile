@@ -34,10 +34,30 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PORT=8000
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        libpq5 curl tini \
+        libpq5 curl ca-certificates tini \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --system --gid 1000 mond \
     && useradd  --system --uid 1000 --gid mond --create-home --home-dir /home/mond mond
+
+# OPA Rego 평가 — 단일 Go 바이너리. arm64/amd64 자동 분기.
+# 미설치 환경도 동작(엔진 'opa' 정책만 비활성)하므로 download 실패 시 build를 끊지 않음.
+ARG OPA_VERSION=v1.17.1
+RUN set -e; \
+    arch="$(uname -m)"; \
+    case "$arch" in \
+      x86_64)  opa_arch=amd64 ;; \
+      aarch64) opa_arch=arm64 ;; \
+      arm64)   opa_arch=arm64 ;; \
+      *)       echo "Skip OPA install for arch=$arch"; exit 0 ;; \
+    esac; \
+    if curl -fsSL -o /usr/local/bin/opa \
+         "https://github.com/open-policy-agent/opa/releases/download/${OPA_VERSION}/opa_linux_${opa_arch}_static"; then \
+      chmod 755 /usr/local/bin/opa; \
+      /usr/local/bin/opa version; \
+    else \
+      echo "OPA download failed — engine 'opa' will be disabled"; \
+      rm -f /usr/local/bin/opa; \
+    fi
 
 COPY --from=deps /opt/venv /opt/venv
 
