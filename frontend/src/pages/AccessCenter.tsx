@@ -31,7 +31,8 @@ import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { useI18n } from "@/i18n";
 import { api } from "@/lib/api";
-import { iamApi, type AccessRequest, type AccessRequestStatus, type IAMIdentity, type IdentityType, type PermissionRow } from "@/lib/iam-api";
+import { iamApi, type AccessRequest, type AccessRequestStatus, type IAMIdentity, type IAMSourceKind, type IdentityType, type PermissionRow } from "@/lib/iam-api";
+import { identityDisplay, permissionDisplay } from "@/lib/iam-display";
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
@@ -143,6 +144,13 @@ export default function AccessCenter() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Source ID → name/kind 매핑 (Option 안의 소스 태그용)
+  const sourceById = useMemo(() => {
+    const m = new Map<number, { name: string; kind: IAMSourceKind }>();
+    for (const s of sources ?? []) m.set(s.id, { name: s.name, kind: s.kind });
+    return m;
+  }, [sources]);
+
   // source 필터에 따른 노출 목록
   const filteredIdentities = useMemo(
     () => (identities ?? []).filter((i) => sourceFilter == null || i.source_id === sourceFilter),
@@ -153,7 +161,7 @@ export default function AccessCenter() {
     [permissions, sourceFilter],
   );
 
-  // Identity OptGroup
+  // Identity OptGroup — IAM Explorer와 같은 헬퍼로 사람이 읽는 이름 + 원본 ID 보조 라인
   const identityGroups = useMemo(() => {
     const map = new Map<IdentityType, IAMIdentity[]>();
     for (const i of filteredIdentities) {
@@ -166,12 +174,74 @@ export default function AccessCenter() {
       .map((t) => ({
         label: TYPE_LABEL[t][locale],
         title: TYPE_LABEL[t][locale],
-        options: (map.get(t) ?? []).map((i) => ({
-          value: i.id,
-          label: i.name,
-        })),
+        options: (map.get(t) ?? []).map((i) => {
+          const d = identityDisplay(i);
+          const src = sourceById.get(i.source_id);
+          const isSso = i.identity_type === "sso_user" || i.identity_type === "sso_group";
+          // searchValue로 원본 ID·display_name 모두 매칭 — Select showSearch가 이걸 사용
+          const searchValue = [d.primary, d.secondary, i.name, i.external_id]
+            .filter(Boolean)
+            .join(" ");
+          return {
+            value: i.id,
+            searchValue,
+            label: (
+              <Space size={6} wrap style={{ width: "100%" }}>
+                <Text strong>{d.primary}</Text>
+                {isSso && <Tag color="magenta" style={{ marginInlineEnd: 0 }}>SSO</Tag>}
+                {src && (
+                  <Tag style={{ marginInlineEnd: 0, fontSize: 11 }}>
+                    {src.kind.toUpperCase()} · {src.name}
+                  </Tag>
+                )}
+                {d.secondary && (
+                  <Text type="secondary" style={{ fontSize: 11, fontFamily: "var(--mond-font-mono, monospace)" }}>
+                    {d.secondary}
+                  </Text>
+                )}
+              </Space>
+            ),
+          };
+        }),
       }));
-  }, [filteredIdentities, locale]);
+  }, [filteredIdentities, locale, sourceById]);
+
+  // Permission options — 권한 이름 + risk 태그 + 소스 + 설명 + 원본 ARN
+  const permissionOptions = useMemo(
+    () =>
+      filteredPermissions.map((p) => {
+        const d = permissionDisplay(p);
+        const src = sourceById.get(p.source_id);
+        const searchValue = [d.primary, d.secondary, p.name, p.external_id, p.description, p.risk_hint]
+          .filter(Boolean)
+          .join(" ");
+        return {
+          value: p.id,
+          searchValue,
+          label: (
+            <Space size={6} wrap style={{ width: "100%" }}>
+              <Text strong>{d.primary}</Text>
+              {p.risk_hint && (
+                <Tag color={RISK_COLOR[p.risk_hint] ?? "default"} style={{ marginInlineEnd: 0 }}>
+                  {p.risk_hint.toUpperCase()}
+                </Tag>
+              )}
+              {src && (
+                <Tag style={{ marginInlineEnd: 0, fontSize: 11 }}>
+                  {src.kind.toUpperCase()} · {src.name}
+                </Tag>
+              )}
+              {p.description && (
+                <Text type="secondary" style={{ fontSize: 11 }}>
+                  {p.description.length > 60 ? `${p.description.slice(0, 60)}…` : p.description}
+                </Text>
+              )}
+            </Space>
+          ),
+        };
+      }),
+    [filteredPermissions, sourceById],
+  );
 
   // 자동 AI 사전 평가 (debounced)
   useEffect(() => {
@@ -267,8 +337,8 @@ export default function AccessCenter() {
           >
             <Select
               showSearch
-              optionFilterProp="label"
-              placeholder={locale === "ko" ? "검색하거나 선택" : "Search or pick"}
+              optionFilterProp="searchValue"
+              placeholder={locale === "ko" ? "이름·이메일·ARN으로 검색" : "Search by name, email, ARN"}
               value={identityId}
               onChange={setIdentityId}
               options={identityGroups}
@@ -288,28 +358,11 @@ export default function AccessCenter() {
           >
             <Select
               showSearch
-              optionFilterProp="label"
-              placeholder={locale === "ko" ? "권한 검색" : "Search permission"}
+              optionFilterProp="searchValue"
+              placeholder={locale === "ko" ? "권한 이름·ARN·설명 검색" : "Search by name, ARN, description"}
               value={permissionId}
               onChange={setPermissionId}
-              options={filteredPermissions.map((p: PermissionRow) => ({
-                value: p.id,
-                label: p.name + (p.risk_hint ? ` · ${p.risk_hint}` : ""),
-                rawRisk: p.risk_hint,
-              }))}
-              optionRender={(option) => {
-                const raw = option.data as { label: string; rawRisk?: string | null };
-                return (
-                  <Space>
-                    {raw.rawRisk && (
-                      <Tag color={RISK_COLOR[raw.rawRisk] || "default"} style={{ marginRight: 0 }}>
-                        {raw.rawRisk}
-                      </Tag>
-                    )}
-                    <span>{raw.label.split(" · ")[0]}</span>
-                  </Space>
-                );
-              }}
+              options={permissionOptions}
             />
           </Form.Item>
 
