@@ -114,6 +114,14 @@ services:
     command: celery -A app.celery_app:celery_app worker --loglevel=info --concurrency=2
     volumes:
       - ./backend:/app
+    # backend Dockerfile의 HTTP healthcheck를 상속하지 않고, Celery ping으로 교체.
+    # worker 컨테이너에는 8000 포트 HTTP 서버가 없으므로 기본값을 따르면 영원히 unhealthy.
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.celery_app:celery_app inspect ping -d celery@$$HOSTNAME -t 5 || exit 1"]
+      interval: 30s
+      timeout: 8s
+      start_period: 20s
+      retries: 3
     restart: unless-stopped
 
   frontend:
