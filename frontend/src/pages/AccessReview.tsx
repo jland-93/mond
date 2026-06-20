@@ -230,7 +230,8 @@ export default function AccessReview() {
                     )}
                     {ai.risk_level && (
                       <Tag color={RISK_COLOR[ai.risk_level as string] ?? "default"} style={{ marginInlineEnd: 0 }}>
-                        {locale === "ko" ? "위험" : "risk"}: {ai.risk_level}
+                        {locale === "ko" ? "위험도" : "risk"}:{" "}
+                        {(t.iam.riskLevels as Record<string, string>)[ai.risk_level as string] ?? ai.risk_level}
                       </Tag>
                     )}
                   </Space>

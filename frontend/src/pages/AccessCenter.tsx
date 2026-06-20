@@ -417,7 +417,8 @@ export default function AccessCenter() {
                   {preview && (
                     <>
                       <Tag color={RISK_COLOR[preview.risk_level] || "default"}>
-                        risk: {preview.risk_level}
+                        {locale === "ko" ? "위험도" : "risk"}:{" "}
+                        {(t.iam.riskLevels as Record<string, string>)[preview.risk_level] ?? preview.risk_level}
                       </Tag>
                       <Tag>
                         {locale === "ko"
@@ -484,7 +485,10 @@ export default function AccessCenter() {
                 <div>
                   <Tag color="purple">{t.iam.aiDecision}</Tag>
                   <Tag color={RISK_COLOR[r.ai_decision.risk_level ?? "medium"]}>
-                    risk: {r.ai_decision.risk_level ?? "—"}
+                    {locale === "ko" ? "위험도" : "risk"}:{" "}
+                    {r.ai_decision.risk_level
+                      ? ((t.iam.riskLevels as Record<string, string>)[r.ai_decision.risk_level] ?? r.ai_decision.risk_level)
+                      : "—"}
                   </Tag>
                   {r.ai_decision.decision && (
                     <Tag>
