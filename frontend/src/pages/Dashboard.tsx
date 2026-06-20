@@ -26,6 +26,7 @@ import {
 import MoonPhase, { phaseForSeverity } from "@/components/MoonPhase";
 import { useI18n } from "@/i18n";
 import { api, type DashboardOverview, type Severity } from "@/lib/api";
+import NextSteps from "@/pages/dashboard/NextSteps";
 
 const { Text } = Typography;
 
@@ -94,6 +95,8 @@ export default function Dashboard() {
       <Text style={{ color: "var(--fg-tertiary)", fontSize: 12, letterSpacing: "0.08em" }}>
         DASHBOARD
       </Text>
+
+      <NextSteps overview={data} />
 
       {/* Hero — Moon score + 7일 area chart */}
       <section className="mond-tile mond-hero3d">
