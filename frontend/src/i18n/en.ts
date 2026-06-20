@@ -363,7 +363,14 @@ export const en: Dict = {
       deny: "Deny",
     },
     riskLevels: { critical: "Critical", high: "High", medium: "Medium", low: "Low" },
-    identityTypes: { user: "User", role: "Role", service_account: "Service account", group: "Group" },
+    identityTypes: {
+      user: "User",
+      role: "Role",
+      service_account: "Service account",
+      group: "Group",
+      sso_user: "SSO user",
+      sso_group: "SSO group",
+    },
   },
 
   settings: {

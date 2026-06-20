@@ -26,6 +26,7 @@ import {
   Typography,
 } from "antd";
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { useAuth } from "@/auth/AuthContext";
 import { useI18n } from "@/i18n";
@@ -57,13 +58,22 @@ const RISK_COLOR: Record<string, string> = {
   low: "green",
 };
 
-const TYPE_ORDER: IdentityType[] = ["user", "role", "service_account", "group"];
+const TYPE_ORDER: IdentityType[] = [
+  "user",
+  "sso_user",
+  "role",
+  "service_account",
+  "group",
+  "sso_group",
+];
 
 const TYPE_LABEL: Record<IdentityType, { ko: string; en: string }> = {
   user: { ko: "사용자", en: "Users" },
   role: { ko: "역할", en: "Roles" },
   service_account: { ko: "서비스 계정", en: "Service accounts" },
   group: { ko: "그룹", en: "Groups" },
+  sso_user: { ko: "SSO 사용자 (Identity Center 등)", en: "SSO users" },
+  sso_group: { ko: "SSO 그룹 (Identity Center 등)", en: "SSO groups" },
 };
 
 interface PreviewResp {
@@ -107,6 +117,31 @@ export default function AccessCenter() {
   useEffect(() => {
     if (user?.email) form.setFieldValue("requester", user.email);
   }, [user, form]);
+
+  // IAM Explorer의 "권한 요청" CTA에서 진입했을 때 URL 파라미터로 사전 채움
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const pid = Number(searchParams.get("permission_id"));
+    const sid = Number(searchParams.get("source_id"));
+    const iid = Number(searchParams.get("identity_id"));
+    let touched = false;
+    if (pid && Number.isFinite(pid)) {
+      setPermissionId(pid);
+      form.setFieldValue("permission", pid);
+      touched = true;
+    }
+    if (sid && Number.isFinite(sid)) {
+      setSourceFilter(sid);
+      touched = true;
+    }
+    if (iid && Number.isFinite(iid)) {
+      setIdentityId(iid);
+      form.setFieldValue("identity", iid);
+      touched = true;
+    }
+    if (touched) setSearchParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // source 필터에 따른 노출 목록
   const filteredIdentities = useMemo(

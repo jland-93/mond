@@ -308,7 +308,8 @@ export const ko = {
     accessCenterDesc:
       "필요한 IAM 권한을 신청하면 Claude가 1차로 위험을 평가하고, 필요 시 보안 담당자가 승인합니다.",
     iamExplorerTitle: "IAM 탐색",
-    iamExplorerDesc: "가져온 IAM 사용자/역할과 부여 가능한 권한을 둘러봅니다.",
+    iamExplorerDesc:
+      "회사 IAM·SSO·디렉토리에서 가져온 계정(Identity)과 신청 가능한 권한(Permission)을 한 곳에서 봅니다. 필요한 권한을 찾으면 옆의 '권한 요청' 버튼으로 바로 신청하세요.",
     accessReviewTitle: "권한 검토",
     accessReviewDesc: "AI가 담당자 검토로 넘긴 요청을 보안 담당자가 승인/거부합니다.",
     fields: {
@@ -362,7 +363,14 @@ export const ko = {
       deny: "거부",
     },
     riskLevels: { critical: "치명적", high: "높음", medium: "중간", low: "낮음" },
-    identityTypes: { user: "사용자", role: "역할", service_account: "서비스 계정", group: "그룹" },
+    identityTypes: {
+      user: "사용자",
+      role: "역할",
+      service_account: "서비스 계정",
+      group: "그룹",
+      sso_user: "SSO 사용자",
+      sso_group: "SSO 그룹",
+    },
   },
 
   settings: {

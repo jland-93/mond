@@ -14,7 +14,13 @@ export interface IAMCapability {
   revoke: boolean;
   note: string;
 }
-export type IdentityType = "user" | "role" | "service_account" | "group";
+export type IdentityType =
+  | "user"
+  | "role"
+  | "service_account"
+  | "group"
+  | "sso_user"
+  | "sso_group";
 export type AccessRequestStatus =
   | "pending_ai_review"
   | "ai_auto_approved"
