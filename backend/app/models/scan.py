@@ -62,6 +62,10 @@ class Scan(Base, TimestampMixin):
     raw_output: Mapped[dict | None] = mapped_column(JSON)
     error_message: Mapped[str | None] = mapped_column(Text)
 
+    # webhook push에서 자동 스캐너 선택이 발생한 경우 라우터 결정 근거(reason/counts/fallback).
+    # router_decision이 None이면 사용자가 명시적으로 scanner를 지정한 manual/AI 트리거.
+    router_decision: Mapped[dict | None] = mapped_column(JSON)
+
     asset: Mapped["Asset"] = relationship(back_populates="scans", lazy="joined")
     findings: Mapped[list["Finding"]] = relationship(
         back_populates="scan",

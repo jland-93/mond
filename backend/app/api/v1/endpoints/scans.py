@@ -12,11 +12,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.deps import current_user, require_role
 from app.core.database import get_db
 from app.models.user import Role, User
+from app.models.scan import Scan
 from app.schemas.scan import ScanCreate, ScanRead
 from app.services import asset as asset_service
 from app.services import scan as scan_service
 
 router = APIRouter()
+
+
+def _to_read(s: Scan) -> ScanRead:
+    """Scan ORM → ScanRead. asset.name까지 nested로 채워서 응답에 노출."""
+    payload = ScanRead.model_validate(s).model_dump()
+    payload["asset_name"] = s.asset.name if s.asset else None
+    return ScanRead.model_validate(payload)
 
 
 @router.get("", response_model=list[ScanRead])
@@ -28,7 +36,7 @@ async def list_scans(
     db: AsyncSession = Depends(get_db),
 ) -> list[ScanRead]:
     scans = await scan_service.list_scans(db, limit=limit, offset=offset, asset_id=asset_id)
-    return [ScanRead.model_validate(s) for s in scans]
+    return [_to_read(s) for s in scans]
 
 
 @router.post(
@@ -43,7 +51,7 @@ async def trigger_scan(payload: ScanCreate, db: AsyncSession = Depends(get_db)) 
     scan = await scan_service.trigger_scan(
         db, asset=asset, scanner_name=payload.scanner, trigger=payload.trigger
     )
-    return ScanRead.model_validate(scan)
+    return _to_read(scan)
 
 
 @router.get("/{scan_id}", response_model=ScanRead)
@@ -55,4 +63,4 @@ async def get_scan(
     scan = await scan_service.get_scan(db, scan_id)
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
-    return ScanRead.model_validate(scan)
+    return _to_read(scan)

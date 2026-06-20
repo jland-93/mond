@@ -151,6 +151,7 @@ async def github_webhook(
         asset=asset,
         scanner_name=scanner_name,
         trigger=ScanTrigger.WEBHOOK,
+        router_decision=decision,
     )
     return {
         "matched": True,

@@ -19,6 +19,7 @@ class ScanCreate(BaseModel):
 class ScanRead(Timestamped):
     id: int
     asset_id: int
+    asset_name: str | None = None  # 화면에서 ID 대신 이름으로 노출
     scanner: str
     trigger: ScanTrigger
     status: ScanStatus
@@ -27,3 +28,5 @@ class ScanRead(Timestamped):
     duration_ms: int | None = None
     findings_count: int = 0
     error_message: str | None = None
+    # webhook 자동 스캐너 선택의 근거 (reason / counts / fallback). manual/AI에는 None.
+    router_decision: dict | None = None
