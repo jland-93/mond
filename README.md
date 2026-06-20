@@ -408,7 +408,7 @@ class MyAdapter(ScannerAdapter):
 - [ ] 비동기 스캔 큐 (Celery) — 인라인 실행 대체
 - [x] OPA Rego 정책 평가 — Dockerfile에 OPA v1.x 번들 + Policy.engine="opa"로 Rego 평가
 - [x] 자산 자동 동기화 — GitHub org (Kubernetes / AWS Auto-scaling는 v0.3)
-- [ ] Webhook push 이벤트 → diff 분석 후 적절한 스캐너 선택
+- [x] Webhook push 이벤트 → diff 분석 후 적절한 스캐너 선택 (semgrep · trivy · nuclei 자동 라우팅)
 - [ ] CI 통합 패키지 (GitHub Actions / GitLab CI step)
 - [x] Rate limiting / abuse protection (login · AI · webhook · github-sync)
 - [x] AI 프롬프트 PII redaction — 외부 LLM provider로 보내기 전 이메일/전화/RRN/AWS키/토큰 자동 마스킹
