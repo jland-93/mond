@@ -34,3 +34,7 @@ class FindingRead(FindingBase, Timestamped):
     id: int
     status: FindingStatus
     fingerprint: str
+    # 화면에서 ID 대신 자산 이름·타입·환경을 보여주기 위한 nested 정보
+    asset_name: str | None = None
+    asset_type: str | None = None
+    asset_environment: str | None = None

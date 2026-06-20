@@ -52,6 +52,9 @@ export interface Asset {
 export interface Finding {
   id: number;
   asset_id: number;
+  asset_name?: string | null;
+  asset_type?: string | null;
+  asset_environment?: string | null;
   scan_id?: number | null;
   rule_id: string;
   title: string;
