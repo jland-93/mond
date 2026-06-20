@@ -29,7 +29,12 @@ from app.models.scan import ScanTrigger
 from app.models.user import Role
 from app.models.slack import SlackPurpose
 from app.models.webhook_token import WebhookToken
-from app.services import sbom_diff, scan as scan_service, slack as slack_service
+from app.services import (
+    sbom_diff,
+    scan as scan_service,
+    slack as slack_service,
+    webhook_router,
+)
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -130,10 +135,21 @@ async def github_webhook(
         logger.info("webhook_no_matching_asset", url=html_url)
         return {"matched": False, "repository": html_url}
 
+    # push 이벤트에서 변경 파일을 뽑아 스캐너 자동 선택.
+    changed_files = webhook_router.files_from_push_payload(payload)
+    scanner_name, decision = webhook_router.pick_scanner(asset, changed_files)
+    logger.info(
+        "webhook_scanner_routed",
+        asset_id=asset.id,
+        scanner=scanner_name,
+        files=len(changed_files),
+        **decision,
+    )
+
     scan = await scan_service.trigger_scan(
         db,
         asset=asset,
-        scanner_name="trivy",
+        scanner_name=scanner_name,
         trigger=ScanTrigger.WEBHOOK,
     )
     return {
@@ -141,6 +157,8 @@ async def github_webhook(
         "asset_id": asset.id,
         "scan_id": scan.id,
         "status": scan.status.value,
+        "scanner": scanner_name,
+        "router_decision": decision,
     }
 
 
