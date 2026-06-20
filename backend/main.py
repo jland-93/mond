@@ -39,6 +39,7 @@ async def lifespan(app: FastAPI):
             "ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP WITH TIME ZONE",
             "ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS revoked_at TIMESTAMP WITH TIME ZONE",
             "ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS revoke_result JSON DEFAULT '{}'::json NOT NULL",
+            "ALTER TABLE policies ADD COLUMN IF NOT EXISTS engine VARCHAR(16) DEFAULT 'builtin' NOT NULL",
         ):
             await conn.execute(text(ddl))
 

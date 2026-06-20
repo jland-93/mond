@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.ai.client import current_model_label, get_provider, is_enabled
 from app.core.database import get_db
 from app.scanners.registry import list_scanners
+from app.services import opa as opa_service
 
 router = APIRouter()
 
@@ -15,6 +16,14 @@ router = APIRouter()
 @router.get("/scanners")
 async def list_scanner_integrations() -> dict:
     return {"scanners": list_scanners()}
+
+
+@router.get("/opa")
+async def opa_integration_status() -> dict:
+    return {
+        "available": opa_service.is_available(),
+        "binary": opa_service.opa_binary(),
+    }
 
 
 @router.get("/ai")

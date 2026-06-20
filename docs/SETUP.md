@@ -746,6 +746,43 @@ scan 트리거 시 backend가 즉시 `PENDING` Scan을 반환하고, worker가 `
 
 운영 (Helm) — 별도 Deployment로 worker를 띄우고 `replicaCount`로 동시 처리량 조절. concurrency는 `command: celery -A app.celery_app:celery_app worker --concurrency=N`로 worker 인스턴스 안에서 조절.
 
+### 8-4) OPA Rego 정책 평가
+
+backend Docker 이미지에 OPA v1.x 정적 바이너리(`/usr/local/bin/opa`)가 번들되어 있다. Helm/Compose 둘 다 추가 설치 불필요.
+
+가용성 확인:
+```bash
+curl -s http://localhost:8000/api/v1/integrations/opa
+# {"available": true, "binary": "/usr/local/bin/opa"}
+```
+
+#### 정책 만들기 (REVIEWER+)
+
+```http
+POST /api/v1/policies
+{
+  "name": "Block known critical CVE",
+  "policy_type": "custom",
+  "enabled": true,
+  "severity_threshold": "low",
+  "engine": "opa",
+  "definition": {
+    "rego": "package mond\ndeny contains msg if {\n  some f in input.findings\n  f.rule_id == \"CVE-2024-0001\"\n  msg := sprintf(\"blocked %s (%s)\", [f.rule_id, f.severity])\n}\n",
+    "query": "data.mond.deny"
+  }
+}
+```
+
+#### 시뮬레이션
+
+`POST /api/v1/policy/simulate` 호출 시 `engine="opa"` 정책은 OPA로 평가되고, 응답 result의 `engine`/`reason`/`matched` 필드에 OPA가 반환한 deny 메시지가 들어간다.
+
+#### 제약
+
+- Rego v1 문법 (OPA v1.0+ 표준). 과거 `import future.keywords.if` 같은 import는 불필요/금지
+- 평가 timeout 8초 — 무한 루프/큰 데이터 방지
+- input 스키마는 `{"findings": [{"rule_id", "severity", "scanner"}]}` 고정
+
 ### 8-3) AI 프롬프트 PII redaction
 
 기본 활성. 사용자 쿼리가 외부 LLM provider로 가기 직전에 PII와 시크릿을 placeholder로 치환한다.

@@ -80,6 +80,30 @@ DEMO_POLICIES = [
         "definition": {"rules": ["AKIA[0-9A-Z]{16}", "-----BEGIN.*PRIVATE KEY-----"]},
         "compliance_refs": ["OWASP-A02"],
     },
+    {
+        # OPA Rego 데모 — Trivy의 특정 rule_id를 deny.
+        # OPA 바이너리가 backend 이미지에 함께 빌드되어 즉시 평가 가능.
+        # 비활성으로 시드해 OSS 첫 부팅에 영향 없음; Admin UI에서 활성화.
+        "name": "Sample OPA — Deny Trivy CVE-2024-0001",
+        "policy_type": PolicyType.CUSTOM,
+        "description": "OPA Rego 평가 데모 — 특정 CVE rule_id가 발견되면 deny",
+        "enabled": False,
+        "severity_threshold": "low",
+        "engine": "opa",
+        "definition": {
+            "rego": """package mond
+
+# OPA v1 Rego — keywords가 기본 포함이므로 import 불필요
+deny contains msg if {
+    some f in input.findings
+    f.rule_id == "CVE-2024-0001"
+    msg := sprintf("blocked vulnerability %s (%s)", [f.rule_id, f.severity])
+}
+""",
+            "query": "data.mond.deny",
+        },
+        "compliance_refs": [],
+    },
 ]
 
 

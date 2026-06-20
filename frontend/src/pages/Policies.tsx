@@ -90,6 +90,14 @@ export default function Policies() {
             },
             { title: t.policies.threshold, dataIndex: "severity_threshold", width: 120 },
             {
+              title: "engine",
+              dataIndex: "engine",
+              width: 110,
+              render: (v: string) => (
+                <Tag color={v === "opa" ? "geekblue" : "default"}>{v || "builtin"}</Tag>
+              ),
+            },
+            {
               title: t.common.enabled,
               dataIndex: "enabled",
               render: (v: boolean) => <Switch checked={v} disabled />,
