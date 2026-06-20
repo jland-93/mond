@@ -135,6 +135,19 @@ def attach(source: IAMSource, identity: IAMIdentity, permission: Permission) -> 
     try:
         import uuid
         client = AuthorizationManagementClient(cred, subscription_id=sub)
+
+        # 멱등성 — 동일 scope/principal/role 조합이 이미 있으면 그대로 success
+        for ra in client.role_assignments.list_for_scope(scope=scope):
+            if ra.principal_id == principal_id and ra.role_definition_id == role_def_id:
+                return AttachResult(
+                    success=True,
+                    detail={
+                        "assignment_name": ra.name,
+                        "scope": scope,
+                        "already": True,
+                    },
+                )
+
         assignment_name = str(uuid.uuid4())
         client.role_assignments.create(
             scope=scope,
@@ -148,7 +161,14 @@ def attach(source: IAMSource, identity: IAMIdentity, permission: Permission) -> 
         )
         return AttachResult(success=True, detail={"assignment_name": assignment_name, "scope": scope})
     except Exception as exc:
-        return AttachResult(success=False, detail={"error": str(exc)})
+        msg = str(exc)
+        # Azure가 race로 RoleAssignmentExists를 반환하면 success로 흡수
+        if "RoleAssignmentExists" in msg or "already exists" in msg.lower():
+            return AttachResult(
+                success=True,
+                detail={"scope": scope, "already": True, "raced": True},
+            )
+        return AttachResult(success=False, detail={"error": msg})
 
 
 def detach(source: IAMSource, identity: IAMIdentity, permission: Permission) -> AttachResult:
