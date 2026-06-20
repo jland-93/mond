@@ -306,7 +306,7 @@ export const ko = {
   iam: {
     accessCenterTitle: "권한 요청",
     accessCenterDesc:
-      "필요한 IAM 권한을 신청하면 Claude가 1차로 위험을 평가하고, 필요 시 보안 담당자가 승인합니다.",
+      "필요한 IAM 권한을 셀프서비스로 신청합니다. AI가 1차로 위험도를 평가해 안전한 건은 즉시 자동 승인, 검토가 필요한 건만 보안 담당자에게 전달됩니다.",
     iamExplorerTitle: "IAM 탐색",
     iamExplorerDesc:
       "회사 IAM·SSO·디렉토리에서 가져온 계정(Identity)과 신청 가능한 권한(Permission)을 한 곳에서 봅니다. 필요한 권한을 찾으면 옆의 '권한 요청' 버튼으로 바로 신청하세요.",
@@ -356,7 +356,7 @@ export const ko = {
     revokeNow: "지금 회수",
     sweepExpired: "만료된 권한 즉시 회수",
     sweepDone: "만료 회수 처리됨",
-    durationHint: "값을 비우면 영구 권한, 값을 넣으면 만료 후 자동 회수됩니다.",
+    durationHint: "임시 권한 — 시간(h) 단위. 8 입력 시 승인 8시간 후 자동 회수. 비우면 만료 없는 영구 권한(비추천).",
     decisions: {
       auto_approve: "자동 승인",
       needs_human: "담당자 검토 필요",

@@ -306,9 +306,16 @@ export default function AccessCenter() {
           </Form.Item>
 
           {/* Source 필터 — 전체 또는 특정 연동 */}
-          <Form.Item label={locale === "ko" ? "연동 필터" : "Source filter"}>
+          <Form.Item
+            label={locale === "ko" ? "어디서 권한이 필요한가요?" : "Where do you need access?"}
+            extra={
+              locale === "ko"
+                ? "AWS·GCP·Azure·Kubernetes·사내 LDAP 중 어떤 시스템인지 고르세요. 비워두면 전체 연동에서 검색합니다."
+                : undefined
+            }
+          >
             <Select
-              placeholder={locale === "ko" ? "전체 연동" : "All sources"}
+              placeholder={locale === "ko" ? "전체 연동 (모든 시스템에서 검색)" : "All sources"}
               allowClear
               value={sourceFilter ?? undefined}
               onChange={(v) => {
@@ -328,9 +335,14 @@ export default function AccessCenter() {
           <Form.Item
             label={
               <Space>
-                <span>{t.iam.fields.identity}</span>
+                <span>{locale === "ko" ? "어떤 계정/역할에 부여할까요?" : t.iam.fields.identity}</span>
                 <Tag>{filteredIdentities.length}</Tag>
               </Space>
+            }
+            extra={
+              locale === "ko"
+                ? "본인 또는 본인이 담당하는 IAM 계정/역할/서비스 계정을 선택. Identity Center로 들어온 SSO 사용자는 자홍색 'SSO' 태그로 표시됩니다."
+                : undefined
             }
             name="identity"
             required
@@ -349,9 +361,14 @@ export default function AccessCenter() {
           <Form.Item
             label={
               <Space>
-                <span>{t.iam.fields.permission}</span>
+                <span>{locale === "ko" ? "어떤 권한이 필요한가요?" : t.iam.fields.permission}</span>
                 <Tag>{filteredPermissions.length}</Tag>
               </Space>
+            }
+            extra={
+              locale === "ko"
+                ? "ADMIN(전체 권한) · WRITE(쓰기/수정) · READ(읽기) 등 위험도가 태그로 표시됩니다. 필요한 최소 권한만 고르세요."
+                : undefined
             }
             name="permission"
             required
@@ -366,7 +383,11 @@ export default function AccessCenter() {
             />
           </Form.Item>
 
-          <Form.Item label={t.iam.fields.duration} name="duration_hours" extra={t.iam.durationHint}>
+          <Form.Item
+            label={locale === "ko" ? "얼마나 오래 쓸 건가요? (시간)" : t.iam.fields.duration}
+            name="duration_hours"
+            extra={t.iam.durationHint}
+          >
             <InputNumber
               min={1}
               max={720}
@@ -378,13 +399,22 @@ export default function AccessCenter() {
           </Form.Item>
 
           <Form.Item
-            label={t.iam.fields.reason}
+            label={locale === "ko" ? "왜 필요한가요? (사유)" : t.iam.fields.reason}
             name="reason"
             rules={[{ required: true, min: 5 }]}
+            extra={
+              locale === "ko"
+                ? "구체적으로 — 어떤 작업·티켓·인시던트 때문인지. 사유가 자세할수록 AI가 자동 승인 가능성이 높아집니다."
+                : undefined
+            }
           >
             <TextArea
               rows={3}
-              placeholder={locale === "ko" ? "이 권한이 왜 필요한지 구체적으로 적어주세요." : "Why do you need this permission?"}
+              placeholder={
+                locale === "ko"
+                  ? "예: 'INC-1234 장애 대응 — production EC2 로그 확인 필요. ReadOnly 24시간.'"
+                  : "Why do you need this permission?"
+              }
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
@@ -423,10 +453,10 @@ export default function AccessCenter() {
                       <Tag>
                         {locale === "ko"
                           ? preview.expected_status === "granted"
-                            ? "→ 즉시 승인 예상"
+                            ? "제출하면 자동 승인 예상"
                             : preview.expected_status === "needs_human_review"
-                              ? "→ 관리자 검토 필요"
-                              : "→ 거부 예상"
+                              ? "담당자 검토로 넘어갈 예정"
+                              : "제출해도 거부될 가능성 높음"
                           : `→ ${preview.expected_status}`}
                       </Tag>
                       <Text type="secondary" style={{ fontSize: 12 }}>
@@ -447,7 +477,7 @@ export default function AccessCenter() {
               style={{ marginBottom: 12 }}
               message={
                 locale === "ko"
-                  ? "이 권한은 admin/root 등급입니다. 사유를 가능한 한 구체적으로 작성하세요."
+                  ? "ADMIN 등급 — 모든 작업이 가능한 권한입니다. 사유에 작업 범위·기간·티켓 번호를 구체적으로 적어주세요. 가능하면 더 좁은 권한(READ/WRITE)으로 대체할 수 있는지 검토하세요."
                   : "This is an admin/root-level permission. Describe the reason as specifically as possible."
               }
             />
