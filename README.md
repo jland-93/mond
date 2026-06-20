@@ -82,7 +82,7 @@
 
 - **무엇을 푸는가** — DevSecOps 도구가 너무 흩어져 있고, 발견사항이 너무 많고, 의사결정은 너무 느립니다. Mond는 **AI가 1차 분석**해서 **사람이 결정만** 하면 되는 흐름을 만듭니다.
 - **어떻게 다른가** — 클라우드 / 스캐너 / AI provider / IdP — 어디에도 묶이지 않습니다. 어댑터로 갈아끼우고, 한국어가 1급 시민입니다.
-- **어디로 가는가** — 자산 자동 동기화, RAG 기반 AI Insights, OPA Rego 평가, CI 패키지로 확장합니다.
+- **어디로 가는가** — v0.2(Unreleased): 자산 자동 동기화 · RAG 기반 AI Insights · OPA Rego 평가 · CI 패키지 · SBOM diff · 스캐너 자동 라우팅 등 11개 항목 완료. v0.3: 멀티 클러스터 K8s 자동 동기화, AWS Auto-scaling, 한국 규제 1급 지원.
 
 > 📖 **자세한 이야기는 → [docs/ABOUT.md](docs/ABOUT.md)**
 > 🛠️ **설치·운영 가이드 → [docs/SETUP.md](docs/SETUP.md)**
@@ -402,26 +402,27 @@ class MyAdapter(ScannerAdapter):
 - [x] Helm 차트 (charts/mond) + 운영용 멀티스테이지 Docker 이미지
 - [x] AI provider 추상화 — Anthropic · OpenAI · AWS Bedrock · Ollama(로컬)
 
-### v0.2 로드맵
-- [ ] SBOM 실 의존성 추출 (package.json · go.mod · Dockerfile 파싱)
-- [ ] AI Insights RAG — 조직 문서/정책을 검색해 응답 근거화
-- [ ] 비동기 스캔 큐 (Celery) — 인라인 실행 대체
-- [x] OPA Rego 정책 평가 — Dockerfile에 OPA v1.x 번들 + Policy.engine="opa"로 Rego 평가
-- [x] 자산 자동 동기화 — GitHub org (Kubernetes / AWS Auto-scaling는 v0.3)
+### v0.2 로드맵 — 완료 (Unreleased)
+- [x] SBOM 실 의존성 추출 — `package.json` · `package-lock.json` · `requirements.txt` · `go.mod` · `Dockerfile` 5종 파서 + Reports UI
+- [x] SBOM Diff on PR — `pull_request` 이벤트에 신규/제거/버전 변경 추출 + PR comment + Slack
+- [x] AI Insights RAG — Asset · Finding · Policy · Knowledge 4 소스 검색 + `[N]` 인용
+- [x] 비동기 스캔 큐 (Celery) — `SCAN_QUEUE_ENABLED=true`로 enqueue, 별도 worker
+- [x] OPA Rego 정책 평가 — backend Dockerfile에 OPA v1.x 번들 + `Policy.engine="opa"`로 Rego 평가
+- [x] 자산 자동 동기화 — GitHub org (Kubernetes / AWS Auto-scaling은 v0.3)
 - [x] Webhook push 이벤트 → diff 분석 후 적절한 스캐너 선택 (semgrep · trivy · nuclei 자동 라우팅)
-- [ ] CI 통합 패키지 (GitHub Actions / GitLab CI step)
-- [x] Rate limiting / abuse protection (login · AI · webhook · github-sync)
-- [x] AI 프롬프트 PII redaction — 외부 LLM provider로 보내기 전 이메일/전화/RRN/AWS키/토큰 자동 마스킹
+- [x] CI 통합 패키지 — `.github/actions/mond-scan` composite action 한 줄 통합
+- [x] Rate limiting / abuse protection — login · AI · webhook · github-sync (Redis 기반)
+- [x] AI 프롬프트 PII redaction — 외부 LLM 호출 전 이메일/전화/RRN/AWS키/토큰 자동 마스킹
 - [x] GCP / Azure IAM 어댑터 권한 부여(grant) 완성도 보강 — 멱등성 + etag 충돌 재시도
 
-## 🧪 Known Limitations (v0.1.0)
+## 🧪 Known Limitations
 
-신뢰성 측면에서 정직하게 밝혀둡니다.
+v0.1.0 시점의 한계와 v0.2(Unreleased)에서 해소된 항목을 함께 기록합니다.
 
-- **SBOM** — 현재 CycloneDX-lite stub. 실 의존성 추출은 v0.2 (UI에 experimental 배지 표시)
-- **스캐너** — 동기 인라인 실행. 대용량/장시간 스캔은 타임아웃 위험. 큐 도입은 v0.2
-- **AI Insights** — provider 호출은 동작하지만 응답에 RAG(조직 문서 검색)는 미적용 — hallucination 위험을 인지하고 인간 검토와 함께 사용 권장. AI 생성 카드는 ADMIN 전용
-- **IAM 어댑터** — AWS · K8s · LDAP/AD는 권한 부여/회수 완성. GCP · Azure는 보강 중 (capability API가 `ready`/`coming_soon`/`demo`를 정직하게 노출)
+- **SBOM** — ~~v0.1: CycloneDX-lite stub~~ → **v0.2 해소**: 5종 ecosystem 실 파서 + Reports UI + PR diff
+- **스캐너** — ~~v0.1: 동기 인라인 실행~~ → **v0.2 해소**: Celery 큐 옵션 (`SCAN_QUEUE_ENABLED`)
+- **AI Insights** — ~~v0.1: RAG 미적용~~ → **v0.2 해소**: 4 소스 RAG + inline citation. hallucination 위험 인지·인간 검토 권장은 유지. AI 생성 카드는 ADMIN 전용
+- **IAM 어댑터** — ~~v0.1: GCP/Azure 보강 중~~ → **v0.2 해소**: 5종 모두 멱등성 + etag 재시도. capability API는 `ready`/`coming_soon`/`demo`를 그대로 노출
 - **테스트 커버리지** — 의도적으로 낮음 (MVP). 기여 환영
 - **정책 템플릿의 규제 매핑** — 참고용 출발점이며 법적 자문이 아닙니다
 
