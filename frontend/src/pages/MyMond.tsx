@@ -131,7 +131,21 @@ export default function MyMond() {
             {(data?.my_assets?.length ?? 0) === 0 ? (
               <Empty
                 description={
-                  locale === "ko" ? "owner=내 이메일인 자산이 없습니다" : "No assets owned by you"
+                  <Space direction="vertical" align="center" size={4}>
+                    <Text strong>
+                      {locale === "ko" ? "담당 중인 자산이 없습니다" : "No assets owned by you"}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {locale === "ko"
+                        ? "자산의 owner 필드에 본인 이메일을 등록하면 이 카드에 표시됩니다."
+                        : "Set owner=your email on an asset to see it here."}
+                    </Text>
+                    <Link to="/assets">
+                      <Button size="small" type="primary">
+                        {locale === "ko" ? "자산 보기" : "View assets"}
+                      </Button>
+                    </Link>
+                  </Space>
                 }
               />
             ) : (
@@ -166,7 +180,20 @@ export default function MyMond() {
             style={{ marginBottom: 12 }}
           >
             {(data?.recent_findings?.length ?? 0) === 0 ? (
-              <Empty description={locale === "ko" ? "조용한 하루입니다" : "Quiet day"} />
+              <Empty
+                description={
+                  <Space direction="vertical" align="center" size={4}>
+                    <Text strong>
+                      {locale === "ko" ? "조용한 하루입니다" : "Quiet day"}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {locale === "ko"
+                        ? "본인이 owner인 자산에 새 발견사항이 생기면 여기에 표시됩니다."
+                        : "Findings on assets you own will appear here."}
+                    </Text>
+                  </Space>
+                }
+              />
             ) : (
               <List
                 size="small"
@@ -192,7 +219,20 @@ export default function MyMond() {
             extra={<Link to="/access-center">{locale === "ko" ? "갱신 요청" : "Renew"}</Link>}
           >
             {(data?.expiring_soon?.length ?? 0) === 0 ? (
-              <Empty description={locale === "ko" ? "임박한 만료 없음" : "Nothing expiring soon"} />
+              <Empty
+                description={
+                  <Space direction="vertical" align="center" size={4}>
+                    <Text strong>
+                      {locale === "ko" ? "7일 안에 만료될 권한 없음" : "Nothing expiring in 7 days"}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {locale === "ko"
+                        ? "만료가 가까워지면 갱신 요청 버튼이 여기에 보입니다."
+                        : "When permissions are nearing expiry, you'll be able to request renewal here."}
+                    </Text>
+                  </Space>
+                }
+              />
             ) : (
               <List
                 size="small"
@@ -232,7 +272,25 @@ export default function MyMond() {
             extra={<Link to="/access-center">{locale === "ko" ? "센터" : "Center"}</Link>}
           >
             {(data?.my_requests?.length ?? 0) === 0 ? (
-              <Empty description={locale === "ko" ? "권한 요청 없음" : "No requests"} />
+              <Empty
+                description={
+                  <Space direction="vertical" align="center" size={4}>
+                    <Text strong>
+                      {locale === "ko" ? "아직 요청한 권한이 없습니다" : "You haven't requested any access yet"}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {locale === "ko"
+                        ? "필요한 IAM 권한을 셀프서비스로 신청 — AI가 안전한 건은 즉시 자동 승인합니다."
+                        : "Request IAM access — AI auto-approves low-risk items instantly."}
+                    </Text>
+                    <Link to="/access-center">
+                      <Button size="small" type="primary">
+                        {locale === "ko" ? "권한 요청 시작" : "Start a request"}
+                      </Button>
+                    </Link>
+                  </Space>
+                }
+              />
             ) : (
               <List
                 size="small"
