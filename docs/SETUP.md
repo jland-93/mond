@@ -701,7 +701,10 @@ GitHub repo Settings → Webhooks:
 - **Events**: `push` + `pull_request` 둘 다 체크
 
 #### 동작
-- `push` 이벤트 — 매칭 자산이 있으면 Trivy 스캔 자동 트리거
+- `push` 이벤트 — 매칭 자산이 있으면 변경 파일 기반으로 **스캐너 자동 선택**. 응답·로그에 `scanner`와 `router_decision`(reason/counts/fallback) 포함
+  - **REPOSITORY 자산**: SAST 파일(`.py`/`.go`/`.ts`/`.java`/`.rs`/`.rb`/`.php`/`.cs`/`.c`/`.cpp`...) 비중이 다른 카테고리 합보다 많으면 → **semgrep**. SCA(`package.json`/`requirements.txt`/`go.mod`/`pom.xml`/`Gemfile`/`Cargo.toml`...) · IaC(`.tf`/`.tfvars`/`.hcl`) · Container(`Dockerfile`/`*.dockerfile`) 변경 우세 또는 분류 불가 → **trivy**
+  - **CONTAINER_IMAGE 자산** → 항상 trivy
+  - **URL 자산** → nuclei (없으면 trivy fallback)
 - `pull_request` (opened / synchronize / reopened) — 변경된 의존성 파일(`package.json` / `package-lock.json` / `requirements.txt` / `go.mod` / `Dockerfile`)에서 before/after를 파싱해 **신규 / 제거 / 버전 변경**을 추출. `GITHUB_TOKEN`이 있으면 PR에 comment를 달고, FINDING purpose의 Slack 채널이 설정되어 있으면 Slack에도 알림.
 
 **Skip 옵션**: 수동 스캔으로 충분하면 webhook 없이도 OK.
