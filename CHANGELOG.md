@@ -7,9 +7,16 @@
 ## [Unreleased]
 
 ### Changed
+- **IAM Explorer 가시화 + Identity Center 지원** — 외부 시스템 import 식별자(ARN/UUID/LDAP DN)를 사람이 읽는 이름으로 노출(`displayName`/`email`/`mail`/ARN tail/LDAP RDN/UUID 단축). Identity Center · Azure AD · Okta SCIM 등 SSO federation은 `IdentityType.SSO_USER`/`SSO_GROUP`으로 분리하고 자홍색 `SSO` 태그로 표기. Source segmented 필터 + 통합 검색(이름·이메일·ARN·설명 매칭). Permission 행에 inline `권한 요청` CTA → `/access-center?permission_id=...` 자동 채움. `iam-display.ts` 헬퍼 재사용으로 Access Center dropdown(대상·요청 권한 옵션)과 Access Review(검토 큐 행)도 동일 톤. 위험도 `critical`/`high`는 행 좌측 색띠로 즉시 인지.
+- **Access Center · Access Review UX 폴리시** — 신청자/검토자 양쪽 라벨·hint·placeholder를 사람이 헷갈리지 않게 한국어로 다시 정리. 폼 라벨이 질문형('어떤 권한이 필요한가요?' / '얼마나 오래 쓸 건가요?' / '왜 필요한가요?'), 사유 placeholder는 실제 인시던트 예시로, ADMIN 권한 warning은 작업 범위·기간·티켓 번호를 명시 + 더 좁은 권한 검토 권고. AI 사전 평가 chip은 화살표 표기 대신 '제출하면 자동 승인 예상' 같은 자연스러운 문장. AccessReview는 AI 결정(verdict + risk + reason)을 카드 형태로 강조 + 위험도 색띠. status 라벨(`granted` → '권한 부여 완료', `expired_revoked` → '만료 후 자동 회수', `needs_human_review` → '담당자 검토 대기' 등) 정리.
+- **MyMond 빈 상태 카드 친화화** — 신규 임직원이 `/me` 처음 진입 시 4 카드 모두 빈 상태에서 '없습니다'만 보이던 것을 친절한 설명 + CTA로. '담당 중인 자산이 없습니다 → 자산 보기' · '아직 요청한 권한이 없습니다 → 권한 요청 시작' · '7일 안에 만료될 권한 없음' · '조용한 하루입니다'.
+- **Reports SBOM 두 카드 차이 명확화** — 자산 단위 다운로드는 orange `experimental`(stale) → 회색 `자산 기반 (요약본)`로 톤다운, 의존성 파서 카드는 녹색 `실 추출` 태그 + 'CI SBOM diff와 동일 파서' 안내 추가. 두 카드의 역할이 한눈에 구분.
+- **위험도·상태 라벨 한국어 통일** — `risk: high`처럼 페이지마다 raw 영어로 섞이던 표기를 `t.iam.riskLevels` 번역으로 일괄 한국어화('위험도: 높음/중간/낮음'). AccessReview · AccessCenter 사전 평가 · 내 요청 expand 모두 동일.
 - **GCP/Azure IAM grant 어댑터 완성도 보강** — GCP `attach`/`detach`는 read-modify-write etag 충돌(`aborted`/`etag`/`concurrent`/`conflict` 힌트)을 최대 3회 재시도. 이미 부여된 member는 즉시 success(idempotent). detach 시 binding이 비면 자동 제거. identity prefix(`user:`/`group:`/`serviceAccount:`) 자동 normalize. Azure `attach`는 동일 `(scope, principal, role)`이 이미 있으면 그대로 success로 흡수하고, race로 `RoleAssignmentExists`가 나도 success로 처리. unit test 6 케이스.
 
 ### Added
+- **`IdentityType.SSO_USER` · `SSO_GROUP`** — AWS IAM Identity Center / Azure AD / Okta SCIM 등 외부 IdP federation 식별자 구분용. backend 모델 + Pydantic schema + i18n 라벨('SSO 사용자' / 'SSO 그룹')에 추가. AWS provider stub에 Identity Center 샘플 2건 + `attributes.display_name`/`email` 포함.
+- **라우트별 코드 스플릿** — 22개 페이지를 `React.lazy + import()`로 분리. 첫 로드 index 1834KB(457KB gz) → **684KB(227KB gz)**, three.js 873KB는 Moon3D hero가 있는 `/login`에서만 로드. `vite.config.ts` manualChunks로 `vendor-three`만 분리, 나머지는 rollup 자동 처리(circular dep 회피). \`chunkSizeWarningLimit: 1024\`.
 - **Webhook push → 스캐너 자동 선택** — GitHub push 이벤트의 `commits[*].{added,modified,removed}`를 모아 파일 카테고리 분류(SAST: `.py`/`.go`/`.js`/`.ts`/`.java`/`.rs`/... · SCA: `package.json`/`requirements.txt`/`go.mod`/`pom.xml`/... · IaC: `.tf`/`.tfvars`/`.hcl` · Container: `Dockerfile`/`*.dockerfile`). REPOSITORY 자산은 SAST 파일이 다른 카테고리 합보다 많으면 **semgrep**, 그 외(SCA/IaC/Container 변경 우세 또는 분류 불가)는 **trivy**. CONTAINER_IMAGE는 항상 trivy, URL은 nuclei→trivy fallback. 응답 + 로그에 `scanner` + `router_decision`(reason/counts/fallback) 포함. unit test 9 케이스.
 - **OPA Rego 정책 평가** — Policy 모델에 `engine` 컬럼 추가(`builtin`/`opa`). `engine="opa"`인 정책은 `definition.rego` (필수) + `definition.query` (선택, 기본 `data.mond.deny`)를 OPA 바이너리(subprocess, 8s timeout)로 평가하고 `deny`가 1건 이상이면 차단. backend Dockerfile에 OPA v1.17.1 정적 바이너리 번들(amd64/arm64). `GET /api/v1/integrations/opa`로 가용성 확인, Policies UI에 `engine` 배지(`opa` 청색). 시드에 `Sample OPA — Deny Trivy CVE-2024-0001` 비활성 데모 포함. lightweight migration(`ALTER TABLE policies ADD COLUMN IF NOT EXISTS engine ...`)로 기존 설치 자동 호환. OPA 다운로드 실패 시 build를 끊지 않고 graceful disable.
 - **AI 프롬프트 PII redaction** — 외부 LLM provider(Anthropic/OpenAI/Bedrock/Ollama 등)로 사용자 쿼리를 보내기 전 이메일·한국 전화번호·주민등록번호·AWS access/secret key·GitHub token·일반 API token(`sk-`/`pat_`)·JWT·Luhn 통과 신용카드 번호를 자동 마스킹. 마스킹된 종류와 건수는 응답 `redactions` 필드로 노출되고 AI Insights UI에 `redacted email:N` 같은 chip으로 표시. `AI_PROMPT_REDACT_PII=false`로 끌 수 있음(기본 켜짐). RAG는 원본으로 검색하고 LLM에는 마스킹본만 전달.
@@ -42,8 +49,16 @@
 - `/integrations` 라우트와 `Integrations.tsx` 페이지 제거. Admin → Connections로 일원화된 뒤 dead code였음. 외부 링크가 있던 경우 `/admin/connections`로 이동.
 
 ### Fixed
+- `docker-compose.yml` worker 컨테이너 healthcheck — backend Dockerfile의 HTTP healthcheck(curl `:8000/health`)를 상속해 영원히 `unhealthy`로 표시되던 것을 `celery -A app.celery_app:celery_app inspect ping`으로 교체. `start_period: 20s`로 부팅 여유.
+- `frontend/package-lock.json` 재생성 — react-router-dom 7 · recharts 3 · openai 2 · kubernetes 36 · eslint 10 등 다수 dependabot PR 누적 머지로 `package.json` ↔ lockfile 불일치 → `npm ci` 실패. lockfile 갱신으로 정합.
 - `frontend/Dockerfile`: nginx-unprivileged 1.27이 `/etc/nginx/conf.d`를 read-only로 만들어 발생한 envsubst 실패를 표준 `templates/` 패턴으로 해결. `docker-compose` 포트 매핑도 `3000:8080`으로 정렬.
 - `backend/app/services/me.py`: unused `sqlalchemy.func` / `or_` import 제거 (ruff F401).
+
+### Dependencies
+- 프론트엔드 메이저 — `react-router-dom` 6 → 7 · `recharts` 2 → 3 · `eslint` 9 → 10 · `@tanstack/react-query`/`antd` 패치
+- 백엔드 메이저 — `openai` 1 → 2 · `kubernetes` 31 → 36 · `pytest` 8.3 → 8.4.2 · `pytest-asyncio` 0.24 → 1.4 (동반 bump)
+- GitHub Actions — `docker/login-action` 3 → 4 · `docker/build-push-action` 6 → 7 · `actions/setup-node` 5 → 6 · `github/codeql-action` 3 → 4 · `actions/labeler` 5 → 6
+- `@types/react` 18 → 19는 `react@18` 환경 유지를 위해 보류(React 19 마이그레이션 시 4종 묶음으로).
 
 ### Refactored
 - `backend/app/iam/providers.py` 1,154줄을 패키지로 분해 — `base.py` + provider별 5 파일(`aws/k8s/ldap/gcp/azure`) + `registry.py`. 공개 import path는 그대로.

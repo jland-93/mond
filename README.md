@@ -403,6 +403,8 @@ class MyAdapter(ScannerAdapter):
 - [x] AI provider 추상화 — Anthropic · OpenAI · AWS Bedrock · Ollama(로컬)
 
 ### v0.2 로드맵 — 완료 (Unreleased)
+
+핵심 기능:
 - [x] SBOM 실 의존성 추출 — `package.json` · `package-lock.json` · `requirements.txt` · `go.mod` · `Dockerfile` 5종 파서 + Reports UI
 - [x] SBOM Diff on PR — `pull_request` 이벤트에 신규/제거/버전 변경 추출 + PR comment + Slack
 - [x] AI Insights RAG — Asset · Finding · Policy · Knowledge 4 소스 검색 + `[N]` 인용
@@ -414,6 +416,15 @@ class MyAdapter(ScannerAdapter):
 - [x] Rate limiting / abuse protection — login · AI · webhook · github-sync (Redis 기반)
 - [x] AI 프롬프트 PII redaction — 외부 LLM 호출 전 이메일/전화/RRN/AWS키/토큰 자동 마스킹
 - [x] GCP / Azure IAM 어댑터 권한 부여(grant) 완성도 보강 — 멱등성 + etag 충돌 재시도
+
+UX·가시화 보강:
+- [x] IAM Explorer 가시화 — ARN/UUID/LDAP DN을 사람이 읽는 이름으로(`displayName`/email/ARN tail/RDN/UUID 단축). Source segmented 필터 + 통합 검색 + Permission inline `권한 요청` CTA
+- [x] AWS IAM Identity Center 지원 — `IdentityType.SSO_USER`/`SSO_GROUP` 분리 + 자홍색 `SSO` 태그
+- [x] Access Center 폼 친화화 — 질문형 라벨('어떤 권한이 필요한가요?'·'얼마나 오래 쓸 건가요?'·'왜 필요한가요?') + 실제 인시던트 예시 placeholder
+- [x] Access Review 위험도 색띠 — `critical`/`high` 행 좌측 색띠, AI 결정(verdict + risk + reason) 카드 형식
+- [x] MyMond 빈 상태 카드 친화화 — 신규 임직원이 첫 진입 시 '담당 자산이 없습니다 → 자산 보기', '아직 요청한 권한이 없습니다 → 권한 요청 시작' CTA
+- [x] 위험도·상태 라벨 한국어 통일 — `risk: high` → `위험도: 높음`, `granted` → `권한 부여 완료` 등
+- [x] 라우트별 코드 스플릿 — 첫 로드 1834KB → **684KB** (63% 감소). three.js 873KB는 Moon3D hero 화면에서만 lazy 로드
 
 ## 🧪 Known Limitations
 
