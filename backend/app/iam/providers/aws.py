@@ -206,6 +206,20 @@ def _stub() -> FetchResult:
             FetchedIdentity(identity_type=IdentityType.USER, name="bob", external_id="arn:aws:iam::000000000000:user/bob"),
             FetchedIdentity(identity_type=IdentityType.ROLE, name="DeveloperRole", external_id="arn:aws:iam::000000000000:role/DeveloperRole"),
             FetchedIdentity(identity_type=IdentityType.ROLE, name="ReadOnlyRole", external_id="arn:aws:iam::000000000000:role/ReadOnlyRole"),
+            # Identity Center (구 SSO) — Azure AD/Okta 등에서 federation으로 들어온 사람 식별자.
+            # principalId는 UUID, attributes에 display_name·email이 들어 있어 화면에서 사람 이름으로 보임.
+            FetchedIdentity(
+                identity_type=IdentityType.SSO_USER,
+                name="charlie@corp.com",
+                external_id="d4b86c70-1c4e-4a2b-9c5e-7a3f1e8d2c9b",
+                attributes={"display_name": "Charlie Kim", "email": "charlie@corp.com", "source": "identity_center"},
+            ),
+            FetchedIdentity(
+                identity_type=IdentityType.SSO_GROUP,
+                name="aws-platform-admins",
+                external_id="9b1f3d44-2e5a-4c0a-83a1-7b2c6f9d4e1a",
+                attributes={"display_name": "Platform Admins (Identity Center)", "source": "identity_center"},
+            ),
         ],
         permissions=[
             FetchedPermission(name="ReadOnlyAccess", external_id="arn:aws:iam::aws:policy/ReadOnlyAccess", risk_hint="read", description="모든 AWS 리소스 읽기"),

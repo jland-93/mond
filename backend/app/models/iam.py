@@ -63,6 +63,10 @@ class IdentityType(str, enum.Enum):
     ROLE = "role"
     SERVICE_ACCOUNT = "service_account"
     GROUP = "group"
+    # AWS IAM Identity Center (구 SSO) — federated user / group.
+    # Azure AD / Entra ID 계열, Okta SCIM 동기화 등 다양한 외부 IdP에서 import된 식별자.
+    SSO_USER = "sso_user"
+    SSO_GROUP = "sso_group"
 
 
 class IAMIdentity(Base, TimestampMixin):
