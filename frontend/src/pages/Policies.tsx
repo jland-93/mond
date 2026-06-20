@@ -6,7 +6,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Card, Empty, Input, Segmented, Space, Switch, Table, Tag, Typography } from "antd";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { useI18n } from "@/i18n";
 import { api, type Policy } from "@/lib/api";
@@ -30,6 +31,20 @@ export default function Policies() {
   const [query, setQuery] = useState("");
 
   const { data, isLoading } = useQuery({ queryKey: ["policies"], queryFn: fetchPolicies });
+
+  // AI Insights citation에서 진입 시 ?focus=N → row highlight
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [focusId, setFocusId] = useState<number | null>(null);
+  useEffect(() => {
+    const id = Number(searchParams.get("focus"));
+    if (!id || !data) return;
+    if (data.some((p) => p.id === id)) {
+      setFocusId(id);
+      setSearchParams({}, { replace: true });
+      const timer = setTimeout(() => setFocusId(null), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [data, searchParams, setSearchParams]);
   const { data: frameworks } = useQuery({
     queryKey: ["policy-templates-frameworks"],
     queryFn: policyTemplatesApi.frameworks,
@@ -77,6 +92,7 @@ export default function Policies() {
           loading={isLoading}
           dataSource={filteredPolicies}
           rowKey="id"
+          rowClassName={(r) => (focusId === r.id ? "mond-row-focus" : "")}
           locale={{
             emptyText: <Empty description={locale === "ko" ? "정책이 없습니다" : "No policies"} />,
           }}

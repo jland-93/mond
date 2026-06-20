@@ -276,3 +276,16 @@ a:hover {
 .mond-row-high td:first-child {
   box-shadow: inset 3px 0 0 0 var(--severity-high, #f29142);
 }
+
+/* AI Insights citation에서 deep-link 진입한 행을 8초간 강조 */
+.mond-row-focus td:first-child {
+  box-shadow: inset 3px 0 0 0 var(--mond-source-ai, #6a4cff);
+}
+.mond-row-focus td {
+  background: color-mix(in oklab, var(--mond-source-ai, #6a4cff) 8%, transparent) !important;
+  animation: mond-focus-fade 8s ease-out forwards;
+}
+@keyframes mond-focus-fade {
+  0% { background: color-mix(in oklab, var(--mond-source-ai, #6a4cff) 16%, transparent); }
+  100% { background: transparent; }
+}
