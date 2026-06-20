@@ -67,9 +67,16 @@ export interface Finding {
   updated_at: string;
 }
 
+export interface RouterDecision {
+  reason: string;
+  counts: { sca: number; container: number; iac: number; sast: number; unknown: number };
+  fallback: boolean;
+}
+
 export interface Scan {
   id: number;
   asset_id: number;
+  asset_name?: string | null;
   scanner: string;
   trigger: string;
   status: ScanStatus;
@@ -78,6 +85,7 @@ export interface Scan {
   duration_ms?: number | null;
   findings_count: number;
   error_message?: string | null;
+  router_decision?: RouterDecision | null;
   created_at: string;
   updated_at: string;
 }

@@ -48,12 +48,16 @@ async def trigger_scan(
     asset: Asset,
     scanner_name: str,
     trigger: ScanTrigger = ScanTrigger.MANUAL,
+    router_decision: dict | None = None,
 ) -> Scan:
     """스캔을 시작한다.
 
     기본은 인라인 동기 실행 — 빠르게 끝나는 단일 자산 스캔에 적합.
     `SCAN_QUEUE_ENABLED=true`면 PENDING 상태로 Scan만 만들고 Celery 큐에 enqueue,
     worker가 비동기로 실행. 운영의 대용량/장시간 스캔에서 backend 타임아웃 회피.
+
+    router_decision은 webhook push가 자동 스캐너 선택을 한 경우의 근거
+    (reason/counts/fallback). manual/AI 트리거에는 None.
     """
     adapter = get_scanner(scanner_name)
     if adapter is None:
@@ -63,6 +67,7 @@ async def trigger_scan(
             trigger=trigger,
             status=ScanStatus.FAILED,
             error_message=f"Unknown scanner: {scanner_name}",
+            router_decision=router_decision,
         )
         db.add(scan)
         await db.commit()
@@ -75,6 +80,7 @@ async def trigger_scan(
             scanner=scanner_name,
             trigger=trigger,
             status=ScanStatus.FAILED,
+            router_decision=router_decision,
             error_message=(
                 f"Scanner '{scanner_name}'은 자산 타입 '{asset.asset_type.value}'을 지원하지 않습니다."
             ),
@@ -91,6 +97,7 @@ async def trigger_scan(
             scanner=scanner_name,
             trigger=trigger,
             status=ScanStatus.PENDING,
+            router_decision=router_decision,
         )
         db.add(scan)
         await db.commit()
@@ -108,6 +115,7 @@ async def trigger_scan(
         trigger=trigger,
         status=ScanStatus.RUNNING,
         started_at=datetime.now(timezone.utc),
+        router_decision=router_decision,
     )
     db.add(scan)
     await db.commit()

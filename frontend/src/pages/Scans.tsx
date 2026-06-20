@@ -2,15 +2,17 @@
  * Scans — 스캔 이력 + 트리거
  */
 
-import { ThunderboltOutlined } from "@ant-design/icons";
+import { RobotOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Form,
   Modal,
   Select,
+  Space,
   Table,
   Tag,
+  Tooltip,
   Typography,
   message,
 } from "antd";
@@ -19,9 +21,16 @@ import { useState } from "react";
 import { useI18n } from "@/i18n";
 import { api, type Asset, type Page, type Scan } from "@/lib/api";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const SCANNERS = ["trivy", "semgrep", "nuclei"];
+
+const TRIGGER_COLOR: Record<string, string> = {
+  manual: "default",
+  scheduled: "blue",
+  webhook: "purple",
+  ai: "magenta",
+};
 
 async function fetchScans(): Promise<Scan[]> {
   const { data } = await api.get<Scan[]>("/scans", { params: { limit: 100 } });
@@ -82,10 +91,48 @@ export default function Scans() {
         loading={isLoading}
         dataSource={data ?? []}
         rowKey="id"
+        expandable={{
+          rowExpandable: (r) => !!r.router_decision || !!r.error_message,
+          expandedRowRender: (r) => (
+            <Space direction="vertical" size={6} style={{ paddingBlock: 4 }}>
+              {r.router_decision && (
+                <Space size={6} wrap>
+                  <Tag color="purple" icon={<RobotOutlined />}>
+                    auto-router
+                  </Tag>
+                  <Text>{r.router_decision.reason}</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    SAST {r.router_decision.counts.sast} · SCA {r.router_decision.counts.sca} ·
+                    Container {r.router_decision.counts.container} · IaC {r.router_decision.counts.iac} ·
+                    기타 {r.router_decision.counts.unknown}
+                  </Text>
+                  {r.router_decision.fallback && (
+                    <Tag color="default" style={{ fontSize: 11 }}>
+                      fallback
+                    </Tag>
+                  )}
+                </Space>
+              )}
+              {r.error_message && (
+                <Text type="danger" style={{ fontSize: 12 }}>
+                  {r.error_message}
+                </Text>
+              )}
+            </Space>
+          ),
+        }}
         columns={[
           { title: "ID", dataIndex: "id", width: 70 },
-          { title: t.common.asset, dataIndex: "asset_id", width: 110 },
-          { title: t.common.scanner, dataIndex: "scanner", width: 140 },
+          {
+            title: t.common.asset,
+            dataIndex: "asset_name",
+            render: (name: string | null | undefined, r: Scan) => (
+              <Tooltip title={`asset_id=${r.asset_id}`}>
+                <Text>{name || `#${r.asset_id}`}</Text>
+              </Tooltip>
+            ),
+          },
+          { title: t.common.scanner, dataIndex: "scanner", width: 120 },
           {
             title: t.common.status,
             dataIndex: "status",
@@ -94,20 +141,33 @@ export default function Scans() {
                 {s}
               </Tag>
             ),
-            width: 120,
+            width: 110,
           },
           {
             title: t.scans.trigger,
             dataIndex: "trigger",
-            render: (v: string) => <Tag>{v}</Tag>,
-            width: 110,
+            render: (v: string, r: Scan) => (
+              <Space size={4}>
+                <Tag color={TRIGGER_COLOR[v] ?? "default"} style={{ marginInlineEnd: 0 }}>
+                  {v}
+                </Tag>
+                {r.router_decision && (
+                  <Tooltip title={r.router_decision.reason}>
+                    <Tag color="purple" style={{ marginInlineEnd: 0 }} icon={<RobotOutlined />}>
+                      auto
+                    </Tag>
+                  </Tooltip>
+                )}
+              </Space>
+            ),
+            width: 150,
           },
-          { title: t.scans.findingsCount, dataIndex: "findings_count", width: 110 },
+          { title: t.scans.findingsCount, dataIndex: "findings_count", width: 100 },
           {
             title: t.scans.duration,
             dataIndex: "duration_ms",
             render: (v: number | null) => (v ? `${v} ms` : "—"),
-            width: 110,
+            width: 100,
           },
           {
             title: t.common.when,
