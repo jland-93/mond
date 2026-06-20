@@ -33,7 +33,7 @@ httpx==0.28.1
 
 # LLM (AI Insights 엔진)
 anthropic==0.109.2
-openai==1.59.7
+openai==2.43.0
 
 # AWS IAM 통합 (자격증명 미설정 시 stub 모드로 동작)
 boto3==1.43.32
