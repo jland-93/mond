@@ -130,6 +130,29 @@ def fetch(source: IAMSource) -> FetchResult:
     return FetchResult(identities=identities, permissions=permissions)
 
 
+# IAM policy는 다른 클라이언트가 동시에 수정할 수 있어 etag 충돌이 가끔 난다.
+# read-modify-write를 짧은 backoff로 최대 3회 재시도.
+_MAX_RETRIES = 3
+# etag mismatch · ABORTED는 GCP가 이렇게 알려준다.
+_RETRYABLE_HINTS = ("aborted", "etag", "concurrent", "conflict")
+
+
+def _normalize_member(identity: IAMIdentity) -> str:
+    """member는 'user:alice@corp.com' 같이 prefix가 있어야 한다.
+    external_id에 이미 prefix가 있으면 그대로, 아니면 identity_type에 따라 prefix 추가."""
+    raw = identity.external_id or identity.name
+    if not raw:
+        return ""
+    if ":" in raw:
+        return raw
+    prefix_map = {
+        IdentityType.USER: "user",
+        IdentityType.GROUP: "group",
+        IdentityType.SERVICE_ACCOUNT: "serviceAccount",
+    }
+    return f"{prefix_map.get(identity.identity_type, 'user')}:{raw}"
+
+
 def attach(source: IAMSource, identity: IAMIdentity, permission: Permission) -> AttachResult:
     project_id = (source.config or {}).get("project_id")
     if not project_id:
@@ -146,30 +169,46 @@ def attach(source: IAMSource, identity: IAMIdentity, permission: Permission) -> 
     except ImportError:
         return AttachResult(success=False, detail={"error": "google-cloud SDK not installed"})
 
-    member = identity.external_id or identity.name
+    member = _normalize_member(identity)
     role = permission.external_id or permission.name
     if not (member and role):
         return AttachResult(success=False, detail={"error": "missing member/role"})
 
-    try:
-        projects = resourcemanager_v3.ProjectsClient()
-        resource = f"projects/{project_id}"
-        policy = projects.get_iam_policy(request=iam_policy_pb2.GetIamPolicyRequest(resource=resource))
-        target = None
-        for b in policy.bindings:
-            if b.role == role:
-                target = b
-                break
-        if target is None:
-            target = policy_pb2.Binding(role=role, members=[member])
-            policy.bindings.append(target)
-        else:
-            if member not in target.members:
+    resource = f"projects/{project_id}"
+
+    last_error: str | None = None
+    for attempt in range(1, _MAX_RETRIES + 1):
+        try:
+            projects = resourcemanager_v3.ProjectsClient()
+            policy = projects.get_iam_policy(
+                request=iam_policy_pb2.GetIamPolicyRequest(resource=resource)
+            )
+            target = next((b for b in policy.bindings if b.role == role), None)
+            if target is not None and member in target.members:
+                # 이미 부여됨 — 멱등성 success
+                return AttachResult(
+                    success=True,
+                    detail={"resource": resource, "role": role, "member": member, "already": True},
+                )
+            if target is None:
+                policy.bindings.append(policy_pb2.Binding(role=role, members=[member]))
+            else:
                 target.members.append(member)
-        projects.set_iam_policy(request=iam_policy_pb2.SetIamPolicyRequest(resource=resource, policy=policy))
-        return AttachResult(success=True, detail={"resource": resource, "role": role, "member": member})
-    except Exception as exc:
-        return AttachResult(success=False, detail={"error": str(exc)})
+            projects.set_iam_policy(
+                request=iam_policy_pb2.SetIamPolicyRequest(resource=resource, policy=policy)
+            )
+            return AttachResult(
+                success=True,
+                detail={"resource": resource, "role": role, "member": member, "attempt": attempt},
+            )
+        except Exception as exc:
+            msg = str(exc).lower()
+            last_error = str(exc)
+            if attempt < _MAX_RETRIES and any(h in msg for h in _RETRYABLE_HINTS):
+                logger.info("gcp_iam_retry", attempt=attempt, error=last_error[:200])
+                continue
+            return AttachResult(success=False, detail={"error": last_error, "attempt": attempt})
+    return AttachResult(success=False, detail={"error": last_error or "unknown", "attempt": _MAX_RETRIES})
 
 
 def detach(source: IAMSource, identity: IAMIdentity, permission: Permission) -> AttachResult:
@@ -188,20 +227,43 @@ def detach(source: IAMSource, identity: IAMIdentity, permission: Permission) -> 
     except ImportError:
         return AttachResult(success=False, detail={"error": "google-cloud SDK not installed"})
 
-    member = identity.external_id or identity.name
+    member = _normalize_member(identity)
     role = permission.external_id or permission.name
+    resource = f"projects/{project_id}"
 
-    try:
-        projects = resourcemanager_v3.ProjectsClient()
-        resource = f"projects/{project_id}"
-        policy = projects.get_iam_policy(request=iam_policy_pb2.GetIamPolicyRequest(resource=resource))
-        for b in policy.bindings:
-            if b.role == role and member in b.members:
-                b.members.remove(member)
-        projects.set_iam_policy(request=iam_policy_pb2.SetIamPolicyRequest(resource=resource, policy=policy))
-        return AttachResult(success=True, detail={"resource": resource, "role": role, "member": member})
-    except Exception as exc:
-        return AttachResult(success=False, detail={"error": str(exc)})
+    last_error: str | None = None
+    for attempt in range(1, _MAX_RETRIES + 1):
+        try:
+            projects = resourcemanager_v3.ProjectsClient()
+            policy = projects.get_iam_policy(
+                request=iam_policy_pb2.GetIamPolicyRequest(resource=resource)
+            )
+            target = next((b for b in policy.bindings if b.role == role), None)
+            if target is None or member not in target.members:
+                # 이미 없음 — 멱등성 success
+                return AttachResult(
+                    success=True,
+                    detail={"resource": resource, "role": role, "member": member, "already_absent": True},
+                )
+            target.members.remove(member)
+            # binding이 비면 제거 (GCP 정책상 빈 binding은 거부될 수 있음)
+            if not target.members:
+                policy.bindings.remove(target)
+            projects.set_iam_policy(
+                request=iam_policy_pb2.SetIamPolicyRequest(resource=resource, policy=policy)
+            )
+            return AttachResult(
+                success=True,
+                detail={"resource": resource, "role": role, "member": member, "attempt": attempt},
+            )
+        except Exception as exc:
+            msg = str(exc).lower()
+            last_error = str(exc)
+            if attempt < _MAX_RETRIES and any(h in msg for h in _RETRYABLE_HINTS):
+                logger.info("gcp_iam_retry", attempt=attempt, error=last_error[:200])
+                continue
+            return AttachResult(success=False, detail={"error": last_error, "attempt": attempt})
+    return AttachResult(success=False, detail={"error": last_error or "unknown", "attempt": _MAX_RETRIES})
 
 
 def _stub(reason: str | None = None) -> FetchResult:

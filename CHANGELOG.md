@@ -6,6 +6,9 @@
 
 ## [Unreleased]
 
+### Changed
+- **GCP/Azure IAM grant 어댑터 완성도 보강** — GCP `attach`/`detach`는 read-modify-write etag 충돌(`aborted`/`etag`/`concurrent`/`conflict` 힌트)을 최대 3회 재시도. 이미 부여된 member는 즉시 success(idempotent). detach 시 binding이 비면 자동 제거. identity prefix(`user:`/`group:`/`serviceAccount:`) 자동 normalize. Azure `attach`는 동일 `(scope, principal, role)`이 이미 있으면 그대로 success로 흡수하고, race로 `RoleAssignmentExists`가 나도 success로 처리. unit test 6 케이스.
+
 ### Added
 - **OPA Rego 정책 평가** — Policy 모델에 `engine` 컬럼 추가(`builtin`/`opa`). `engine="opa"`인 정책은 `definition.rego` (필수) + `definition.query` (선택, 기본 `data.mond.deny`)를 OPA 바이너리(subprocess, 8s timeout)로 평가하고 `deny`가 1건 이상이면 차단. backend Dockerfile에 OPA v1.17.1 정적 바이너리 번들(amd64/arm64). `GET /api/v1/integrations/opa`로 가용성 확인, Policies UI에 `engine` 배지(`opa` 청색). 시드에 `Sample OPA — Deny Trivy CVE-2024-0001` 비활성 데모 포함. lightweight migration(`ALTER TABLE policies ADD COLUMN IF NOT EXISTS engine ...`)로 기존 설치 자동 호환. OPA 다운로드 실패 시 build를 끊지 않고 graceful disable.
 - **AI 프롬프트 PII redaction** — 외부 LLM provider(Anthropic/OpenAI/Bedrock/Ollama 등)로 사용자 쿼리를 보내기 전 이메일·한국 전화번호·주민등록번호·AWS access/secret key·GitHub token·일반 API token(`sk-`/`pat_`)·JWT·Luhn 통과 신용카드 번호를 자동 마스킹. 마스킹된 종류와 건수는 응답 `redactions` 필드로 노출되고 AI Insights UI에 `redacted email:N` 같은 chip으로 표시. `AI_PROMPT_REDACT_PII=false`로 끌 수 있음(기본 켜짐). RAG는 원본으로 검색하고 LLM에는 마스킹본만 전달.
