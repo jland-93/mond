@@ -268,3 +268,11 @@ a:hover {
   .mond-tagline-long { display: none !important; }
   .mond-user-name { display: none !important; }
 }
+
+/* AccessReview 위험도 행 강조 — critical 빨강, high 주황 좌측 경계 색띠. */
+.mond-row-critical td:first-child {
+  box-shadow: inset 3px 0 0 0 var(--severity-critical, #e8484a);
+}
+.mond-row-high td:first-child {
+  box-shadow: inset 3px 0 0 0 var(--severity-high, #f29142);
+}
