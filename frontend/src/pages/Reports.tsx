@@ -86,8 +86,8 @@ export default function Reports() {
             title={
               <Space>
                 <span>{t.reports.sbom}</span>
-                <Tag color="orange" icon={<ExperimentOutlined />}>
-                  experimental
+                <Tag color="default" icon={<ExperimentOutlined />}>
+                  {locale === "ko" ? "자산 기반 (요약본)" : "asset-based (summary)"}
                 </Tag>
               </Space>
             }
@@ -98,8 +98,8 @@ export default function Reports() {
               style={{ marginBottom: 12 }}
               message={
                 locale === "ko"
-                  ? "이 카드의 SBOM은 자산의 finding을 묶은 CycloneDX-lite입니다. 의존성 파일 직접 파싱은 아래 'SBOM 파일 파싱' 카드 사용."
-                  : "This SBOM is a finding-based CycloneDX-lite. For real dependency parsing use the 'SBOM File Parsing' card below."
+                  ? "자산의 발견사항을 묶어 만든 CycloneDX-lite 요약본입니다. 실제 의존성 트리를 추출하려면 아래 'SBOM 파일 파싱' 카드에 package.json · go.mod · Dockerfile 같은 파일을 붙여넣으세요."
+                  : "Finding-based CycloneDX-lite summary. For real dependency parsing, paste package.json / go.mod / Dockerfile into the 'SBOM File Parsing' card below."
               }
             />
             <Paragraph type="secondary">{t.reports.sbomDesc}</Paragraph>
@@ -180,14 +180,15 @@ export default function Reports() {
               <Space>
                 <FileSearchOutlined />
                 <span>{locale === "ko" ? "SBOM 파일 파싱" : "SBOM File Parsing"}</span>
+                <Tag color="green">{locale === "ko" ? "실 추출" : "real parser"}</Tag>
                 <Tag color="blue">npm · pypi · go · docker</Tag>
               </Space>
             }
           >
             <Paragraph type="secondary">
               {locale === "ko"
-                ? "package.json / package-lock.json / requirements.txt / go.mod / Dockerfile 내용을 붙여 넣으면 의존성을 추출합니다."
-                : "Paste contents of package.json / package-lock.json / requirements.txt / go.mod / Dockerfile to extract dependencies."}
+                ? "의존성 파일 내용을 붙여 넣으면 ecosystem(npm·pypi·go·docker)을 자동 감지해 패키지 목록을 추출합니다. CI에서 SBOM diff(PR 신규/제거/버전 변경)와 동일한 파서를 사용합니다."
+                : "Paste the contents of a dependency file. Mond auto-detects the ecosystem (npm/pypi/go/docker) and extracts the package list. Same parser used by SBOM diff on PRs."}
             </Paragraph>
             <Space style={{ width: "100%", marginBottom: 12 }} wrap>
               <Select
