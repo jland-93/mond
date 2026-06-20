@@ -412,7 +412,7 @@ class MyAdapter(ScannerAdapter):
 - [ ] CI 통합 패키지 (GitHub Actions / GitLab CI step)
 - [x] Rate limiting / abuse protection (login · AI · webhook · github-sync)
 - [x] AI 프롬프트 PII redaction — 외부 LLM provider로 보내기 전 이메일/전화/RRN/AWS키/토큰 자동 마스킹
-- [ ] GCP / Azure IAM 어댑터 권한 부여(grant) 완성도 보강
+- [x] GCP / Azure IAM 어댑터 권한 부여(grant) 완성도 보강 — 멱등성 + etag 충돌 재시도
 
 ## 🧪 Known Limitations (v0.1.0)
 
