@@ -197,16 +197,29 @@ export default function AIInsights() {
                 )}
               </Paragraph>
 
+              <FollowUps
+                intent={analyze.data.intent}
+                suggested={analyze.data.suggested_actions ?? []}
+                onAsk={(q) => {
+                  setQuery(q);
+                  analyze.mutate(q);
+                }}
+                locale={locale}
+              />
+
               {analyze.data.suggested_actions.length > 0 && (
                 <div>
-                  <Text strong>{locale === "ko" ? "제안된 행동" : "Suggested actions"}</Text>
-                  <ul>
-                    {analyze.data.suggested_actions.map((a, i) => (
-                      <li key={i}>
-                        {a.label}
-                        {a.endpoint ? ` — ${a.endpoint}` : ""}
-                      </li>
-                    ))}
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {locale === "ko" ? "Claude 제안 endpoint" : "Claude suggested endpoints"}
+                  </Text>
+                  <ul style={{ marginBottom: 0, fontSize: 12 }}>
+                    {analyze.data.suggested_actions
+                      .filter((a) => a.endpoint)
+                      .map((a, i) => (
+                        <li key={i}>
+                          <Text code>{a.endpoint}</Text> — {a.label}
+                        </li>
+                      ))}
                   </ul>
                 </div>
               )}
@@ -251,6 +264,70 @@ export default function AIInsights() {
           </Card>
         )}
       </Card>
+    </div>
+  );
+}
+
+/** intent별 표준 follow-up + Claude suggested_actions의 label을 chip으로 노출. */
+function FollowUps({
+  intent,
+  suggested,
+  onAsk,
+  locale,
+}: {
+  intent: string;
+  suggested: Array<{ label: string; endpoint?: string }>;
+  onAsk: (q: string) => void;
+  locale: "ko" | "en";
+}) {
+  // 1) AI가 제안한 label에서 자연어 후보를 모음
+  const fromAi = suggested
+    .map((a) => a.label?.trim())
+    .filter((l): l is string => !!l)
+    .slice(0, 3);
+
+  // 2) intent별 표준 follow-up (외부 LLM 없어도 흐름이 끊기지 않도록)
+  const intentFallbacks: Record<string, { ko: string[]; en: string[] }> = {
+    scan: {
+      ko: ["방금 스캔 결과 요약해줘", "이 자산에 자동 스캔 일정을 잡으려면?"],
+      en: ["Summarize the latest scan", "How do I auto-schedule scans?"],
+    },
+    list_findings: {
+      ko: ["critical만 보여줘", "이번 주 새로 발견된 것만", "open 상태만 알려줘"],
+      en: ["Show critical only", "New this week", "Open only"],
+    },
+    explain: {
+      ko: ["수정 가이드(remediation)도 보여줘", "관련 정책이 있어?"],
+      en: ["Show remediation", "Any related policy?"],
+    },
+    unknown: {
+      ko: ["우리 critical 자산 알려줘", "ISMS-P 매핑 정책 보여줘", "최근 만료된 권한 회수 내역"],
+      en: ["Top critical assets", "ISMS-P mapped policies", "Recent expired permissions"],
+    },
+  };
+
+  const fallbacks = (intentFallbacks[intent] ?? intentFallbacks.unknown)[locale];
+  const items = Array.from(new Set([...fromAi, ...fallbacks])).slice(0, 6);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div>
+      <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
+        {locale === "ko" ? "이어서 묻기" : "Follow-up"}
+      </Text>
+      <Space size={[6, 6]} wrap>
+        {items.map((q, i) => (
+          <Tag
+            key={i}
+            color="default"
+            style={{ cursor: "pointer", padding: "4px 10px", fontSize: 12 }}
+            onClick={() => onAsk(q)}
+          >
+            {q}
+          </Tag>
+        ))}
+      </Space>
     </div>
   );
 }
