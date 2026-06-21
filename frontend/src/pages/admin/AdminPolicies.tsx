@@ -38,6 +38,19 @@ const { Title, Paragraph, Text } = Typography;
 const ALL = "__all__";
 const SEVERITIES = ["critical", "high", "medium", "low", "info"];
 
+const SEVERITY_COLOR: Record<string, string> = {
+  critical: "#e8484a",
+  high: "#f29142",
+  medium: "#eab308",
+  low: "#4ad28d",
+  info: "#8a8aff",
+};
+
+const ENGINE_COLOR: Record<string, string> = {
+  builtin: "default",
+  opa: "geekblue",
+};
+
 async function fetchPolicies(): Promise<Policy[]> {
   const { data } = await api.get<Policy[]>("/policies");
   return data;
@@ -190,11 +203,35 @@ export default function AdminPolicies() {
                   size="small"
                   value={v}
                   style={{ width: "100%" }}
-                  options={SEVERITIES.map((s) => ({ value: s, label: s }))}
+                  options={SEVERITIES.map((s) => ({
+                    value: s,
+                    label: (
+                      <Space size={6}>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            background: SEVERITY_COLOR[s],
+                          }}
+                        />
+                        <span>{s}</span>
+                      </Space>
+                    ),
+                  }))}
                   onChange={(val) =>
                     updatePolicy.mutate({ id: r.id, patch: { severity_threshold: val } as Partial<Policy> })
                   }
                 />
+              ),
+            },
+            {
+              title: "engine",
+              dataIndex: "engine",
+              width: 100,
+              render: (v: string) => (
+                <Tag color={ENGINE_COLOR[v] ?? "default"}>{v || "builtin"}</Tag>
               ),
             },
             {
@@ -455,7 +492,25 @@ function CustomPolicyModal({
             <Select options={TYPES.map((v) => ({ value: v, label: v }))} />
           </Form.Item>
           <Form.Item label={t.policies.fieldThreshold} name="severity_threshold" style={{ width: 200 }}>
-            <Select options={SEVERITIES.map((v) => ({ value: v, label: v }))} />
+            <Select
+              options={SEVERITIES.map((s) => ({
+                value: s,
+                label: (
+                  <Space size={6}>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        background: SEVERITY_COLOR[s],
+                      }}
+                    />
+                    <span>{s}</span>
+                  </Space>
+                ),
+              }))}
+            />
           </Form.Item>
         </Space>
 
