@@ -138,6 +138,18 @@ def _runtime_from_env() -> ProviderRuntime | None:
             model_deep=settings.OLLAMA_MODEL_DEEP,
             source="env",
         )
+    if provider == "vllm" and settings.VLLM_BASE_URL:
+        # vLLM은 OpenAI-호환 server이므로 _call_openai 흐름을 그대로 탄다.
+        # provider 라벨은 'vllm'으로 유지해 usage log/대시보드 구분 가능.
+        return ProviderRuntime(
+            provider="vllm",
+            api_key=settings.VLLM_API_KEY or "EMPTY",
+            base_url=settings.VLLM_BASE_URL,
+            region=None,
+            model_default=settings.VLLM_MODEL_DEFAULT,
+            model_deep=settings.VLLM_MODEL_DEEP,
+            source="env",
+        )
     return None
 
 
@@ -147,7 +159,7 @@ def _has_credentials(rt: ProviderRuntime) -> bool:
     if rt.provider == "bedrock":
         # boto3가 IAM 자격을 자동 감지 — region만 있으면 OK
         return bool(rt.region)
-    if rt.provider == "ollama":
+    if rt.provider in {"ollama", "vllm"}:
         return bool(rt.base_url)
     return False
 
@@ -226,19 +238,48 @@ async def complete_json(
         logger.info("ai_intent_routed", provider=rt.provider, intent=intent, tier=tier, model=model)
     max_tokens = max_tokens or settings.AI_MAX_TOKENS
 
+    result: CompletionResult | None = None
+    failed = False
     try:
         if rt.provider == "anthropic":
-            return await _call_anthropic(rt, system, user, model, max_tokens)
-        if rt.provider == "openai":
-            return await _call_openai(rt, system, user, model, max_tokens)
-        if rt.provider == "bedrock":
-            return await _call_bedrock(rt, system, user, model, max_tokens)
-        if rt.provider == "ollama":
-            return await _call_ollama(rt, system, user, model, max_tokens)
+            result = await _call_anthropic(rt, system, user, model, max_tokens)
+        elif rt.provider == "openai":
+            result = await _call_openai(rt, system, user, model, max_tokens)
+        elif rt.provider == "bedrock":
+            result = await _call_bedrock(rt, system, user, model, max_tokens)
+        elif rt.provider == "ollama":
+            result = await _call_ollama(rt, system, user, model, max_tokens)
+        elif rt.provider == "vllm":
+            # vLLM은 OpenAI-호환 API. 같은 호출 흐름 재사용, provider 라벨만 vllm.
+            r = await _call_openai(rt, system, user, model, max_tokens)
+            result = CompletionResult(
+                text=r.text,
+                provider="vllm",
+                model=r.model,
+                input_tokens=r.input_tokens,
+                output_tokens=r.output_tokens,
+            )
     except Exception as exc:
         logger.warning("ai_complete_failed", provider=rt.provider, model=model, error=str(exc))
-        return None
-    return None
+        failed = True
+
+    # 사용량 기록 — 실패해도 행 1건 남겨 호출수가 비용 0로 카운트되게.
+    try:
+        from app.services import ai_usage as ai_usage_service
+        await ai_usage_service.record(
+            db,
+            provider=rt.provider,
+            model=model,
+            tier=tier,
+            intent=intent,
+            input_tokens=result.input_tokens if result else 0,
+            output_tokens=result.output_tokens if result else 0,
+            failed=failed or result is None,
+        )
+    except Exception as exc:  # usage 기록 실패가 호출을 막지 않게
+        logger.warning("ai_usage_record_failed", error=str(exc))
+
+    return result
 
 
 # ── Anthropic ───────────────────────────────────────────────────
