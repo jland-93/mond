@@ -19,7 +19,14 @@ async def list_assets(
     offset: int = 0,
     asset_type: str | None = None,
     q: str | None = None,
+    workspace_id: int | None = None,
+    include_unscoped: bool = True,
 ) -> tuple[list[Asset], int]:
+    """자산 목록.
+
+    workspace_id가 None이면 모든 workspace + 미배정(NULL) 자산.
+    workspace_id가 주어지면 해당 workspace + (include_unscoped=True면) NULL 자산.
+    """
     stmt = select(Asset)
     count_stmt = select(func.count(Asset.id))
 
@@ -30,6 +37,13 @@ async def list_assets(
         like = f"%{q}%"
         stmt = stmt.where(Asset.name.ilike(like) | Asset.uri.ilike(like))
         count_stmt = count_stmt.where(Asset.name.ilike(like) | Asset.uri.ilike(like))
+    if workspace_id is not None:
+        if include_unscoped:
+            cond = (Asset.workspace_id == workspace_id) | (Asset.workspace_id.is_(None))
+        else:
+            cond = Asset.workspace_id == workspace_id
+        stmt = stmt.where(cond)
+        count_stmt = count_stmt.where(cond)
 
     total = (await db.execute(count_stmt)).scalar_one()
     items = (await db.execute(stmt.order_by(Asset.id.desc()).limit(limit).offset(offset))).scalars().all()

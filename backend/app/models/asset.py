@@ -7,7 +7,7 @@ Asset — 보호 대상 (repo / image / host / URL / cloud resource / applicatio
 import enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Enum, String
+from sqlalchemy import JSON, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -46,6 +46,15 @@ class Asset(Base, TimestampMixin):
 
     owner: Mapped[str | None] = mapped_column(String(255), index=True)
     environment: Mapped[str | None] = mapped_column(String(64), index=True)  # dev / staging / prod
+
+    # 다중 워크스페이스(v0.3 MVP) — NULL이면 모든 workspace에서 visible
+    # (기존 자산 + 단일 조직 운영 호환). v0.4에서 nullable=False 전환 예정.
+    workspace_id: Mapped[int | None] = mapped_column(
+        Integer,
+        ForeignKey("workspaces.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
 
     # 통계 캐시 (서비스 계층에서 갱신)
     open_findings_count: Mapped[int] = mapped_column(default=0, nullable=False)

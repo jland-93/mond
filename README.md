@@ -443,7 +443,7 @@ UX·가시화 보강:
 - [x] **AI 멀티 프로바이더 라우팅** — 의도(`intent`)별 model 자동 라우팅 (`remediation`/`explain`/`deep_analysis`는 `model_deep`, 그 외 `model_default`)
 - [x] **SBOM CycloneDX 정식 출력** — CycloneDX 1.5 표준 (`bomFormat: "CycloneDX"`, `serialNumber: urn:uuid:…`, `metadata.tools`, REPOSITORY 자산은 default branch에서 `components[]` 자동 추출, findings → 표준 `vulnerabilities[]`)
 - [x] **MCP HTTP 마운트 안정화** — Bearer 토큰 미들웨어(`MCP_HTTP_AUTH_TOKEN`), `GET /integrations/mcp/health` (enabled/mounted/transport/auth_required/reason/url), 마운트 path를 `/mcp/mcp` → `/mcp/`로 단순화, Claude Desktop/Code config 예시 + 7개 tools 표 (SETUP.md)
-- [ ] **다중 워크스페이스/조직 분리** — 사내 여러 팀이 한 인스턴스를 공유할 때 자산/정책 scope
+- [x] **다중 워크스페이스/조직 분리 (Phase 1 — Asset)** — `Workspace` 모델(slug/name/default) + Admin CRUD + Asset에 `workspace_id` (NULL 허용 — 기존 단일 조직 운영 호환). Assets 페이지에 workspace selector(ADMIN). Policy/Finding/IAM 등 나머지 자원 분리는 v0.4 Phase 2
 - [x] **감사 로그 검색 UI** — `Admin → 감사 로그`에서 기간/actor/event/request_id 필터 + 시계열 timeline
 - [x] **한국 규제 인증 심사 패키지** — `GET /admin/audit-package/isms-p?format=markdown` ISMS-P 핵심 통제 10개(정책·자산·위험·접근·특수계정·접근통제·감사로그·취약점·사고대응·prod 자산)에 Mond 실 데이터를 자동 매핑. Reports 페이지에 ADMIN 전용 카드. 전체 80개 통제는 v0.4
 - [x] **알림 라우팅 다채널** — Slack 외 Discord + MS Teams webhook 추가 (severity 색상 채널별 변환)

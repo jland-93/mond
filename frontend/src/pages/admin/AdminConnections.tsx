@@ -20,6 +20,7 @@ import BitbucketWorkspaceSyncCard from "./connections/BitbucketWorkspaceSyncCard
 import DailyDigestCard from "./connections/DailyDigestCard";
 import GitHubOrgSyncCard from "./connections/GitHubOrgSyncCard";
 import GitLabGroupSyncCard from "./connections/GitLabGroupSyncCard";
+import WorkspacesCard from "./connections/WorkspacesCard";
 import IAMSourceCard from "./connections/IAMSourceCard";
 import IAMSourceModal from "./connections/IAMSourceModal";
 import SSOCard from "./connections/SSOCard";
@@ -38,6 +39,7 @@ export default function AdminConnections() {
       </Title>
       <Paragraph type="secondary">{t.adminArea.connectionsDesc}</Paragraph>
 
+      <WorkspacesCard />
       <IAMSourceCard onAdd={() => setModalOpen(true)} />
       <SSOCard />
       <AIProvidersCard />

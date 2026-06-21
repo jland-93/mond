@@ -40,9 +40,18 @@ const ASSET_TYPES: AssetType[] = [
   "application",
 ];
 
-async function fetchAssets(): Promise<Page<Asset>> {
-  const { data } = await api.get<Page<Asset>>("/assets", { params: { limit: 100 } });
+async function fetchAssets(workspaceId?: number | null): Promise<Page<Asset>> {
+  const params: Record<string, number | string> = { limit: 100 };
+  if (workspaceId) params.workspace_id = workspaceId;
+  const { data } = await api.get<Page<Asset>>("/assets", { params });
   return data;
+}
+
+interface WorkspaceLite {
+  id: number;
+  slug: string;
+  name: string;
+  is_default: boolean;
 }
 
 export default function Assets() {
@@ -51,10 +60,21 @@ export default function Assets() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
+  const isAdmin = user?.role === "admin";
+
+  // workspace filter (ADMIN만). 0/null = 모두
+  const [workspaceFilter, setWorkspaceFilter] = useState<number | null>(null);
+
+  const { data: workspaces } = useQuery({
+    queryKey: ["workspaces-lite"],
+    queryFn: async () => (await api.get<WorkspaceLite[]>("/admin/workspaces")).data,
+    enabled: isAdmin,
+    retry: false,
+  });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["assets"],
-    queryFn: fetchAssets,
+    queryKey: ["assets", workspaceFilter],
+    queryFn: () => fetchAssets(workspaceFilter),
   });
 
   // AI Insights citation에서 진입 시 ?focus=N → row highlight + scroll
@@ -107,9 +127,26 @@ export default function Assets() {
         <Title level={2} style={{ margin: 0 }}>
           {t.assets.title}
         </Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setOpen(true)}>
-          {t.assets.add}
-        </Button>
+        <Space>
+          {isAdmin && workspaces && workspaces.length > 1 && (
+            <Select
+              size="middle"
+              style={{ minWidth: 180 }}
+              value={workspaceFilter ?? 0}
+              onChange={(v) => setWorkspaceFilter(v === 0 ? null : Number(v))}
+              options={[
+                { value: 0, label: locale === "ko" ? "모든 워크스페이스" : "All workspaces" },
+                ...workspaces.map((w) => ({
+                  value: w.id,
+                  label: `${w.name}${w.is_default ? " ★" : ""}`,
+                })),
+              ]}
+            />
+          )}
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setOpen(true)}>
+            {t.assets.add}
+          </Button>
+        </Space>
       </div>
 
       <Table
