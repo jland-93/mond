@@ -898,6 +898,32 @@ RATE_LIMIT_ENABLED=true     # 기본. false로 끄면 모든 버킷 통과 (test
 
 Redis 다운 시 fail open(가용성 우선) — `rate_limit_redis_down` 경고 로그를 남기고 요청은 통과. 보안 critical 환경이면 monitor에서 이 로그를 알림으로 연결할 것.
 
+### 8-2) ISMS-P 인증 심사 증빙 패키지 (한국 조직)
+
+KISA ISMS-P 인증을 받았거나 받을 예정인 조직을 위한 v0.3 자동 증빙. 80여 개 통제 중 가장 자주 점검되는 **핵심 10개**를 Mond의 실 운영 데이터(자산·접근통제·로그·발견사항·권한요청 흐름)에 매핑해 markdown / JSON으로 추출한다.
+
+```http
+GET /api/v1/admin/audit-package/isms-p?days=90&format=markdown   # 심사원 전달용
+GET /api/v1/admin/audit-package/isms-p?days=90&format=json       # 자동화/2차 가공
+```
+
+매핑된 통제 10개:
+
+| 통제 | 항목 | Mond 데이터 |
+|---|---|---|
+| 1.1.5 | 정보보호 정책 + CISO | Policy 카탈로그 |
+| 1.2.1 | 자산 식별·분류 | Asset (환경/유형/owner) |
+| 1.2.3 | 위험 평가 | open Finding severity 분포 |
+| 2.5.1 | 권한 부여 절차 | AccessRequest 흐름 + AI/담당자 결정 |
+| 2.5.5 | 특수계정 + MFA | ADMIN/Reviewer 명단 + 등록 상태 |
+| 2.6.1 | 접근통제 정책 | 접근 키워드 Policy |
+| 2.9.1 | 로그 기록 | access_audit_logs 시계열 |
+| 2.10.2 | 패치/취약점 | Finding 상태별 + 해결률 |
+| 2.11.1 | 사고 대응 | critical/high finding 처리 흐름 |
+| 3.2.1 | 개인정보 처리 자산 | environment=production Asset |
+
+Admin → **Reports → ISMS-P 인증 심사 증빙** 카드에서 1-click 다운로드. 1차 증빙용이며 최종 심사 자료 제출 전 보안담당자 검토를 권장. 전체 80개 통제 매핑은 v0.4 예정.
+
 ### 9) 데모 시드 끄기
 
 ```bash
