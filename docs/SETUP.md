@@ -593,20 +593,27 @@ SCANNER_NUCLEI_BIN=nuclei
 ****옵션 B** — 정책 삭제 후 자체 정책 작성** — Policies 화면에서 신규 작성
 ****옵션 C** — Skip** (`SEED_ON_STARTUP=false`) — 비어있는 상태로 시작
 
-### 7) 알림 — Slack / Generic Webhook / 둘 다
+### 7) 알림 — Slack / Discord / Teams / Generic Webhook
 
 | 선택지 | 언제 쓰나 | 설정 |
 |---|---|---|
 | **Slack Webhook** (권장) | 팀이 Slack 사용 | `SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...` |
-| **Generic Webhook** | Teams · Discord · 사내 incident bot | `GENERIC_WEBHOOK_URL=https://your-bot/mond` (JSON POST) |
-| **둘 다 동시** | severity 다른 채널로 분리하고 싶을 때 | 둘 다 설정. 알림은 양쪽으로 전송 |
-| **알림 끄기** | 데모 · 조용한 환경 | 두 ENV 모두 비워두기 |
+| **Discord Webhook** | 커뮤니티/스타트업/오픈소스 팀 | `DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...` |
+| **MS Teams Webhook** | 회사 표준이 Microsoft 365 | `TEAMS_WEBHOOK_URL=https://outlook.office.com/webhook/...` |
+| **Generic Webhook** | PagerDuty · Lark · 자체 incident bot | `GENERIC_WEBHOOK_URL=https://your-bot/mond` (JSON POST) |
+| **여러 채널 동시** | 채널별로 다른 청중에게 알림 | 원하는 ENV를 모두 설정. 알림은 모든 채널에 fan-out |
+| **알림 끄기** | 데모 · 조용한 환경 | 위 ENV를 모두 비워두기 |
 
 ```bash
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/.../...
+TEAMS_WEBHOOK_URL=https://outlook.office.com/webhook/...
 GENERIC_WEBHOOK_URL=https://your-incident-bot/mond
 NOTIFY_MIN_SEVERITY=high   # critical / high / medium / low / info (threshold)
 ```
+
+> Discord/Teams는 webhook URL만 받으면 즉시 활성화 — 별도 OAuth/앱 등록 불필요.
+> severity별 색상(critical=빨강, high=주황, medium=노랑, low=파랑)은 채널별 형식으로 자동 변환.
 
 `NOTIFY_MIN_SEVERITY` 권장:
 - 운영 — `high` (default) — critical/high만 알림

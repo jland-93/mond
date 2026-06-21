@@ -104,6 +104,10 @@ class Settings(BaseSettings):
     # 알림 채널 (URL 비어 있으면 no-op)
     SLACK_WEBHOOK_URL: Optional[str] = None
     GENERIC_WEBHOOK_URL: Optional[str] = None
+    # Discord/Teams는 incoming webhook URL을 등록하면 자동 활성화.
+    # payload 포맷은 채널별로 다름 → app/services/notify_channels.py에서 변환.
+    DISCORD_WEBHOOK_URL: Optional[str] = None
+    TEAMS_WEBHOOK_URL: Optional[str] = None
     NOTIFY_MIN_SEVERITY: str = "high"  # critical / high / medium / low / info
     # Daily Digest 전용 채널. 비우면 SLACK_WEBHOOK_URL을 fallback.
     DIGEST_SLACK_WEBHOOK_URL: Optional[str] = None
