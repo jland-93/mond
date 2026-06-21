@@ -184,7 +184,7 @@ UI는 한국어를 기본으로 표시하며, 우측 상단 토글로 영어로 
 | 기능 | 방식 |
 |---|---|
 | **자동 스캔 (GitHub push)** | `POST /api/v1/webhooks/github` → 매칭 레포 자산 자동 trivy 스캔 |
-| **Slack/Generic 알림** | 임계치 이상 finding을 ENV의 Webhook URL로 자동 전송 |
+| **알림 다채널** | 임계치 이상 finding을 Slack/Discord/Teams/Generic webhook으로 자동 전송 (채널별 형식 변환) |
 | **MCP — Claude Desktop/Code** | stdio: `python -m mcp_server`. HTTP+SSE: `/mcp` 마운트 |
 
 ---
@@ -394,7 +394,7 @@ class MyAdapter(ScannerAdapter):
 - [x] Policy Simulation (PR diff 미리보기)
 - [x] SBOM / Compliance 리포트 (JSON · Markdown)
 - [x] GitHub Webhook 자동 스캔
-- [x] Slack / Generic Webhook 알림
+- [x] Slack / Discord / MS Teams / Generic Webhook 알림 (채널별 포맷 변환)
 - [x] MCP 서버 (stdio + HTTP/SSE)
 - [x] 멀티유저 + RBAC + OIDC SSO (Keycloak · Okta · Google)
 - [x] MFA — 패스키(WebAuthn/FIDO2) + TOTP + 백업 코드
@@ -440,15 +440,15 @@ UX·가시화 보강:
 
 ### v0.3 후보 로드맵
 - [ ] **자산 자동 동기화 확장** — Kubernetes 클러스터 namespace/pod 자동 발견, AWS Auto-scaling group, GitLab/Bitbucket org sync
-- [ ] **AI 멀티 프로바이더 라우팅** — 의도(`intent`)별로 다른 model 사용 (e.g. triage=Haiku, deep-explain=Sonnet)
+- [x] **AI 멀티 프로바이더 라우팅** — 의도(`intent`)별 model 자동 라우팅 (`remediation`/`explain`/`deep_analysis`는 `model_deep`, 그 외 `model_default`)
 - [ ] **SBOM CycloneDX 정식 출력** — lite stub 대신 CycloneDX 1.5 JSON/XML, vex 포함
 - [ ] **MCP HTTP 마운트 안정화** — Claude Desktop/Code 외부 에이전트가 Mond를 도구로 자연스럽게 사용
 - [ ] **다중 워크스페이스/조직 분리** — 사내 여러 팀이 한 인스턴스를 공유할 때 자산/정책 scope
-- [ ] **감사 로그 검색 UI** — 현재 access_audit_logs DB만, UI에서 시계열 + 필터
+- [x] **감사 로그 검색 UI** — `Admin → 감사 로그`에서 기간/actor/event/request_id 필터 + 시계열 timeline
 - [ ] **한국 규제 인증 심사 패키지** — ISMS-P 자동 증빙 자료 출력 (실제 심사 대응)
-- [ ] **알림 라우팅 다채널** — Slack 외 Email/Teams/PagerDuty
+- [x] **알림 라우팅 다채널** — Slack 외 Discord + MS Teams webhook 추가 (severity 색상 채널별 변환)
 - [ ] **온프레미스 LLM 게이트웨이 표준화** — 사내 vLLM 어댑터 + 토큰 사용량 추적
-- [ ] **PR Bot — AI 분석 PR comment** — push 스캔 결과를 PR에 자동 코멘트 (현재는 SBOM diff만)
+- [x] **PR Bot — AI 분석 PR comment** — push 스캔 결과를 PR에 자동 코멘트 + AI triage 1-liner
 
 ## 🧪 Known Limitations
 

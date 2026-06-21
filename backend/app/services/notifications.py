@@ -18,6 +18,7 @@ from app.models.asset import Asset
 from app.models.slack import SlackPurpose
 from app.models.user import User
 from app.models.user_slack import UserSlackPreference
+from app.services import notify_channels
 from app.services import slack as slack_service
 
 logger = get_logger(__name__)
@@ -95,12 +96,16 @@ async def notify_finding(finding) -> None:
             )
         )
 
-    if not payloads:
-        return
+    if payloads:
+        async with httpx.AsyncClient(timeout=10) as client:
+            for url, body in payloads:
+                try:
+                    await client.post(url, json=body)
+                except Exception as exc:  # 외부 채널 실패가 코어를 막지 않게
+                    logger.warning("notification_failed", url=url, error=str(exc))
 
-    async with httpx.AsyncClient(timeout=10) as client:
-        for url, body in payloads:
-            try:
-                await client.post(url, json=body)
-            except Exception as exc:  # 외부 채널 실패가 코어를 막지 않게
-                logger.warning("notification_failed", url=url, error=str(exc))
+    # Discord/Teams — 포맷이 달라 별도 어댑터로. URL 미설정이면 silent skip.
+    sev = finding.severity.value
+    short_title = f"{emoji} Mond — {sev.upper()} finding · {finding.title}"
+    await notify_channels.post_discord(base_text, title=short_title, severity=sev)
+    await notify_channels.post_teams(base_text, title=short_title, severity=sev)
