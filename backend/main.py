@@ -85,28 +85,84 @@ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 # MCP HTTP 마운트 — 원격 클라이언트용. stdio 모드는 mcp_server.py로 별도 진입.
 # Streamable HTTP(MCP 신규 표준) > SSE 순으로 시도, 둘 다 실패해도 backend 정상 부팅.
+# 상태는 app.state.mcp에 저장 — /integrations/mcp/health가 노출한다.
+app.state.mcp = {
+    "enabled": settings.MCP_HTTP_ENABLED,
+    "mounted": False,
+    "transport": None,
+    "reason": None,
+    "auth_required": bool(settings.MCP_HTTP_AUTH_TOKEN),
+}
+
 if settings.MCP_HTTP_ENABLED:
     try:
         from mcp_server import mcp as mond_mcp
+        from starlette.middleware.base import BaseHTTPMiddleware
+        from starlette.responses import JSONResponse
+
+        class _BearerAuthMiddleware(BaseHTTPMiddleware):
+            """/mcp 진입 전 Bearer 토큰 검증. 토큰 미설정이면 anonymous OK (개발 편의)."""
+
+            def __init__(self, app, token: str | None):
+                super().__init__(app)
+                self.token = token
+
+            async def dispatch(self, request, call_next):
+                if self.token is None:
+                    return await call_next(request)
+                auth = request.headers.get("authorization", "")
+                if not auth.lower().startswith("bearer "):
+                    return JSONResponse(
+                        {"error": "mcp_auth_required", "detail": "Bearer token required"},
+                        status_code=401,
+                    )
+                supplied = auth.split(" ", 1)[1].strip()
+                if supplied != self.token:
+                    return JSONResponse(
+                        {"error": "mcp_auth_invalid", "detail": "Bearer token mismatch"},
+                        status_code=403,
+                    )
+                return await call_next(request)
 
         mcp_app = None
+        chosen_transport: str | None = None
+        last_error: str | None = None
         for attr in ("streamable_http_app", "sse_app"):
             factory = getattr(mond_mcp, attr, None)
             if factory is None:
                 continue
             try:
                 mcp_app = factory()
+                chosen_transport = attr
                 logger.info("mcp_transport_resolved", transport=attr)
                 break
             except Exception as exc:
+                last_error = f"{attr}: {exc}"
                 logger.warning("mcp_transport_failed", transport=attr, error=str(exc))
 
         if mcp_app is not None:
+            # mcp_app 자체에 Bearer middleware를 두른다 — mount된 sub-app은
+            # 부모 FastAPI middleware 체인을 안 거쳐 별도로 보호 필요.
+            mcp_app.add_middleware(_BearerAuthMiddleware, token=settings.MCP_HTTP_AUTH_TOKEN)
             app.mount("/mcp", mcp_app)
-            logger.info("mcp_mounted", path="/mcp")
+            app.state.mcp.update({"mounted": True, "transport": chosen_transport})
+            logger.info(
+                "mcp_mounted",
+                path="/mcp",
+                transport=chosen_transport,
+                auth=bool(settings.MCP_HTTP_AUTH_TOKEN),
+            )
+            if not settings.MCP_HTTP_AUTH_TOKEN:
+                logger.warning(
+                    "mcp_anonymous_access",
+                    detail="MCP_HTTP_AUTH_TOKEN is empty — /mcp is anonymous; set a token in production",
+                )
         else:
-            logger.warning("mcp_mount_skipped", reason="no compatible transport")
+            reason = last_error or "no compatible transport"
+            app.state.mcp["reason"] = reason
+            logger.warning("mcp_mount_skipped", reason=reason)
     except Exception as exc:
+        app.state.mcp["reason"] = str(exc)
         logger.warning("mcp_mount_failed", error=str(exc))
 
 
@@ -117,5 +173,5 @@ async def root() -> dict:
         "version": settings.VERSION,
         "docs": "/docs",
         "api": settings.API_V1_PREFIX,
-        "mcp": "/mcp" if settings.MCP_HTTP_ENABLED else None,
+        "mcp": "/mcp" if app.state.mcp.get("mounted") else None,
     }

@@ -31,6 +31,12 @@ from app.services import scan as scan_service
 
 
 mcp = FastMCP("mond")
+# FastMCP 기본 streamable_http_path는 '/mcp', sse_path는 '/sse'다.
+# Mond는 FastAPI에서 app.mount('/mcp', mcp_app)로 한 번 더 prefix를 붙이므로
+# 외부 노출 path가 '/mcp/mcp'·'/mcp/sse'로 이중이 된다. 안쪽을 '/'로 풀어
+# 외부 path를 '/mcp'·'/mcp/sse'로 단순화한다.
+mcp.settings.streamable_http_path = "/"
+mcp.settings.sse_path = "/sse"
 
 
 @asynccontextmanager

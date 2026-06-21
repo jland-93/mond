@@ -888,25 +888,70 @@ DEFAULT_LOCALE=en   # 글로벌 팀
 
 ### 11) MCP 서버 활성화 (선택) — Claude Desktop / Code 연동
 
-Mond를 외부 AI 에이전트의 도구로 노출하려면:
+Mond를 외부 AI 에이전트의 도구로 노출. 두 전송 방식 중 하나 선택.
+
+#### A) HTTP — 원격 클라이언트 (권장)
 
 ```bash
-MCP_HTTP_ENABLED=true   # 기본 — /mcp 엔드포인트 노출
+MCP_HTTP_ENABLED=true
+# 운영에선 반드시 Bearer 토큰을 설정. 비어 있으면 anonymous 허용 + 경고 로그.
+# python -c 'import secrets; print(secrets.token_urlsafe(32))'
+MCP_HTTP_AUTH_TOKEN=<32바이트 secret>
 ```
 
-Claude Desktop `claude_desktop_config.json`:
+상태 확인 — `GET /api/v1/integrations/mcp/health` (인증 불필요):
+
+```json
+{
+  "enabled": true,
+  "mounted": true,
+  "transport": "streamable_http_app",
+  "auth_required": true,
+  "reason": null,
+  "url": "/mcp"
+}
+```
+
+Claude Desktop `claude_desktop_config.json` (또는 Claude Code `~/.claude/config.json`):
 
 ```json
 {
   "mcpServers": {
     "mond": {
-      "url": "http://localhost:8000/mcp"
+      "url": "https://mond.your-corp.com/mcp/",
+      "headers": { "Authorization": "Bearer <위에서 만든 토큰>" }
     }
   }
 }
 ```
 
-Claude가 Mond의 자산·발견·정책을 자연어로 조회 가능.
+> URL 끝에 trailing slash(`/`)를 유지하세요. `/mcp`로 보내면 307 redirect → `/mcp/`로 follow됩니다.
+
+#### B) stdio — 로컬 단일 사용자
+
+```jsonc
+{
+  "mcpServers": {
+    "mond": {
+      "command": "python",
+      "args": ["-m", "mcp_server"],
+      "cwd": "/path/to/mond/backend"
+    }
+  }
+}
+```
+
+#### 노출되는 tools (v0.3 기준)
+
+| Tool | 설명 |
+|---|---|
+| `list_assets` / `get_asset` | Mond 자산 검색 / 조회 |
+| `list_findings` | severity · asset_id · scanner 필터 |
+| `trigger_scan` | 자산에 대해 trivy/semgrep/nuclei 스캔 실행 |
+| `triage_finding` | finding 1건을 Claude로 severity 재평가 + remediation 제안 |
+| `list_scanners_tool` | 등록된 스캐너 어댑터 목록 |
+| `ask` | 자연어를 의도(scan/list_findings/explain/unknown)로 분류 |
+| `regulations_for` / `regulation_detail` | 시나리오/규제 조회 (ISMS-P · GDPR · PCI DSS 등) |
 
 **Skip 옵션**: `MCP_HTTP_ENABLED=false` — 외부 도구 노출 안 함.
 
@@ -1058,17 +1103,7 @@ docker compose exec -T postgres psql -U mond -d mond < dump.sql
 
 ### Q. MCP 서버를 Claude Desktop에 연결하고 싶다
 
-→ `MCP_HTTP_ENABLED=true` (기본). Claude Desktop config에:
-
-```json
-{
-  "mcpServers": {
-    "mond": {
-      "url": "http://localhost:8000/mcp"
-    }
-  }
-}
-```
+→ [Part 5 · 11) MCP 서버 활성화](#11-mcp-서버-활성화-선택--claude-desktop--code-연동) 참고. 운영에선 `MCP_HTTP_AUTH_TOKEN`을 반드시 설정하고 client config의 `headers.Authorization: Bearer ...`로 전달.
 
 ---
 
