@@ -187,6 +187,21 @@ async def current_model_label(db: AsyncSession) -> str:
     return f"{rt.provider}:{rt.model_default}"
 
 
+# intent별 라우팅 규칙 — model_default(빠르고 저비용) vs model_deep(추론 정확도).
+# remediation/explain/deep_analysis 같은 '깊이가 필요한' intent는 자동으로 deep 모델로.
+# 그 외(triage/route/list_findings/scan)는 default 모델로 비용/지연 최소화.
+_DEEP_INTENTS = {"remediation", "explain", "deep_analysis"}
+
+
+def _pick_model(rt: ProviderRuntime, *, deep: bool, intent: str | None) -> tuple[str, str]:
+    """라우팅 결정. (model, tier='default'|'deep') 반환."""
+    if deep:
+        return rt.model_deep, "deep"
+    if intent and intent in _DEEP_INTENTS:
+        return rt.model_deep, "deep"
+    return rt.model_default, "default"
+
+
 async def complete_json(
     db: AsyncSession,
     system: str,
@@ -194,12 +209,21 @@ async def complete_json(
     *,
     deep: bool = False,
     max_tokens: int | None = None,
+    intent: str | None = None,
 ) -> CompletionResult | None:
-    """provider별 LLM 호출. 실패하면 None — 호출부는 fallback 처리."""
+    """provider별 LLM 호출. 실패하면 None — 호출부는 fallback 처리.
+
+    intent별 라우팅:
+      - 'remediation' / 'explain' / 'deep_analysis' → model_deep (느리지만 정확)
+      - 그 외(triage/route 등) → model_default (빠르고 저비용)
+      - `deep=True`는 intent와 무관하게 deep 강제 (하위 호환)
+    """
     rt = await get_runtime(db)
     if rt is None:
         return None
-    model = rt.model_deep if deep else rt.model_default
+    model, tier = _pick_model(rt, deep=deep, intent=intent)
+    if intent:
+        logger.info("ai_intent_routed", provider=rt.provider, intent=intent, tier=tier, model=model)
     max_tokens = max_tokens or settings.AI_MAX_TOKENS
 
     try:

@@ -62,7 +62,10 @@ async def analyze_finding(db: AsyncSession, finding: Finding, *, deep: bool = Fa
         return _fallback(finding)
 
     user_prompt = _build_user_prompt(finding)
-    result = await complete_json(db, SYSTEM_PROMPT, user_prompt, deep=deep)
+    # intent — deep=True면 'remediation'(코드 패치 제안 포함), 아니면 'triage'(분류만).
+    # client._pick_model이 'remediation'은 자동으로 model_deep으로 라우팅.
+    finding_intent = "remediation" if deep else "triage"
+    result = await complete_json(db, SYSTEM_PROMPT, user_prompt, deep=deep, intent=finding_intent)
     if result is None:
         logger.warning("ai_analyze_failed_or_disabled", finding_id=finding.id)
         return _fallback(finding)
@@ -129,7 +132,8 @@ async def route_query(db: AsyncSession, query: str) -> dict:
     if context_block:
         system = f"{system}\n\n{context_block}"
 
-    result = await complete_json(db, system, user_prompt, max_tokens=600)
+    # route_query는 자연어 → intent 분류이므로 model_default(빠른 모델)로 라우팅.
+    result = await complete_json(db, system, user_prompt, max_tokens=600, intent="route")
     if result is None:
         fallback = _heuristic_route(query)
         fallback["citations"] = [c.to_dict() for c in citations]
