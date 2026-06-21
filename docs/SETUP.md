@@ -762,6 +762,34 @@ Admin → **Connections → GitHub Org Asset Sync** 카드에서:
 
 API 직접 호출: `POST /api/v1/admin/github-sync/run` body `{"org":"...","dry_run":false,"include_archived":false}`.
 
+#### GitLab group 자산 자동 동기화
+
+GitHub와 같은 패턴. self-host GitLab은 `GITLAB_API_URL`로 지정.
+
+```bash
+GITLAB_API_URL=https://gitlab.com/api/v4         # 기본값. self-host면 https://gitlab.your-corp.com/api/v4
+GITLAB_TOKEN=glpat-...                           # Personal Access Token (scope: read_api 권장)
+GITLAB_GROUP=your-group                          # 선택. sub-group은 'parent/sub' 형식
+```
+
+Admin → **Connections → GitLab Group Asset Sync** 카드에서 group 입력 → 미리보기 → 동기화. sub-group이 있으면 `include_subgroups=true`가 기본 적용되어 한 번에 가져온다.
+
+API: `POST /api/v1/admin/gitlab-sync/run` body `{"group":"...","dry_run":false,"include_archived":false}`.
+
+#### Bitbucket workspace 자산 자동 동기화
+
+Bitbucket Cloud REST API v2 — 인증은 username + app password.
+
+```bash
+BITBUCKET_USERNAME=alice
+BITBUCKET_APP_PASSWORD=ATBB...                   # Personal settings → App passwords (scope: Repositories:Read)
+BITBUCKET_WORKSPACE=your-team
+```
+
+Admin → **Connections → Bitbucket Workspace Asset Sync** 카드에서 workspace 입력 → 미리보기 → 동기화.
+
+API: `POST /api/v1/admin/bitbucket-sync/run` body `{"workspace":"...","dry_run":false}`.
+
 ### 8-1) 스캔 큐 (Celery) — 운영 안정성
 
 기본은 인라인 동기 실행. 대용량/장시간 스캔에서 backend 타임아웃이 문제라면 비동기 큐로 전환.
@@ -863,6 +891,8 @@ RATE_LIMIT_ENABLED=true     # 기본. false로 끄면 모든 버킷 통과 (test
 | `webhook_github` | 120 | IP | `POST /webhooks/github` |
 | `webhook_personal` | 30 | IP | `POST /webhooks/personal` |
 | `github_sync` | 5 | user | `POST /admin/github-sync/run` |
+| `gitlab_sync` | 5 | user | `POST /admin/gitlab-sync/run` |
+| `bitbucket_sync` | 5 | user | `POST /admin/bitbucket-sync/run` |
 
 응답 헤더 — `X-RateLimit-Limit` / `X-RateLimit-Remaining` / `X-RateLimit-Reset`. 초과 시 HTTP 429 + `Retry-After`.
 
