@@ -23,10 +23,26 @@ class UserRead(Timestamped):
     role: Role
     sso_provider: str | None = None
     last_login_at_iso: str | None = None
+    mfa_enrolled: bool = False
 
 
 class UpdateRoleIn(BaseModel):
     role: Role
+
+
+def _to_read(u: User) -> UserRead:
+    return UserRead(
+        id=u.id,
+        email=u.email,
+        name=u.name,
+        picture_url=u.picture_url,
+        role=u.role,
+        sso_provider=u.sso_provider,
+        last_login_at_iso=u.last_login_at.isoformat() if u.last_login_at else None,
+        mfa_enrolled=bool(u.mfa_enrolled),
+        created_at=u.created_at,
+        updated_at=u.updated_at,
+    )
 
 
 @router.get(
@@ -36,22 +52,7 @@ class UpdateRoleIn(BaseModel):
 )
 async def list_users(db: AsyncSession = Depends(get_db)) -> list[UserRead]:
     items = list((await db.execute(select(User).order_by(User.id))).scalars().all())
-    out: list[UserRead] = []
-    for u in items:
-        out.append(
-            UserRead(
-                id=u.id,
-                email=u.email,
-                name=u.name,
-                picture_url=u.picture_url,
-                role=u.role,
-                sso_provider=u.sso_provider,
-                last_login_at_iso=u.last_login_at.isoformat() if u.last_login_at else None,
-                created_at=u.created_at,
-                updated_at=u.updated_at,
-            )
-        )
-    return out
+    return [_to_read(u) for u in items]
 
 
 @router.patch(
@@ -75,17 +76,7 @@ async def update_role(
     target.role = payload.role
     await db.commit()
     await db.refresh(target)
-    return UserRead(
-        id=target.id,
-        email=target.email,
-        name=target.name,
-        picture_url=target.picture_url,
-        role=target.role,
-        sso_provider=target.sso_provider,
-        last_login_at_iso=target.last_login_at.isoformat() if target.last_login_at else None,
-        created_at=target.created_at,
-        updated_at=target.updated_at,
-    )
+    return _to_read(target)
 
 
 @router.get("/me/refresh", response_model=UserRead)
@@ -93,14 +84,4 @@ async def me_refresh(
     user: User = Depends(current_user),
 ) -> UserRead:
     """최신 role/메타 재조회용."""
-    return UserRead(
-        id=user.id,
-        email=user.email,
-        name=user.name,
-        picture_url=user.picture_url,
-        role=user.role,
-        sso_provider=user.sso_provider,
-        last_login_at_iso=user.last_login_at.isoformat() if user.last_login_at else None,
-        created_at=user.created_at,
-        updated_at=user.updated_at,
-    )
+    return _to_read(user)
