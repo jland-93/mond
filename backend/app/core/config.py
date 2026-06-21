@@ -36,7 +36,7 @@ class Settings(BaseSettings):
 
     # 애플리케이션 메타
     APP_NAME: str = "Mond"
-    VERSION: str = "0.1.0"
+    VERSION: str = "0.3.0"
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
 
