@@ -89,6 +89,14 @@ class Settings(BaseSettings):
     OLLAMA_MODEL_DEFAULT: str = "llama3.1:8b"
     OLLAMA_MODEL_DEEP: str = "llama3.1:70b"
 
+    # vLLM — 사내 GPU 서버에 vLLM을 OpenAI-호환 API로 띄운 경우.
+    # 기본값은 ENV가 비어 있으면 OpenAI provider + base_url 흐름을 그대로 재사용.
+    # AI_PROVIDER=vllm 으로 지정해도 OpenAI 호출 경로로 라우팅된다.
+    VLLM_BASE_URL: Optional[str] = None
+    VLLM_API_KEY: Optional[str] = "EMPTY"            # vLLM은 대개 token 미요구, openai SDK 호환을 위해 placeholder
+    VLLM_MODEL_DEFAULT: str = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+    VLLM_MODEL_DEEP: str = "meta-llama/Meta-Llama-3.1-70B-Instruct"
+
     # 스캐너 통합 토글 (없으면 stub 모드로 동작)
     SCANNER_TRIVY_BIN: Optional[str] = "trivy"
     SCANNER_SEMGREP_BIN: Optional[str] = "semgrep"

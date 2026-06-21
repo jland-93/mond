@@ -21,7 +21,7 @@ from app.models.user import Role
 
 router = APIRouter()
 
-SUPPORTED = {"anthropic", "openai", "bedrock", "ollama"}
+SUPPORTED = {"anthropic", "openai", "bedrock", "ollama", "vllm"}
 
 
 class AIProviderRead(BaseModel):
@@ -214,7 +214,8 @@ async def test_provider(payload: TestRequest) -> TestResponse:
     try:
         if provider == "anthropic":
             result = await ai_client._call_anthropic(rt, system, user, rt.model_default, 64)
-        elif provider == "openai":
+        elif provider in {"openai", "vllm"}:
+            # vLLM은 OpenAI-호환 server라 같은 호출 흐름
             result = await ai_client._call_openai(rt, system, user, rt.model_default, 64)
         elif provider == "bedrock":
             result = await ai_client._call_bedrock(rt, system, user, rt.model_default, 64)
@@ -224,3 +225,19 @@ async def test_provider(payload: TestRequest) -> TestResponse:
         return TestResponse(ok=False, provider=provider, model=rt.model_default, detail=str(exc)[:300])
 
     return TestResponse(ok=True, provider=result.provider, model=result.model, detail="connected")
+
+
+# ── AI 토큰 사용량 ─────────────────────────────────────────────
+@router.get(
+    "/usage",
+    dependencies=[Depends(require_role(Role.ADMIN))],
+)
+async def get_ai_usage(
+    db: AsyncSession = Depends(get_db),
+    days: int = 7,
+):
+    """최근 N일 AI 호출 사용량 집계. provider/tier/intent/일별 시계열."""
+    from app.services import ai_usage as ai_usage_service
+
+    days = max(1, min(days, 90))
+    return await ai_usage_service.summary(db, days=days)

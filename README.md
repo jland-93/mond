@@ -447,7 +447,7 @@ UX·가시화 보강:
 - [x] **감사 로그 검색 UI** — `Admin → 감사 로그`에서 기간/actor/event/request_id 필터 + 시계열 timeline
 - [ ] **한국 규제 인증 심사 패키지** — ISMS-P 자동 증빙 자료 출력 (실제 심사 대응)
 - [x] **알림 라우팅 다채널** — Slack 외 Discord + MS Teams webhook 추가 (severity 색상 채널별 변환)
-- [ ] **온프레미스 LLM 게이트웨이 표준화** — 사내 vLLM 어댑터 + 토큰 사용량 추적
+- [x] **온프레미스 LLM 게이트웨이 + 토큰 사용량 추적** — vLLM provider (OpenAI-호환 base_url) + `ai_usage_logs` 테이블 자동 기록 + `GET /admin/ai-providers/usage` (provider/tier/intent/일별 시계열) + Admin 연동 관리에 AI 사용량 카드
 - [x] **PR Bot — AI 분석 PR comment** — push 스캔 결과를 PR에 자동 코멘트 + AI triage 1-liner
 
 ## 🧪 Known Limitations

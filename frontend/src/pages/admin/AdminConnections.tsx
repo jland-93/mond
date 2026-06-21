@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useI18n } from "@/i18n";
 
 import AIProvidersCard from "./connections/AIProvidersCard";
+import AIUsageCard from "./connections/AIUsageCard";
 import DailyDigestCard from "./connections/DailyDigestCard";
 import GitHubOrgSyncCard from "./connections/GitHubOrgSyncCard";
 import IAMSourceCard from "./connections/IAMSourceCard";
@@ -38,6 +39,7 @@ export default function AdminConnections() {
       <IAMSourceCard onAdd={() => setModalOpen(true)} />
       <SSOCard />
       <AIProvidersCard />
+      <AIUsageCard />
       <DailyDigestCard />
       <GitHubOrgSyncCard />
       <WebhookCard />

@@ -6,6 +6,7 @@ create_all 호출 전에 모든 모델 모듈이 임포트되어야 메타데이
 
 from app.models.ai_insight import AIInsight, InsightKind
 from app.models.ai_provider import AIProviderConfig
+from app.models.ai_usage import AIUsageLog
 from app.models.role_request import RoleChangeRequest, RoleRequestStatus
 from app.models.webhook_token import WebhookToken
 from app.models.asset import Asset, AssetType
@@ -55,6 +56,7 @@ __all__ = [
     "AIInsight",
     "InsightKind",
     "AIProviderConfig",
+    "AIUsageLog",
     "WebhookToken",
     "RoleChangeRequest",
     "RoleRequestStatus",

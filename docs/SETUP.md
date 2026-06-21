@@ -14,7 +14,7 @@ In English — everything you need to go from `docker compose up` to a Helm-depl
   - 2-A. DB / Redis 선택 — in-cluster vs 외부 매니지드
   - 2-B. Ingress 선택 — ALB / Nginx / Cloudflare / 사내 GW
   - 2-C. 시크릿 관리 선택 — kubectl / External-Secrets / Sealed-Secrets
-- [Part 3. AI provider 세팅 (Anthropic · OpenAI · Bedrock · Ollama)](#part-3-ai-provider-세팅) — 4종 선택 기준 + 한국어 성능 비고
+- [Part 3. AI provider 세팅 (Anthropic · OpenAI · Bedrock · Ollama · vLLM)](#part-3-ai-provider-세팅) — 5종 선택 기준 + 한국어 성능 비고 + 토큰 사용량 추적
 - [Part 4. 로그인 — Dev / SSO / MFA](#part-4-로그인--dev--sso--mfa) — SSO IdP 선택 기준 + MFA 환경별 권장
 - [Part 5. 관리자 초기 세팅 10단계 체크리스트](#part-5-관리자-초기-세팅-체크리스트) — 각 단계 "옵션 A/B/Skip" 명시
 - [Part 6. 업그레이드 · 백업 · 모니터링](#part-6-업그레이드--백업--모니터링)
@@ -333,7 +333,8 @@ SESSION_SECURE=true
 | **Anthropic 직접** (권장) | `AI_PROVIDER=anthropic` + `ANTHROPIC_API_KEY` | `claude-haiku-4-5-20251001` · `claude-sonnet-4-6` | B / C | ★★★★★ |
 | **OpenAI / Azure OpenAI** | `AI_PROVIDER=openai` + `OPENAI_API_KEY` (+`OPENAI_BASE_URL` for Azure) | `gpt-4o-mini` · `gpt-4o` | C | ★★★★☆ |
 | **AWS Bedrock** | `AI_PROVIDER=bedrock` + IAM 자격 | `anthropic.claude-3-5-sonnet-20241022-v2:0` | C (AWS heavy) | ★★★★★ |
-| **Ollama / vLLM (로컬)** | `AI_PROVIDER=ollama` + `OLLAMA_BASE_URL` | `llama3.1:8b` · `llama3.1:70b` · `qwen2.5:32b` | **D (폐쇄망)** | ★★★☆☆ (모델 따라) |
+| **Ollama (로컬)** | `AI_PROVIDER=ollama` + `OLLAMA_BASE_URL` | `llama3.1:8b` · `llama3.1:70b` · `qwen2.5:32b` | **D (폐쇄망)** | ★★★☆☆ (모델 따라) |
+| **vLLM (사내 GPU)** | `AI_PROVIDER=vllm` + `VLLM_BASE_URL` (OpenAI 호환) | `meta-llama/Meta-Llama-3.1-70B-Instruct` 등 vLLM 서버에 띄운 모델 | **D (폐쇄망 + 고처리량)** | 모델 따라 |
 
 ### 3-2. 설정 예시
 
@@ -377,13 +378,40 @@ OLLAMA_MODEL_DEFAULT=llama3.1:8b
 OLLAMA_MODEL_DEEP=llama3.1:70b
 ```
 
-### 3-3. 키 없을 때 (Heuristic 모드)
+#### vLLM (사내 GPU 게이트웨이 — OpenAI 호환)
+
+사내 GPU 서버에 vLLM을 OpenAI 호환 모드로 띄운 환경. Ollama보다 처리량/배치 효율이 높고, 같은 OpenAI SDK 호출 경로를 그대로 재사용한다.
+
+```bash
+# vllm serve meta-llama/Meta-Llama-3.1-70B-Instruct \
+#   --host 0.0.0.0 --port 8000 --tensor-parallel-size 4
+
+AI_PROVIDER=vllm
+VLLM_BASE_URL=http://gpu-01.internal:8000/v1
+VLLM_API_KEY=EMPTY        # vLLM은 인증 미요구. openai SDK placeholder.
+VLLM_MODEL_DEFAULT=meta-llama/Meta-Llama-3.1-8B-Instruct
+VLLM_MODEL_DEEP=meta-llama/Meta-Llama-3.1-70B-Instruct
+```
+
+> 폐쇄망에 vLLM/Ollama를 동시에 두는 패턴도 가능합니다. UI Admin → 연동 관리에서 default provider만 토글하세요.
+
+### 3-3. 토큰 사용량 추적
+
+모든 `complete_json` 호출은 `ai_usage_logs` 테이블에 provider · model tier · intent · 입출력 토큰을 기록합니다. Admin → 연동 관리에 `AI 토큰 사용량` 카드가 최근 1/7/30/90일 호출수, 입출력 토큰 합, provider/tier/intent 분포를 보여줍니다.
+
+```http
+GET /api/v1/admin/ai-providers/usage?days=7
+```
+
+응답 JSON: `total` (호출수·입·출·실패) · `by_provider` · `by_tier` (default/deep) · `by_intent` (상위 20) · `by_day` 시계열.
+
+### 3-4. 키 없을 때 (Heuristic 모드)
 
 - 화면 상단에 `ANTHROPIC_API_KEY 미설정 — 기본 규칙 모드` 안내
 - AI Insights / Findings 트리아지는 **휴리스틱 규칙**으로 동작 (severity 매핑·키워드 기반)
 - 사용감을 정확히 확인할 수 있음 → 의사결정 후 키 추가 ✅
 
-### 3-4. 응답 출처 추적
+### 3-5. 응답 출처 추적
 
 모든 AI 응답에는 `{provider}:{model}` 라벨이 함께 저장되어 감사 가능합니다:
 

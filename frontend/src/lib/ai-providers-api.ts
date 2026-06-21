@@ -4,7 +4,7 @@
 
 import { api } from "@/lib/api";
 
-export type AIProviderName = "anthropic" | "openai" | "bedrock" | "ollama";
+export type AIProviderName = "anthropic" | "openai" | "bedrock" | "ollama" | "vllm";
 
 export interface AIProviderRow {
   id: number;

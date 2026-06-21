@@ -41,5 +41,6 @@ export const AI_PROVIDERS: {
   { name: "anthropic", label: "Anthropic Claude", needsKey: true, placeholder: "sk-ant-..." },
   { name: "openai", label: "OpenAI / Azure OpenAI", needsKey: true, placeholder: "sk-proj-..." },
   { name: "bedrock", label: "AWS Bedrock (IAM 자격)", needsKey: false, placeholder: "(boto3가 IAM 자격 자동 감지)" },
-  { name: "ollama", label: "Ollama / vLLM (로컬)", needsKey: false, placeholder: "(base_url로 호출)" },
+  { name: "ollama", label: "Ollama (로컬 LLM)", needsKey: false, placeholder: "(base_url로 호출)" },
+  { name: "vllm", label: "vLLM (사내 GPU 게이트웨이)", needsKey: false, placeholder: "(OpenAI 호환 API · base_url 필수)" },
 ];
