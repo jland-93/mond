@@ -15,7 +15,7 @@ from app.services import sbom_parser
 from app.services.reports import (
     compliance_report,
     compliance_report_markdown,
-    lightweight_sbom,
+    cyclonedx_sbom,
 )
 
 router = APIRouter()
@@ -72,8 +72,12 @@ async def sbom(
     _user: User = Depends(current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """CycloneDX-lite JSON 형식의 SBOM 다운로드."""
-    result = await lightweight_sbom(db, asset_id)
+    """CycloneDX 1.5 JSON 형식의 SBOM 다운로드.
+
+    REPOSITORY 자산이면 GitHub default branch에서 의존성 파일을 fetch해
+    components[]를 채운다. vulnerabilities[]는 자산의 findings.
+    """
+    result = await cyclonedx_sbom(db, asset_id)
     if result.get("error"):
         raise HTTPException(status_code=404, detail=result["error"])
     return result

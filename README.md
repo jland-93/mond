@@ -170,7 +170,7 @@ CI/CD에서 push 또는 PR마다 Mond 스캔을 자동 트리거. Security Setti
 | **Policy Simulation** | "이번 PR에 이 finding이 들어가면 어떤 정책이 깨질까" 미리보기 |
 | **AI Insights** | 자연어 쿼리, intent 분류, Claude 답변 |
 | **Regulations Guide** | 사업 시나리오 → 적용 규제(K-PIPA·GDPR·HIPAA·PCI-DSS·…) + 시점·의무 |
-| **Reports** | 자산별 SBOM(CycloneDX-lite) + 시나리오별 컴플라이언스 리포트 (JSON / Markdown) |
+| **Reports** | 자산별 SBOM(CycloneDX 1.5 표준 — components purl + vulnerabilities) + 시나리오별 컴플라이언스 리포트 (JSON / Markdown) |
 | **Integrations** | 스캐너 / AI / **MCP (stdio+HTTP)** / 알림 채널 / GitHub Webhook 안내 |
 | **Settings** | 헬스 / 버전 / 환경 / 언어 |
 
@@ -441,7 +441,7 @@ UX·가시화 보강:
 ### v0.3 후보 로드맵
 - [ ] **자산 자동 동기화 확장** — Kubernetes 클러스터 namespace/pod 자동 발견, AWS Auto-scaling group, GitLab/Bitbucket org sync
 - [x] **AI 멀티 프로바이더 라우팅** — 의도(`intent`)별 model 자동 라우팅 (`remediation`/`explain`/`deep_analysis`는 `model_deep`, 그 외 `model_default`)
-- [ ] **SBOM CycloneDX 정식 출력** — lite stub 대신 CycloneDX 1.5 JSON/XML, vex 포함
+- [x] **SBOM CycloneDX 정식 출력** — CycloneDX 1.5 표준 (`bomFormat: "CycloneDX"`, `serialNumber: urn:uuid:…`, `metadata.tools`, REPOSITORY 자산은 default branch에서 `components[]` 자동 추출, findings → 표준 `vulnerabilities[]`)
 - [ ] **MCP HTTP 마운트 안정화** — Claude Desktop/Code 외부 에이전트가 Mond를 도구로 자연스럽게 사용
 - [ ] **다중 워크스페이스/조직 분리** — 사내 여러 팀이 한 인스턴스를 공유할 때 자산/정책 scope
 - [x] **감사 로그 검색 UI** — `Admin → 감사 로그`에서 기간/actor/event/request_id 필터 + 시계열 timeline
@@ -454,7 +454,7 @@ UX·가시화 보강:
 
 v0.1.0 시점의 한계와 v0.2(Unreleased)에서 해소된 항목을 함께 기록합니다.
 
-- **SBOM** — ~~v0.1: CycloneDX-lite stub~~ → **v0.2 해소**: 5종 ecosystem 실 파서 + Reports UI + PR diff
+- **SBOM** — ~~v0.1: CycloneDX-lite stub~~ → **v0.2**: 5종 ecosystem 실 파서 + Reports UI + PR diff → **v0.3**: 표준 CycloneDX 1.5 (REPOSITORY 자산은 default branch에서 의존성 자동 추출해 `components[]` 채움, findings → 표준 `vulnerabilities[]`)
 - **스캐너** — ~~v0.1: 동기 인라인 실행~~ → **v0.2 해소**: Celery 큐 옵션 (`SCAN_QUEUE_ENABLED`)
 - **AI Insights** — ~~v0.1: RAG 미적용~~ → **v0.2 해소**: 4 소스 RAG + inline citation. hallucination 위험 인지·인간 검토 권장은 유지. AI 생성 카드는 ADMIN 전용
 - **IAM 어댑터** — ~~v0.1: GCP/Azure 보강 중~~ → **v0.2 해소**: 5종 모두 멱등성 + etag 재시도. capability API는 `ready`/`coming_soon`/`demo`를 그대로 노출

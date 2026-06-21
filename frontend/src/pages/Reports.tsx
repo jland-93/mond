@@ -98,8 +98,8 @@ export default function Reports() {
               style={{ marginBottom: 12 }}
               message={
                 locale === "ko"
-                  ? "자산의 발견사항을 묶어 만든 CycloneDX-lite 요약본입니다. 실제 의존성 트리를 추출하려면 아래 'SBOM 파일 파싱' 카드에 package.json · go.mod · Dockerfile 같은 파일을 붙여넣으세요."
-                  : "Finding-based CycloneDX-lite summary. For real dependency parsing, paste package.json / go.mod / Dockerfile into the 'SBOM File Parsing' card below."
+                  ? "CycloneDX 1.5 표준 형식. REPOSITORY 자산이면 GitHub default branch의 package.json · requirements.txt · go.mod · Dockerfile 등을 자동으로 fetch해 components[]를 채우고, 발견사항은 표준 vulnerabilities[]로 변환합니다."
+                  : "CycloneDX 1.5 standard format. For REPOSITORY assets, dependency files (package.json, requirements.txt, go.mod, Dockerfile) are auto-fetched from the default branch to populate components[]. Findings are emitted as standard vulnerabilities[]."
               }
             />
             <Paragraph type="secondary">{t.reports.sbomDesc}</Paragraph>
