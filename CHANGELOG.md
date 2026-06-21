@@ -6,6 +6,31 @@
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-06-22
+
+v0.2의 기능 골격 위에 **운영 가시성 · 멀티-tenant · 한국 인증 대응 · 외부 LLM/Git 확장**을 더했다. 10개 PR.
+
+### Added
+- **다중 워크스페이스 (Phase 1 — Asset)** — `Workspace` 모델(slug/name/is_default) + Admin CRUD + Asset에 `workspace_id` (NULL 허용 → 단일 조직 운영 영향 0). Assets 페이지 ADMIN selector. Policy/Finding/IAM 분리는 v0.4. (#95)
+- **ISMS-P 인증 심사 증빙 패키지** — KISA 핵심 통제 10개(정책·자산·위험·접근·특수계정+MFA·접근통제·감사로그·취약점·사고대응·prod 자산)에 Mond 실 데이터를 자동 매핑. `GET /admin/audit-package/isms-p?days=N&format=(json|markdown)`. Reports 페이지에 ADMIN 카드. v0.4에서 80개 통제 전체 확장 예정. (#94)
+- **자산 자동 동기화 확장 — GitLab + Bitbucket** — 기존 GitHub org sync 패턴을 GitLab group(`include_subgroups`, self-host `GITLAB_API_URL`) + Bitbucket Cloud workspace(username + app password)로 복제. Admin 연동 관리에 카드 3종, 동일한 dry-run UX. K8s/AWS는 v0.4. (#93)
+- **MCP HTTP Bearer 인증 + health endpoint** — `MCP_HTTP_AUTH_TOKEN` Bearer 미들웨어 (401/403), `GET /integrations/mcp/health` (enabled/mounted/transport/auth_required/reason/url), 외부 path `/mcp/mcp` → `/mcp/`로 단순화 (mcp.settings.streamable_http_path). SETUP에 Claude Desktop/Code config + 7 tools 표. (#92)
+- **온프레미스 LLM 게이트웨이 + AI 토큰 사용량 추적** — vLLM provider 신규(OpenAI-호환 base_url, AI_PROVIDER=vllm). `ai_usage_logs` 테이블에 complete_json 호출별 provider/tier/intent/입출력 토큰 자동 기록. `GET /admin/ai-providers/usage?days=N` 집계 (provider/tier/intent/일별 시계열). Admin 연동 관리에 'AI 토큰 사용량' 카드. (#91)
+- **SBOM CycloneDX 1.5 표준 출력** — `bomFormat: "CycloneDX"` (lite 접미 제거), `serialNumber: urn:uuid:…`, `metadata.tools/component`, REPOSITORY 자산이면 GitHub default branch에서 5종 의존성 파일을 자동 fetch해 `components[]` 채움(purl 표준), findings → 표준 `vulnerabilities[]`. Trivy/Syft/Dependency-Track 호환. (#90)
+- **알림 다채널 — Discord + MS Teams** — 기존 Slack/Generic에 두 채널 추가. severity별 색상(critical 빨강/high 주황/medium 노랑/low 파랑) 채널별 형식으로 자동 변환 (Discord embed / Teams MessageCard). URL만 설정하면 즉시 활성화, 한 채널 실패가 다른 채널을 막지 않음. (#89)
+- **PR Bot — push 스캔 결과를 PR 코멘트로** — webhook push로 스캔이 끝나면 head_sha 매칭 open PR에 finding 요약(severity 표) + AI 1-liner triage를 작성. SBOM diff와 같은 PR comment 라우트 재사용. `GITHUB_TOKEN` 없으면 silent skip. (#88)
+- **AI intent별 model 자동 라우팅** — `complete_json(intent=...)`로 의도 분기. `remediation`/`explain`/`deep_analysis`는 `model_deep`(정확도), 그 외(`triage`/`route`/`list_findings`/`scan`)는 `model_default`(저비용/저지연). 응답에 `model:{provider}:{model}` 라벨로 감사 가능. (#87)
+- **감사 로그 검색 UI** — `GET /admin/audit-log` 필터 5종(기간/actor/event/request_id/페이지). Admin 사이드바 '감사 로그' 페이지에 시계열 timeline 표 (actor + event 색 칩 + detail JSON expand). (#86)
+
+### Notes
+- v0.3은 모든 ALTER TABLE이 `IF NOT EXISTS` — 기존 v0.2 인스턴스는 자동 호환
+- 단일 조직 운영자에게 영향 0 (workspace=NULL이 모든 자산에 자연스럽게 적용)
+- AI 토큰 사용량 기록 실패는 LLM 호출을 막지 않음 (try/except + warning만)
+
+## [0.2.0] — 2026-06-22
+
+v0.1 베이스 위에 **SBOM 실 추출 · RAG AI · Celery 큐 · OPA · 자산/IAM 확장 · UX 전면 다듬기**를 더했다.
+
 ### Changed
 - **Admin Users — MFA 등록 상태 + SSO 출처 + 최근 로그인 시각화** — `UserRead`에 `mfa_enrolled` 추가. AdminUsers 테이블에 MFA 컬럼 신규(등록/필요/—, role∈{admin,reviewer}는 미등록 시 주황 경고), SSO 출처 색 구분(provider 청보라 / Dev Login 회색), 최근 로그인은 절대 시각 → '5분 전·3시간 전·2일 전' 상대 표기(tooltip에 절대 시각). 본인 행 'you' 청록 태그. 본인 ADMIN demote 막힘을 tooltip으로 명시.
 - **PolicySimulator — engine + matched 노출 + 위험도 시각화** — 결과 테이블에 `engine` 컬럼(`opa` 청보라 🤖 / `builtin` 회색), 임계치 색 dot, blocked 행 좌측 색띠, expand에 OPA deny 메시지(또는 차단 finding 리스트). severity Select option도 색 dot로 Admin Policies와 일관성. Alert가 '차단 N건 · 통과 M건 · 총 K개'로 구체화. EXPERIMENTAL 톤다운.
@@ -139,7 +164,9 @@
 - Rate limiting / abuse protection 미구현 (로드맵)
 - 정책 템플릿의 규제 조항 매핑은 참고용이며 법적 자문이 아닙니다.
 
-[Unreleased]: https://github.com/jland-93/mond/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/jland-93/mond/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/jland-93/mond/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/jland-93/mond/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jland-93/mond/releases/tag/v0.1.0
 
 ---
