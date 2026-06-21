@@ -425,6 +425,15 @@ UX·가시화 보강:
 - [x] MyMond 빈 상태 카드 친화화 — 신규 임직원이 첫 진입 시 '담당 자산이 없습니다 → 자산 보기', '아직 요청한 권한이 없습니다 → 권한 요청 시작' CTA
 - [x] 위험도·상태 라벨 한국어 통일 — `risk: high` → `위험도: 높음`, `granted` → `권한 부여 완료` 등
 - [x] 라우트별 코드 스플릿 — 첫 로드 1834KB → **684KB** (63% 감소). three.js 873KB는 Moon3D hero 화면에서만 lazy 로드
+- [x] Scans 페이지 가시화 — 자산 ID → 이름, webhook smart-router 자동 선택 결과(이유·카테고리 카운트) row expand
+- [x] Findings drawer 가시화 — 발견 자산 카드 + AI 인사이트(severity 재평가 화살표·confidence Progress bar·remediation references)
+- [x] Assets owner inline edit — '내 자산으로' 1클릭 + Popover 편집
+- [x] Knowledge Hub 출처 명료화 — `📖 기본 카드` / `🤖 AI 생성` / `📖 직접 작성` + AI 카드 보라 테두리
+- [x] Regulations Guide 카드 그리드 + 시각 위계 — 시나리오 카드 그리드, 규제 카드 2열(관할 색·시점·의무·참고)
+- [x] Dashboard '다음 단계' 가이드 배너 — admin 5단계 / employee 3단계, 완료 시 자동 hide
+- [x] AI Insights citation deep-link — `?focus=N`으로 자산/finding/정책에서 자동 drawer/highlight
+- [x] Admin Policies — engine 컬럼 + 임계치 색 dot
+- [x] Settings — 4 KPI 카드(backend·DB·AI·OPA) + 스캐너 어댑터 + 환경
 
 ## 🧪 Known Limitations
 
