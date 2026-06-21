@@ -2,11 +2,12 @@
  * Reports — SBOM / Compliance 다운로드
  */
 
-import { DownloadOutlined, ExperimentOutlined, FileSearchOutlined } from "@ant-design/icons";
+import { DownloadOutlined, ExperimentOutlined, FileSearchOutlined, SafetyOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Alert, Button, Card, Col, Input, Row, Select, Space, Table, Tag, Typography, message } from "antd";
+import { Alert, Button, Card, Col, Input, InputNumber, Row, Select, Space, Table, Tag, Typography, message } from "antd";
 import { useState } from "react";
 
+import { useAuth } from "@/auth/AuthContext";
 import { useI18n } from "@/i18n";
 import { api, type Asset, type Page } from "@/lib/api";
 
@@ -33,6 +34,8 @@ interface ScenarioLite {
 
 export default function Reports() {
   const { t, locale } = useI18n();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [assetId, setAssetId] = useState<number | undefined>(undefined);
   const [scenarioId, setScenarioId] = useState<string | undefined>(undefined);
 
@@ -40,6 +43,9 @@ export default function Reports() {
   const [filename, setFilename] = useState("package.json");
   const [content, setContent] = useState("");
   const [parsed, setParsed] = useState<ParseResult | null>(null);
+
+  // ISMS-P 인증 심사 패키지 (ADMIN 전용)
+  const [ismsDays, setIsmsDays] = useState(90);
 
   const parseSbom = useMutation({
     mutationFn: async () => {
@@ -173,6 +179,64 @@ export default function Reports() {
             </Space>
           </Card>
         </Col>
+
+        {isAdmin && (
+          <Col xs={24}>
+            <Card
+              title={
+                <Space>
+                  <SafetyOutlined style={{ color: "#722ed1" }} />
+                  <span>{locale === "ko" ? "ISMS-P 인증 심사 증빙" : "ISMS-P Audit Package"}</span>
+                  <Tag color="purple">{locale === "ko" ? "ADMIN" : "ADMIN"}</Tag>
+                  <Tag>10 controls</Tag>
+                </Space>
+              }
+            >
+              <Paragraph type="secondary">
+                {locale === "ko"
+                  ? "KISA ISMS-P 핵심 통제 10개를 Mond 실 데이터(자산·접근통제·로그·발견사항·권한요청 흐름)에 자동 매핑해 1차 증빙 자료를 만듭니다. 심사원에게 그대로 전달 가능."
+                  : "Maps 10 core KISA ISMS-P controls onto Mond's live data (assets, access control, logs, findings, access requests) — first-pass evidence ready to share with auditors."}
+              </Paragraph>
+              <Space wrap>
+                <Space size={4}>
+                  <Text>{locale === "ko" ? "집계 기간(일)" : "Period (days)"}</Text>
+                  <InputNumber
+                    min={1}
+                    max={365}
+                    value={ismsDays}
+                    onChange={(v) => setIsmsDays(Number(v) || 90)}
+                    style={{ width: 90 }}
+                  />
+                </Space>
+                <Button
+                  type="primary"
+                  icon={<DownloadOutlined />}
+                  href={`/api/v1/admin/audit-package/isms-p?days=${ismsDays}&format=markdown`}
+                  target="_blank"
+                >
+                  {locale === "ko" ? "Markdown 다운로드" : "Download Markdown"}
+                </Button>
+                <Button
+                  icon={<DownloadOutlined />}
+                  href={`/api/v1/admin/audit-package/isms-p?days=${ismsDays}&format=json`}
+                  target="_blank"
+                >
+                  {locale === "ko" ? "JSON 다운로드" : "Download JSON"}
+                </Button>
+              </Space>
+              <Alert
+                type="info"
+                showIcon
+                style={{ marginTop: 12 }}
+                message={
+                  locale === "ko"
+                    ? "1차 증빙으로 자동 생성됩니다. 심사 자료로 사용하기 전 보안담당자 검토를 권장합니다. v0.3은 핵심 10개 통제만 다루며, 전체 80여 통제는 v0.4에서 확장 예정."
+                    : "Auto-generated first-pass evidence. Have a security lead review before submitting. v0.3 covers 10 core controls; full 80-control coverage in v0.4."
+                }
+              />
+            </Card>
+          </Col>
+        )}
 
         <Col xs={24}>
           <Card

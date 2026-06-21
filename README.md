@@ -445,7 +445,7 @@ UX·가시화 보강:
 - [x] **MCP HTTP 마운트 안정화** — Bearer 토큰 미들웨어(`MCP_HTTP_AUTH_TOKEN`), `GET /integrations/mcp/health` (enabled/mounted/transport/auth_required/reason/url), 마운트 path를 `/mcp/mcp` → `/mcp/`로 단순화, Claude Desktop/Code config 예시 + 7개 tools 표 (SETUP.md)
 - [ ] **다중 워크스페이스/조직 분리** — 사내 여러 팀이 한 인스턴스를 공유할 때 자산/정책 scope
 - [x] **감사 로그 검색 UI** — `Admin → 감사 로그`에서 기간/actor/event/request_id 필터 + 시계열 timeline
-- [ ] **한국 규제 인증 심사 패키지** — ISMS-P 자동 증빙 자료 출력 (실제 심사 대응)
+- [x] **한국 규제 인증 심사 패키지** — `GET /admin/audit-package/isms-p?format=markdown` ISMS-P 핵심 통제 10개(정책·자산·위험·접근·특수계정·접근통제·감사로그·취약점·사고대응·prod 자산)에 Mond 실 데이터를 자동 매핑. Reports 페이지에 ADMIN 전용 카드. 전체 80개 통제는 v0.4
 - [x] **알림 라우팅 다채널** — Slack 외 Discord + MS Teams webhook 추가 (severity 색상 채널별 변환)
 - [x] **온프레미스 LLM 게이트웨이 + 토큰 사용량 추적** — vLLM provider (OpenAI-호환 base_url) + `ai_usage_logs` 테이블 자동 기록 + `GET /admin/ai-providers/usage` (provider/tier/intent/일별 시계열) + Admin 연동 관리에 AI 사용량 카드
 - [x] **PR Bot — AI 분석 PR comment** — push 스캔 결과를 PR에 자동 코멘트 + AI triage 1-liner
