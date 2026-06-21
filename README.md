@@ -439,7 +439,7 @@ UX·가시화 보강:
 - [x] Admin Users — MFA 등록 상태 + SSO 출처 + 최근 로그인 상대 표기
 
 ### v0.3 후보 로드맵
-- [ ] **자산 자동 동기화 확장** — Kubernetes 클러스터 namespace/pod 자동 발견, AWS Auto-scaling group, GitLab/Bitbucket org sync
+- [x] **자산 자동 동기화 확장** — GitLab group(`include_subgroups`, self-host `GITLAB_API_URL`) + Bitbucket Cloud workspace 일괄 sync. Admin → 연동 관리에 카드 3종(GitHub/GitLab/Bitbucket). K8s namespace·AWS Auto-scaling은 후속
 - [x] **AI 멀티 프로바이더 라우팅** — 의도(`intent`)별 model 자동 라우팅 (`remediation`/`explain`/`deep_analysis`는 `model_deep`, 그 외 `model_default`)
 - [x] **SBOM CycloneDX 정식 출력** — CycloneDX 1.5 표준 (`bomFormat: "CycloneDX"`, `serialNumber: urn:uuid:…`, `metadata.tools`, REPOSITORY 자산은 default branch에서 `components[]` 자동 추출, findings → 표준 `vulnerabilities[]`)
 - [x] **MCP HTTP 마운트 안정화** — Bearer 토큰 미들웨어(`MCP_HTTP_AUTH_TOKEN`), `GET /integrations/mcp/health` (enabled/mounted/transport/auth_required/reason/url), 마운트 path를 `/mcp/mcp` → `/mcp/`로 단순화, Claude Desktop/Code config 예시 + 7개 tools 표 (SETUP.md)

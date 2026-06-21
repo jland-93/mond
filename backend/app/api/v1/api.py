@@ -6,7 +6,9 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     admin_audit_log,
+    admin_bitbucket_sync,
     admin_github_sync,
+    admin_gitlab_sync,
     admin_slack,
     ai,
     ai_providers,
@@ -52,6 +54,8 @@ api_router.include_router(ai.router, prefix="/ai", tags=["AI"])
 api_router.include_router(ai_providers.router, prefix="/admin/ai-providers", tags=["AI Providers (Admin)"])
 api_router.include_router(admin_slack.router, prefix="/admin/slack", tags=["Slack Channels (Admin)"])
 api_router.include_router(admin_github_sync.router, prefix="/admin/github-sync", tags=["GitHub Sync (Admin)"])
+api_router.include_router(admin_gitlab_sync.router, prefix="/admin/gitlab-sync", tags=["GitLab Sync (Admin)"])
+api_router.include_router(admin_bitbucket_sync.router, prefix="/admin/bitbucket-sync", tags=["Bitbucket Sync (Admin)"])
 api_router.include_router(admin_audit_log.router, prefix="/admin/audit-log", tags=["Audit Log (Admin)"])
 api_router.include_router(digest.router, prefix="/admin/digest", tags=["Daily Digest (Admin)"])
 api_router.include_router(integrations.router, prefix="/integrations", tags=["Integrations"])

@@ -128,6 +128,16 @@ class Settings(BaseSettings):
     # 자산 자동 동기화 대상 org. 비우면 admin UI에서 매번 입력.
     GITHUB_ORG: Optional[str] = None
 
+    # GitLab (self-host도 GITLAB_API_URL로 지원)
+    GITLAB_API_URL: Optional[str] = "https://gitlab.com/api/v4"
+    GITLAB_TOKEN: Optional[str] = None       # Personal Access Token (read_api 권장)
+    GITLAB_GROUP: Optional[str] = None       # 기본 group (sub-group 경로는 'parent/sub')
+
+    # Bitbucket Cloud — username + app password Basic auth
+    BITBUCKET_USERNAME: Optional[str] = None
+    BITBUCKET_APP_PASSWORD: Optional[str] = None
+    BITBUCKET_WORKSPACE: Optional[str] = None
+
     # Rate limit — Redis 기반 fixed window. 끄면 모든 버킷 통과 (test/CI 편의).
     # 기본 true — 운영에서 abuse 보호. Redis 다운 시 fail open(가용성 우선).
     RATE_LIMIT_ENABLED: bool = True

@@ -16,8 +16,10 @@ import { useI18n } from "@/i18n";
 
 import AIProvidersCard from "./connections/AIProvidersCard";
 import AIUsageCard from "./connections/AIUsageCard";
+import BitbucketWorkspaceSyncCard from "./connections/BitbucketWorkspaceSyncCard";
 import DailyDigestCard from "./connections/DailyDigestCard";
 import GitHubOrgSyncCard from "./connections/GitHubOrgSyncCard";
+import GitLabGroupSyncCard from "./connections/GitLabGroupSyncCard";
 import IAMSourceCard from "./connections/IAMSourceCard";
 import IAMSourceModal from "./connections/IAMSourceModal";
 import SSOCard from "./connections/SSOCard";
@@ -42,6 +44,8 @@ export default function AdminConnections() {
       <AIUsageCard />
       <DailyDigestCard />
       <GitHubOrgSyncCard />
+      <GitLabGroupSyncCard />
+      <BitbucketWorkspaceSyncCard />
       <WebhookCard />
 
       <IAMSourceModal open={modalOpen} onClose={() => setModalOpen(false)} />
