@@ -1,62 +1,203 @@
 """
-Reports — SBOM (lightweight) + Compliance 리포트
+Reports — SBOM (CycloneDX 1.5) + Compliance 리포트
+
+cyclonedx_sbom
+  - REPOSITORY 자산이면 GitHub default branch의 의존성 파일을 fetch해
+    components[]를 채운다 (npm/pypi/go/docker). 실패하면 components는 빈 배열.
+  - vulnerabilities[]는 자산의 findings를 CycloneDX 1.5 vulnerability 객체로 변환.
+  - serialNumber/timestamp/tools 등 표준 metadata 충족.
 """
 
 from __future__ import annotations
 
+import uuid
 from datetime import datetime, timezone
 
+import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
+from app.core.logging import get_logger
 from app.data.regulations import SCENARIOS, regulation_dict
-from app.models.asset import Asset
+from app.models.asset import Asset, AssetType
 from app.models.finding import Finding, FindingStatus, Severity
+from app.services import sbom_parser
+
+logger = get_logger(__name__)
+
+MOND_TOOL_VERSION = "0.3"
+
+# GitHub repo에서 시도할 의존성 파일 후보. 발견되는 만큼 components에 합집합.
+_DEFAULT_DEP_FILES = (
+    "package.json",
+    "package-lock.json",
+    "requirements.txt",
+    "go.mod",
+    "Dockerfile",
+)
 
 
-async def lightweight_sbom(db: AsyncSession, asset_id: int) -> dict:
-    """완전한 SBOM은 아니지만, 대상 자산의 발견사항을 묶어 CycloneDX-유사 JSON 생성."""
+def _purl(eco: str, name: str, version: str | None) -> str:
+    """ecosystem → CycloneDX/SPDX 표준 Package URL.
+
+    spec: https://github.com/package-url/purl-spec
+      npm:    pkg:npm/<name>@<version>
+      pypi:   pkg:pypi/<name>@<version>
+      go:     pkg:golang/<module>@<version>
+      docker: pkg:oci/<image>@<tag>
+    """
+    scheme = {"npm": "npm", "pypi": "pypi", "go": "golang", "docker": "oci"}.get(eco, eco)
+    base = f"pkg:{scheme}/{name}"
+    return f"{base}@{version}" if version else base
+
+
+def _bom_ref(eco: str, name: str, version: str | None) -> str:
+    """components와 vulnerabilities를 잇는 참조. purl 기반이지만 짧게."""
+    v = version or "unspecified"
+    return f"{eco}:{name}@{v}"
+
+
+def _to_component(pkg: sbom_parser.Package) -> dict:
+    return {
+        "type": "library",
+        "bom-ref": _bom_ref(pkg.ecosystem, pkg.name, pkg.version),
+        "name": pkg.name,
+        "version": pkg.version or "",
+        "purl": _purl(pkg.ecosystem, pkg.name, pkg.version),
+        "properties": [
+            {"name": "mond:ecosystem", "value": pkg.ecosystem},
+            *([{"name": "mond:source", "value": pkg.source_file}] if pkg.source_file else []),
+            *([{"name": "mond:dev", "value": "true"}] if pkg.dev else []),
+        ],
+    }
+
+
+def _to_vulnerability(f: Finding) -> dict:
+    """Finding → CycloneDX 1.5 vulnerability."""
+    method = "OWASP" if f.scanner in {"semgrep", "nuclei"} else "CVSSv3"
+    return {
+        "bom-ref": f.fingerprint,
+        "id": f.rule_id or f.fingerprint,
+        "source": {"name": f.scanner},
+        "ratings": [
+            {"severity": f.severity.value, "method": method, "score": 0.0}
+        ],
+        "description": f.title,
+        "advisories": [
+            {"url": ref} for ref in (f.references or []) if isinstance(ref, str)
+        ],
+        "properties": [
+            {"name": "mond:status", "value": f.status.value},
+            *([{"name": "mond:location", "value": f.location}] if f.location else []),
+        ],
+    }
+
+
+def _parse_github_uri(uri: str | None) -> tuple[str, str] | None:
+    """https://github.com/<owner>/<repo>(.git)? 에서 owner/repo 추출."""
+    if not uri:
+        return None
+    u = uri.rstrip("/")
+    if u.endswith(".git"):
+        u = u[:-4]
+    if "github.com/" not in u:
+        return None
+    tail = u.split("github.com/", 1)[1]
+    parts = tail.split("/")
+    if len(parts) < 2:
+        return None
+    return parts[0], parts[1]
+
+
+async def _fetch_repo_components(asset: Asset) -> list[dict]:
+    """REPOSITORY 자산이면 default branch의 의존성 파일들에서 components 합집합."""
+    if asset.asset_type != AssetType.REPOSITORY:
+        return []
+    parsed = _parse_github_uri(asset.uri)
+    if parsed is None:
+        return []
+    owner, repo = parsed
+
+    token = settings.GITHUB_TOKEN
+    headers = {"Accept": "application/vnd.github+json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    # default branch 조회 — 실패하면 main fallback
+    branch = "main"
+    try:
+        async with httpx.AsyncClient(timeout=10, headers=headers) as client:
+            r = await client.get(f"https://api.github.com/repos/{owner}/{repo}")
+            if r.status_code < 400:
+                branch = (r.json().get("default_branch") or "main")
+    except Exception as exc:
+        logger.info("sbom_default_branch_lookup_failed", error=str(exc))
+
+    components: list[dict] = []
+    seen_refs: set[str] = set()
+    async with httpx.AsyncClient(timeout=15, headers=headers) as client:
+        for fname in _DEFAULT_DEP_FILES:
+            url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{fname}"
+            try:
+                r = await client.get(url, follow_redirects=True)
+                if r.status_code >= 400:
+                    continue
+                _, pkgs = sbom_parser.parse(r.text, fname)
+            except Exception as exc:
+                logger.info("sbom_fetch_failed", file=fname, error=str(exc))
+                continue
+            for p in pkgs:
+                comp = _to_component(p)
+                ref = comp["bom-ref"]
+                if ref in seen_refs:
+                    continue
+                seen_refs.add(ref)
+                components.append(comp)
+    return components
+
+
+async def cyclonedx_sbom(db: AsyncSession, asset_id: int) -> dict:
+    """자산 1건의 CycloneDX 1.5 BOM. components(의존성) + vulnerabilities(findings)."""
     asset = (await db.execute(select(Asset).where(Asset.id == asset_id))).scalar_one_or_none()
     if not asset:
         return {"error": "asset_not_found"}
 
     findings = list(
-        (
-            await db.execute(select(Finding).where(Finding.asset_id == asset_id))
-        ).scalars().all()
+        (await db.execute(select(Finding).where(Finding.asset_id == asset_id))).scalars().all()
     )
+    components = await _fetch_repo_components(asset)
 
     return {
-        "$schema": "https://cyclonedx.org/docs/1.5/json/",
-        "bomFormat": "CycloneDX-lite",
+        "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
+        "bomFormat": "CycloneDX",
         "specVersion": "1.5",
+        "serialNumber": f"urn:uuid:{uuid.uuid4()}",
         "version": 1,
-        "generatedAt": datetime.now(timezone.utc).isoformat(),
         "metadata": {
-            "tool": "mond",
-            "asset": {
-                "id": asset.id,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "tools": [
+                {"vendor": "Mond", "name": "mond", "version": MOND_TOOL_VERSION}
+            ],
+            "component": {
+                "type": "application" if asset.asset_type != AssetType.REPOSITORY else "library",
+                "bom-ref": f"mond:asset:{asset.id}",
                 "name": asset.name,
-                "type": asset.asset_type.value,
-                "uri": asset.uri,
-                "owner": asset.owner,
-                "environment": asset.environment,
+                "properties": [
+                    {"name": "mond:asset_type", "value": asset.asset_type.value},
+                    *([{"name": "mond:uri", "value": asset.uri}] if asset.uri else []),
+                    *([{"name": "mond:owner", "value": asset.owner}] if asset.owner else []),
+                    *([{"name": "mond:environment", "value": asset.environment}] if asset.environment else []),
+                ],
             },
         },
-        "vulnerabilities": [
-            {
-                "id": f.fingerprint,
-                "ruleId": f.rule_id,
-                "title": f.title,
-                "severity": f.severity.value,
-                "scanner": f.scanner,
-                "location": f.location,
-                "status": f.status.value,
-                "references": f.references,
-            }
-            for f in findings
-        ],
+        "components": components,
+        "vulnerabilities": [_to_vulnerability(f) for f in findings],
     }
+
+
+# 하위 호환 alias — 호출처가 점진 이행할 때까지 유지.
+lightweight_sbom = cyclonedx_sbom
 
 
 async def compliance_report(
