@@ -434,6 +434,21 @@ UX·가시화 보강:
 - [x] AI Insights citation deep-link — `?focus=N`으로 자산/finding/정책에서 자동 drawer/highlight
 - [x] Admin Policies — engine 컬럼 + 임계치 색 dot
 - [x] Settings — 4 KPI 카드(backend·DB·AI·OPA) + 스캐너 어댑터 + 환경
+- [x] AI Insights '이어서 묻기' follow-up chip — intent별 표준 후보 + Claude `suggested_actions`
+- [x] PolicySimulator — engine + OPA deny 메시지 expand + 위험도 색
+- [x] Admin Users — MFA 등록 상태 + SSO 출처 + 최근 로그인 상대 표기
+
+### v0.3 후보 로드맵
+- [ ] **자산 자동 동기화 확장** — Kubernetes 클러스터 namespace/pod 자동 발견, AWS Auto-scaling group, GitLab/Bitbucket org sync
+- [ ] **AI 멀티 프로바이더 라우팅** — 의도(`intent`)별로 다른 model 사용 (e.g. triage=Haiku, deep-explain=Sonnet)
+- [ ] **SBOM CycloneDX 정식 출력** — lite stub 대신 CycloneDX 1.5 JSON/XML, vex 포함
+- [ ] **MCP HTTP 마운트 안정화** — Claude Desktop/Code 외부 에이전트가 Mond를 도구로 자연스럽게 사용
+- [ ] **다중 워크스페이스/조직 분리** — 사내 여러 팀이 한 인스턴스를 공유할 때 자산/정책 scope
+- [ ] **감사 로그 검색 UI** — 현재 access_audit_logs DB만, UI에서 시계열 + 필터
+- [ ] **한국 규제 인증 심사 패키지** — ISMS-P 자동 증빙 자료 출력 (실제 심사 대응)
+- [ ] **알림 라우팅 다채널** — Slack 외 Email/Teams/PagerDuty
+- [ ] **온프레미스 LLM 게이트웨이 표준화** — 사내 vLLM 어댑터 + 토큰 사용량 추적
+- [ ] **PR Bot — AI 분석 PR comment** — push 스캔 결과를 PR에 자동 코멘트 (현재는 SBOM diff만)
 
 ## 🧪 Known Limitations
 
