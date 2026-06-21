@@ -41,6 +41,9 @@ async def lifespan(app: FastAPI):
             "ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS revoke_result JSON DEFAULT '{}'::json NOT NULL",
             "ALTER TABLE policies ADD COLUMN IF NOT EXISTS engine VARCHAR(16) DEFAULT 'builtin' NOT NULL",
             "ALTER TABLE scans ADD COLUMN IF NOT EXISTS router_decision JSON",
+            # v0.3 #5 — Asset에 workspace_id 추가. NULL 허용으로 기존 자산은
+            # 모든 workspace에서 visible(백필 안전). v0.4에서 NOT NULL 전환 검토.
+            "ALTER TABLE assets ADD COLUMN IF NOT EXISTS workspace_id INTEGER",
         ):
             await conn.execute(text(ddl))
 

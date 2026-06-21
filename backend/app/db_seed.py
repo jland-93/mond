@@ -17,6 +17,7 @@ from app.models.asset import Asset, AssetType
 from app.models.iam import IAMIdentity, IAMSource, IAMSourceKind, Permission
 from app.models.knowledge import KnowledgeCard, KnowledgeSource
 from app.models.policy import Policy, PolicyType
+from app.models.workspace import Workspace
 
 logger = get_logger(__name__)
 
@@ -108,6 +109,13 @@ deny contains msg if {
 
 
 async def seed_if_empty(db: AsyncSession) -> None:
+    # v0.3 #5 — default workspace 보장. 단일 조직 사용자에게 영향 0.
+    ws_count = (await db.execute(select(func.count(Workspace.id)))).scalar_one()
+    if ws_count == 0:
+        db.add(Workspace(slug="default", name="Default", description="기본 워크스페이스", is_default=True))
+        await db.commit()
+        logger.info("seed_default_workspace")
+
     asset_count = (await db.execute(select(func.count(Asset.id)))).scalar_one()
     policy_count = (await db.execute(select(func.count(Policy.id)))).scalar_one()
 

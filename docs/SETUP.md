@@ -898,6 +898,28 @@ RATE_LIMIT_ENABLED=true     # 기본. false로 끄면 모든 버킷 통과 (test
 
 Redis 다운 시 fail open(가용성 우선) — `rate_limit_redis_down` 경고 로그를 남기고 요청은 통과. 보안 critical 환경이면 monitor에서 이 로그를 알림으로 연결할 것.
 
+### 8-3) 다중 워크스페이스 (한 인스턴스, 여러 팀)
+
+여러 팀/조직이 한 Mond 인스턴스를 공유할 때 자산을 분리한다. v0.3은 **Phase 1 — Asset만** 다루고, Policy/Finding/IAM 등 나머지 자원 분리는 v0.4 Phase 2에서 확장.
+
+설치 직후 `default` 워크스페이스가 자동 시드되므로 단일 조직 운영자에겐 영향 0. 다중 조직이면 Admin → **연동 관리 → 워크스페이스**에서 추가:
+
+```http
+POST /api/v1/admin/workspaces        body {"slug": "platform", "name": "Platform Team", "description": "..."}
+POST /api/v1/admin/workspaces/{id}/default        # 기본 워크스페이스 토글
+DELETE /api/v1/admin/workspaces/{id}              # default · 마지막 1건은 삭제 불가
+```
+
+`slug`는 소문자 + 숫자 + 하이픈(1~64자). URL/헤더 식별자로 사용.
+
+자산 조회 시 workspace로 좁히려면:
+
+```http
+GET /api/v1/assets?workspace_id=2
+```
+
+해당 워크스페이스의 자산 + 미배정(`workspace_id=NULL`) 자산이 함께 반환됩니다. Assets 페이지(ADMIN)에는 우상단에 워크스페이스 selector가 노출돼 한 번에 전환 가능. 자산 생성/수정 시 `workspace_id`를 명시하지 않으면 NULL로 들어가고, 이후 PATCH로 언제든 분류 가능합니다.
+
 ### 8-2) ISMS-P 인증 심사 증빙 패키지 (한국 조직)
 
 KISA ISMS-P 인증을 받았거나 받을 예정인 조직을 위한 v0.3 자동 증빙. 80여 개 통제 중 가장 자주 점검되는 **핵심 10개**를 Mond의 실 운영 데이터(자산·접근통제·로그·발견사항·권한요청 흐름)에 매핑해 markdown / JSON으로 추출한다.

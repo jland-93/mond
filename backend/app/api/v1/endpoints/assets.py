@@ -26,11 +26,17 @@ async def list_assets(
     offset: int = Query(0, ge=0),
     asset_type: str | None = Query(None),
     q: str | None = Query(None, description="이름/URI 부분일치 검색"),
+    workspace_id: int | None = Query(None, description="해당 workspace + 미배정 자산만"),
     _user: User = Depends(current_user),
     db: AsyncSession = Depends(get_db),
 ) -> Page[AssetRead]:
     items, total = await asset_service.list_assets(
-        db, limit=limit, offset=offset, asset_type=asset_type, q=q
+        db,
+        limit=limit,
+        offset=offset,
+        asset_type=asset_type,
+        q=q,
+        workspace_id=workspace_id,
     )
     return Page(items=[AssetRead.model_validate(i) for i in items], total=total, limit=limit, offset=offset)
 

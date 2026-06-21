@@ -28,6 +28,7 @@ from app.models.policy import Policy, PolicyType
 from app.models.scan import Scan, ScanStatus, ScanTrigger
 from app.models.slack import SlackChannel, SlackPurpose
 from app.models.user_slack import UserSlackPreference
+from app.models.workspace import Workspace
 from app.models.user import (
     MfaBackupCode,
     Role,
@@ -53,6 +54,7 @@ __all__ = [
     "SlackChannel",
     "SlackPurpose",
     "UserSlackPreference",
+    "Workspace",
     "AIInsight",
     "InsightKind",
     "AIProviderConfig",

@@ -11,6 +11,7 @@ from app.api.v1.endpoints import (
     admin_github_sync,
     admin_gitlab_sync,
     admin_slack,
+    admin_workspaces,
     ai,
     ai_providers,
     assets,
@@ -59,6 +60,7 @@ api_router.include_router(admin_gitlab_sync.router, prefix="/admin/gitlab-sync",
 api_router.include_router(admin_bitbucket_sync.router, prefix="/admin/bitbucket-sync", tags=["Bitbucket Sync (Admin)"])
 api_router.include_router(admin_audit_log.router, prefix="/admin/audit-log", tags=["Audit Log (Admin)"])
 api_router.include_router(admin_audit_package.router, prefix="/admin/audit-package", tags=["Audit Package (Admin)"])
+api_router.include_router(admin_workspaces.router, prefix="/admin/workspaces", tags=["Workspaces (Admin)"])
 api_router.include_router(digest.router, prefix="/admin/digest", tags=["Daily Digest (Admin)"])
 api_router.include_router(integrations.router, prefix="/integrations", tags=["Integrations"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])

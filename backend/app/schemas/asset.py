@@ -16,6 +16,7 @@ class AssetBase(BaseModel):
     labels: dict = Field(default_factory=dict)
     owner: str | None = None
     environment: str | None = None
+    workspace_id: int | None = None
 
 
 class AssetCreate(AssetBase):
@@ -28,6 +29,7 @@ class AssetUpdate(BaseModel):
     labels: dict | None = None
     owner: str | None = None
     environment: str | None = None
+    workspace_id: int | None = None
 
 
 class AssetRead(AssetBase, Timestamped):
