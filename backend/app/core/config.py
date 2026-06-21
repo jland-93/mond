@@ -143,6 +143,10 @@ class Settings(BaseSettings):
     # MCP HTTP 마운트 — Streamable HTTP > SSE 순서로 시도. mcp 패키지가 둘 다 실패해도 backend는 정상.
     # 기본 false. Claude Desktop / Code 등 외부 에이전트에서 Mond를 도구로 쓸 때만 true.
     MCP_HTTP_ENABLED: bool = False
+    # /mcp HTTP는 외부 클라이언트가 자산/스캔/AI를 호출할 수 있는 진입점이므로
+    # 운영에선 반드시 Bearer 토큰을 설정. 비어 있으면 anonymous 허용 + 경고 로그
+    # (로컬 데모/개발 편의). secrets.token_urlsafe(32)로 생성 권장.
+    MCP_HTTP_AUTH_TOKEN: Optional[str] = None
 
     # ── SSO / RBAC ──────────────────────────────────────────────
     # 인증 모드: "sso" (실제 IdP) / "dev" (이메일 입력만, OSS 데모용)
