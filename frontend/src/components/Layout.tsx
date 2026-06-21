@@ -97,6 +97,7 @@ export default function Layout() {
     { key: "/admin/connections", icon: <ApiOutlined />, label: t.adminArea.menuConnections, minRole: "admin" as const },
     { key: "/admin/slack", icon: <BulbOutlined />, label: t.adminArea.menuSlack, minRole: "admin" as const },
     { key: "/admin/users", icon: <TeamOutlined />, label: t.adminArea.menuUsers, minRole: "admin" as const },
+    { key: "/admin/audit-log", icon: <FileTextOutlined />, label: t.adminArea.menuAuditLog, minRole: "admin" as const },
   ].filter((i) => hasRole(user, i.minRole));
 
   const items = isAdminRoute ? adminFlat : userMenu;

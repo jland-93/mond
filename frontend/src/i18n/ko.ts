@@ -45,6 +45,7 @@ export const ko = {
     menuSlack: "Slack 연동",
     menuPolicies: "정책 관리",
     menuUsers: "사용자·역할",
+    menuAuditLog: "감사 로그",
     connectionsTitle: "연동 관리",
     connectionsDesc:
       "클라우드 IAM 소스, SSO IdP, 외부 Webhook 같은 외부 시스템 연동을 한 곳에서 관리합니다. ADMIN 권한이 필요합니다.",

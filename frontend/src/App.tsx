@@ -34,6 +34,7 @@ const AdminConnections = lazy(() => import("@/pages/admin/AdminConnections"));
 const AdminPolicies = lazy(() => import("@/pages/admin/AdminPolicies"));
 const AdminSlack = lazy(() => import("@/pages/admin/AdminSlack"));
 const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers"));
+const AdminAuditLog = lazy(() => import("@/pages/admin/AdminAuditLog"));
 
 // 페이지 chunk 로딩 중 빈 화면 대신 옅은 placeholder. 다크 테마 배경에 자연스럽게 녹는다.
 function RouteFallback() {
@@ -144,6 +145,14 @@ export default function App() {
             element={
               <RequireAuth minRole="admin">
                 <AdminUsers />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="admin/audit-log"
+            element={
+              <RequireAuth minRole="admin">
+                <AdminAuditLog />
               </RequireAuth>
             }
           />

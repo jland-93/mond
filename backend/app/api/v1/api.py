@@ -5,6 +5,7 @@ API v1 라우터
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    admin_audit_log,
     admin_github_sync,
     admin_slack,
     ai,
@@ -51,6 +52,7 @@ api_router.include_router(ai.router, prefix="/ai", tags=["AI"])
 api_router.include_router(ai_providers.router, prefix="/admin/ai-providers", tags=["AI Providers (Admin)"])
 api_router.include_router(admin_slack.router, prefix="/admin/slack", tags=["Slack Channels (Admin)"])
 api_router.include_router(admin_github_sync.router, prefix="/admin/github-sync", tags=["GitHub Sync (Admin)"])
+api_router.include_router(admin_audit_log.router, prefix="/admin/audit-log", tags=["Audit Log (Admin)"])
 api_router.include_router(digest.router, prefix="/admin/digest", tags=["Daily Digest (Admin)"])
 api_router.include_router(integrations.router, prefix="/integrations", tags=["Integrations"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])

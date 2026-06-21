@@ -47,6 +47,7 @@ export const en: Dict = {
     menuSlack: "Slack Integration",
     menuPolicies: "Policy Management",
     menuUsers: "Users & Roles",
+    menuAuditLog: "Audit Log",
     connectionsTitle: "Connections",
     connectionsDesc:
       "Manage external integrations in one place — cloud IAM sources, SSO IdPs, and external webhooks. ADMIN role required.",
