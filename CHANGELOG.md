@@ -7,6 +7,19 @@
 ## [Unreleased]
 
 ### Changed
+- **Scans 페이지 가시화** — 자산 컬럼이 ID(`6`) 대신 readable `asset_name`(tooltip에 ID 보존). trigger 색 구분(`manual` 회색 · `webhook` 보라 · `scheduled` 청 · `ai` 자홍). webhook smart-router 자동 선택은 `auto` 청보라 태그 + row expand에 reason + SAST/SCA/Container/IaC/기타 카운트 + fallback 여부. `Scan.router_decision` 컬럼 추가(lightweight migration), webhook 핸들러가 결정 근거를 저장.
+- **Findings drawer 가시화** — 상단에 '발견된 자산' 카드(name + type 태그 + env + 📍 위치 monospace). AI 인사이트 섹션: 🤖 아이콘 + 친화적 빈 상태. AI insight 카드의 `kind` 영어 → 한국어(분류/수정 가이드/요약/해설), `model` 태그 색 구분(provider 청보라 / heuristic 회색), recommended_severity가 다르면 `current → recommended` 화살표 시각화, confidence는 Progress bar(70px) + %. `FindingRead`에 `asset_name`/`asset_type`/`asset_environment` 추가.
+- **Assets owner inline edit** — MyMond '자산 보기' CTA에서 진입한 임직원이 본인 owner를 1초에 등록. 담당자 미정 → '내 자산으로' 1클릭 / 본인 owner는 청보라 강조 + '내 자산' 태그 / 그 외 → 클릭 시 Popover 편집(저장/나로/비우기). 자산 추가 모달의 owner 기본값도 본인 이메일.
+- **Knowledge Hub 출처 명료화** — `SEED`/`AI`/`MANUAL` 영문 → `📖 기본 카드` / `🤖 AI 생성` / `📖 직접 작성` + tooltip. AI 생성 카드는 보라 테두리 강조 + '사람 검토 권장' 안내. 검색 placeholder를 `ISMS-P, OWASP A01, SBOM, K-PIPA, 시크릿`로 구체화. 빈 상태 Empty + 필터 초기화/AI 카드 생성 액션.
+- **Regulations Guide 카드 그리드 + 시각 위계** — 시나리오 미선택 시 dropdown 하나 → 9개 시나리오 카드 그리드(이름/설명/적용 규제 태그). 선택 후 헤더 카드(뒤로 버튼·시나리오 이름·'적용 규제 N'·MD 다운로드) + 규제 카드 2열 그리드(관할 한국/유럽/미국/글로벌 색 태그·코드 strong·시점 ⏰·의무 📄·참고 🔗).
+- **Admin Policies — engine + 임계치 색 dot** — 정책 테이블에 `engine` 컬럼 추가(`opa` 청보라 / `builtin` 회색). 임계치 Select option에 8x8 색 dot(critical 빨강·high 주황·medium 노랑·low 녹색·info 보라). 정책 직접 작성 모달도 동일.
+- **Settings 페이지 전면 재작성** — Descriptions 1개 → 4 KPI 상태 카드 + 스캐너 어댑터 + 환경 카드. 서비스 상태(version+env) · 데이터베이스(연결 상태) · AI(provider:model 또는 '기본 규칙 모드') · OPA(사용 가능 + binary 경로). 각 카드 좌상단 ok/warn/down 색 아이콘. AI provider 미설정 시 안내 Alert.
+
+### Added
+- **AI Insights citation deep-link** — RAG citation chip 클릭 → `?focus=N` URL로 진입 시 해당 페이지가 자동 처리. Findings는 drawer 자동 오픈, Assets/Policies는 행 좌측 보라 색띠 + 배경 8초 fade(`.mond-row-focus` + `mond-focus-fade` keyframe). RAG가 만들던 URL 형식은 그대로.
+- **Dashboard '다음 단계' 가이드 배너** — OSS를 처음 띄운 사용자가 'docker compose up 후 무엇을?'에서 막히지 않도록 페르소나(admin 5단계 / employee 3단계)별 next-action 카드. 완료 판정은 `overview.asset_total`/`scans_last_7d`/`/iam/sources`/`/integrations/ai`/`user.mfa_verified`. 진행률 Progress + ✅/⭕ + Link. localStorage 영구 hide. 모두 완료 시 자동 hide.
+
+### Changed (이전 wave)
 - **IAM Explorer 가시화 + Identity Center 지원** — 외부 시스템 import 식별자(ARN/UUID/LDAP DN)를 사람이 읽는 이름으로 노출(`displayName`/`email`/`mail`/ARN tail/LDAP RDN/UUID 단축). Identity Center · Azure AD · Okta SCIM 등 SSO federation은 `IdentityType.SSO_USER`/`SSO_GROUP`으로 분리하고 자홍색 `SSO` 태그로 표기. Source segmented 필터 + 통합 검색(이름·이메일·ARN·설명 매칭). Permission 행에 inline `권한 요청` CTA → `/access-center?permission_id=...` 자동 채움. `iam-display.ts` 헬퍼 재사용으로 Access Center dropdown(대상·요청 권한 옵션)과 Access Review(검토 큐 행)도 동일 톤. 위험도 `critical`/`high`는 행 좌측 색띠로 즉시 인지.
 - **Access Center · Access Review UX 폴리시** — 신청자/검토자 양쪽 라벨·hint·placeholder를 사람이 헷갈리지 않게 한국어로 다시 정리. 폼 라벨이 질문형('어떤 권한이 필요한가요?' / '얼마나 오래 쓸 건가요?' / '왜 필요한가요?'), 사유 placeholder는 실제 인시던트 예시로, ADMIN 권한 warning은 작업 범위·기간·티켓 번호를 명시 + 더 좁은 권한 검토 권고. AI 사전 평가 chip은 화살표 표기 대신 '제출하면 자동 승인 예상' 같은 자연스러운 문장. AccessReview는 AI 결정(verdict + risk + reason)을 카드 형태로 강조 + 위험도 색띠. status 라벨(`granted` → '권한 부여 완료', `expired_revoked` → '만료 후 자동 회수', `needs_human_review` → '담당자 검토 대기' 등) 정리.
 - **MyMond 빈 상태 카드 친화화** — 신규 임직원이 `/me` 처음 진입 시 4 카드 모두 빈 상태에서 '없습니다'만 보이던 것을 친절한 설명 + CTA로. '담당 중인 자산이 없습니다 → 자산 보기' · '아직 요청한 권한이 없습니다 → 권한 요청 시작' · '7일 안에 만료될 권한 없음' · '조용한 하루입니다'.
@@ -14,7 +27,7 @@
 - **위험도·상태 라벨 한국어 통일** — `risk: high`처럼 페이지마다 raw 영어로 섞이던 표기를 `t.iam.riskLevels` 번역으로 일괄 한국어화('위험도: 높음/중간/낮음'). AccessReview · AccessCenter 사전 평가 · 내 요청 expand 모두 동일.
 - **GCP/Azure IAM grant 어댑터 완성도 보강** — GCP `attach`/`detach`는 read-modify-write etag 충돌(`aborted`/`etag`/`concurrent`/`conflict` 힌트)을 최대 3회 재시도. 이미 부여된 member는 즉시 success(idempotent). detach 시 binding이 비면 자동 제거. identity prefix(`user:`/`group:`/`serviceAccount:`) 자동 normalize. Azure `attach`는 동일 `(scope, principal, role)`이 이미 있으면 그대로 success로 흡수하고, race로 `RoleAssignmentExists`가 나도 success로 처리. unit test 6 케이스.
 
-### Added
+### Added (이전 wave)
 - **`IdentityType.SSO_USER` · `SSO_GROUP`** — AWS IAM Identity Center / Azure AD / Okta SCIM 등 외부 IdP federation 식별자 구분용. backend 모델 + Pydantic schema + i18n 라벨('SSO 사용자' / 'SSO 그룹')에 추가. AWS provider stub에 Identity Center 샘플 2건 + `attributes.display_name`/`email` 포함.
 - **라우트별 코드 스플릿** — 22개 페이지를 `React.lazy + import()`로 분리. 첫 로드 index 1834KB(457KB gz) → **684KB(227KB gz)**, three.js 873KB는 Moon3D hero가 있는 `/login`에서만 로드. `vite.config.ts` manualChunks로 `vendor-three`만 분리, 나머지는 rollup 자동 처리(circular dep 회피). \`chunkSizeWarningLimit: 1024\`.
 - **Webhook push → 스캐너 자동 선택** — GitHub push 이벤트의 `commits[*].{added,modified,removed}`를 모아 파일 카테고리 분류(SAST: `.py`/`.go`/`.js`/`.ts`/`.java`/`.rs`/... · SCA: `package.json`/`requirements.txt`/`go.mod`/`pom.xml`/... · IaC: `.tf`/`.tfvars`/`.hcl` · Container: `Dockerfile`/`*.dockerfile`). REPOSITORY 자산은 SAST 파일이 다른 카테고리 합보다 많으면 **semgrep**, 그 외(SCA/IaC/Container 변경 우세 또는 분류 불가)는 **trivy**. CONTAINER_IMAGE는 항상 trivy, URL은 nuclei→trivy fallback. 응답 + 로그에 `scanner` + `router_decision`(reason/counts/fallback) 포함. unit test 9 케이스.
