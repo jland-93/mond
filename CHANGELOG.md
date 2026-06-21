@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Changed
+- **Admin Users — MFA 등록 상태 + SSO 출처 + 최근 로그인 시각화** — `UserRead`에 `mfa_enrolled` 추가. AdminUsers 테이블에 MFA 컬럼 신규(등록/필요/—, role∈{admin,reviewer}는 미등록 시 주황 경고), SSO 출처 색 구분(provider 청보라 / Dev Login 회색), 최근 로그인은 절대 시각 → '5분 전·3시간 전·2일 전' 상대 표기(tooltip에 절대 시각). 본인 행 'you' 청록 태그. 본인 ADMIN demote 막힘을 tooltip으로 명시.
+- **PolicySimulator — engine + matched 노출 + 위험도 시각화** — 결과 테이블에 `engine` 컬럼(`opa` 청보라 🤖 / `builtin` 회색), 임계치 색 dot, blocked 행 좌측 색띠, expand에 OPA deny 메시지(또는 차단 finding 리스트). severity Select option도 색 dot로 Admin Policies와 일관성. Alert가 '차단 N건 · 통과 M건 · 총 K개'로 구체화. EXPERIMENTAL 톤다운.
+- **AI Insights '이어서 묻기' chip** — Claude `suggested_actions.label` + intent별 표준 follow-up(scan/list_findings/explain/unknown 4 카테고리, 외부 LLM 없어도 흐름 끊기지 않음) chip을 응답 직후 노출. 클릭 시 textarea 갱신 + 새 분석 자동 트리거. 기존 'Claude 제안 endpoint' 섹션은 endpoint 있는 것만 보조로 코드 태그 유지.
 - **Scans 페이지 가시화** — 자산 컬럼이 ID(`6`) 대신 readable `asset_name`(tooltip에 ID 보존). trigger 색 구분(`manual` 회색 · `webhook` 보라 · `scheduled` 청 · `ai` 자홍). webhook smart-router 자동 선택은 `auto` 청보라 태그 + row expand에 reason + SAST/SCA/Container/IaC/기타 카운트 + fallback 여부. `Scan.router_decision` 컬럼 추가(lightweight migration), webhook 핸들러가 결정 근거를 저장.
 - **Findings drawer 가시화** — 상단에 '발견된 자산' 카드(name + type 태그 + env + 📍 위치 monospace). AI 인사이트 섹션: 🤖 아이콘 + 친화적 빈 상태. AI insight 카드의 `kind` 영어 → 한국어(분류/수정 가이드/요약/해설), `model` 태그 색 구분(provider 청보라 / heuristic 회색), recommended_severity가 다르면 `current → recommended` 화살표 시각화, confidence는 Progress bar(70px) + %. `FindingRead`에 `asset_name`/`asset_type`/`asset_environment` 추가.
 - **Assets owner inline edit** — MyMond '자산 보기' CTA에서 진입한 임직원이 본인 owner를 1초에 등록. 담당자 미정 → '내 자산으로' 1클릭 / 본인 owner는 청보라 강조 + '내 자산' 태그 / 그 외 → 클릭 시 Popover 편집(저장/나로/비우기). 자산 추가 모달의 owner 기본값도 본인 이메일.
