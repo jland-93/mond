@@ -13,6 +13,7 @@ export interface AdminUser {
   role: Role;
   sso_provider?: string | null;
   last_login_at_iso?: string | null;
+  mfa_enrolled?: boolean;
   created_at: string;
   updated_at: string;
 }

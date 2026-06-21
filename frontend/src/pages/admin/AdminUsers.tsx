@@ -3,8 +3,15 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Button, Card, Input, Select, Space, Table, Tabs, Tag, Typography, message } from "antd";
-import { CheckOutlined, CloseOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
+import { Avatar, Button, Card, Input, Select, Space, Table, Tabs, Tag, Tooltip, Typography, message } from "antd";
+import {
+  CheckCircleFilled,
+  CheckOutlined,
+  CloseOutlined,
+  TeamOutlined,
+  UserOutlined,
+  WarningFilled,
+} from "@ant-design/icons";
 import { useState } from "react";
 
 import { useAuth } from "@/auth/AuthContext";
@@ -23,6 +30,19 @@ const ROLE_COLOR: Record<Role, string> = {
   reviewer: "purple",
   admin: "red",
 };
+
+function relativeKo(iso: string, locale: "ko" | "en"): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  if (ms < 0) return new Date(iso).toLocaleString();
+  const min = Math.floor(ms / 60_000);
+  if (min < 1) return locale === "ko" ? "방금" : "now";
+  if (min < 60) return locale === "ko" ? `${min}분 전` : `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return locale === "ko" ? `${hr}시간 전` : `${hr}h ago`;
+  const d = Math.floor(hr / 24);
+  if (d < 30) return locale === "ko" ? `${d}일 전` : `${d}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
 
 export default function AdminUsers() {
   const { t, locale } = useI18n();
@@ -48,28 +68,94 @@ export default function AdminUsers() {
         dataSource={data ?? []}
         rowKey="id"
         columns={[
-            {
-              title: t.adminArea.user,
-              render: (_: unknown, u: AdminUser) => (
-                <Space>
-                  <Avatar size={28} src={u.picture_url ?? undefined} icon={!u.picture_url && <UserOutlined />} />
-                  <Space direction="vertical" size={0}>
-                    <span>{u.name || u.email}</span>
-                    <span style={{ color: "var(--mond-text-dim)", fontSize: 12 }}>{u.email}</span>
+          {
+            title: t.adminArea.user,
+            render: (_: unknown, u: AdminUser) => (
+              <Space>
+                <Avatar
+                  size={28}
+                  src={u.picture_url ?? undefined}
+                  icon={!u.picture_url && <UserOutlined />}
+                />
+                <Space direction="vertical" size={0}>
+                  <Space size={4}>
+                    <Text strong>{u.name || u.email}</Text>
+                    {me?.id === u.id && (
+                      <Tag color="cyan" style={{ marginInlineEnd: 0, fontSize: 11 }}>
+                        {locale === "ko" ? "본인" : "you"}
+                      </Tag>
+                    )}
                   </Space>
+                  <span style={{ color: "var(--mond-text-dim)", fontSize: 12 }}>{u.email}</span>
                 </Space>
+              </Space>
+            ),
+          },
+          {
+            title: t.adminArea.ssoProvider,
+            dataIndex: "sso_provider",
+            render: (v: string | null) =>
+              v ? (
+                <Tag color="geekblue" style={{ marginInlineEnd: 0 }}>
+                  {v}
+                </Tag>
+              ) : (
+                <Tag color="default" style={{ marginInlineEnd: 0 }}>
+                  {locale === "ko" ? "Dev Login" : "Dev"}
+                </Tag>
               ),
+            width: 130,
+          },
+          {
+            title: "MFA",
+            dataIndex: "mfa_enrolled",
+            render: (enrolled: boolean | undefined, u: AdminUser) => {
+              const needs = u.role === "admin" || u.role === "reviewer";
+              if (enrolled)
+                return (
+                  <Tooltip
+                    title={locale === "ko" ? "MFA 등록 완료" : "MFA enrolled"}
+                  >
+                    <Tag color="green" icon={<CheckCircleFilled />} style={{ marginInlineEnd: 0 }}>
+                      {locale === "ko" ? "등록" : "On"}
+                    </Tag>
+                  </Tooltip>
+                );
+              if (needs)
+                return (
+                  <Tooltip
+                    title={
+                      locale === "ko"
+                        ? `${u.role} role은 MFA 강제 — 본인이 등록할 때까지 보호 리소스 접근 불가`
+                        : `${u.role} role requires MFA`
+                    }
+                  >
+                    <Tag color="orange" icon={<WarningFilled />} style={{ marginInlineEnd: 0 }}>
+                      {locale === "ko" ? "필요" : "Required"}
+                    </Tag>
+                  </Tooltip>
+                );
+              return (
+                <Tag color="default" style={{ marginInlineEnd: 0 }}>
+                  —
+                </Tag>
+              );
             },
-            {
-              title: t.adminArea.ssoProvider,
-              dataIndex: "sso_provider",
-              render: (v: string | null) => (v ? <Tag>{v}</Tag> : "—"),
-              width: 120,
-            },
-            {
-              title: t.adminArea.role,
-              dataIndex: "role",
-              render: (r: Role, u: AdminUser) => (
+            width: 110,
+          },
+          {
+            title: t.adminArea.role,
+            dataIndex: "role",
+            render: (r: Role, u: AdminUser) => (
+              <Tooltip
+                title={
+                  me?.id === u.id && r === "admin"
+                    ? locale === "ko"
+                      ? "본인의 ADMIN 권한은 잠금 방지를 위해 직접 낮출 수 없습니다"
+                      : "Cannot demote your own ADMIN"
+                    : undefined
+                }
+              >
                 <Select
                   size="small"
                   value={r}
@@ -85,14 +171,26 @@ export default function AdminUsers() {
                   onChange={(val) => updateRole.mutate({ id: u.id, role: val })}
                   disabled={me?.id === u.id && r === "admin"}
                 />
+              </Tooltip>
+            ),
+            width: 170,
+          },
+          {
+            title: t.adminArea.lastLogin,
+            dataIndex: "last_login_at_iso",
+            render: (v: string | null) =>
+              v ? (
+                <Tooltip title={new Date(v).toLocaleString()}>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {relativeKo(v, locale)}
+                  </Text>
+                </Tooltip>
+              ) : (
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {locale === "ko" ? "로그인 기록 없음" : "Never"}
+                </Text>
               ),
-              width: 180,
-            },
-            {
-              title: t.adminArea.lastLogin,
-              dataIndex: "last_login_at_iso",
-              render: (v: string | null) => (v ? new Date(v).toLocaleString() : "—"),
-              width: 200,
+            width: 170,
           },
         ]}
       />
