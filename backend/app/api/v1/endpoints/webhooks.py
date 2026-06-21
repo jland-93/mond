@@ -153,6 +153,24 @@ async def github_webhook(
         trigger=ScanTrigger.WEBHOOK,
         router_decision=decision,
     )
+
+    # PR Bot — scan이 인라인으로 완료된 경우(Celery off) head_sha에 매칭되는
+    # open PR이 있으면 코멘트 작성. async 큐 모드에선 worker가 별도 처리(v0.4).
+    pr_bot_result: dict | None = None
+    head_sha = (payload.get("after") or "").strip()
+    if head_sha and scan.status.value == "completed":
+        full_name = (repo.get("full_name") or "").strip()
+        if full_name:
+            from app.services import pr_bot as pr_bot_service
+
+            pr_bot_result = await pr_bot_service.notify_pr_for_scan(
+                db,
+                scan=scan,
+                asset=asset,
+                repo_full_name=full_name,
+                head_sha=head_sha,
+            )
+
     return {
         "matched": True,
         "asset_id": asset.id,
@@ -160,6 +178,7 @@ async def github_webhook(
         "status": scan.status.value,
         "scanner": scanner_name,
         "router_decision": decision,
+        "pr_bot": pr_bot_result,
     }
 
 
