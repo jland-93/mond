@@ -20,7 +20,7 @@ jobs:
     # 머지 후 main에 config 들어가면 정상 동작 → PR 단계에서는 머지 차단하지 않음.
     continue-on-error: true
     steps:
-      - uses: release-drafter/release-drafter@v6
+      - uses: release-drafter/release-drafter@v7
         with:
           config-name: release-drafter.yml
           disable-autolabeler: false
