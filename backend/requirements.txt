@@ -68,5 +68,5 @@ prometheus-client==0.25.0
 # 개발 / 테스트
 pytest==8.4.2
 pytest-asyncio==1.4.0
-black==24.10.0
+black==26.5.1
 ruff==0.15.17
