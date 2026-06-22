@@ -62,7 +62,7 @@ qrcode[pil]==8.2
 mcp>=1.2.0,<2.0.0
 
 # 관측성
-structlog==24.4.0
+structlog==26.1.0
 prometheus-client==0.25.0
 
 # 개발 / 테스트
