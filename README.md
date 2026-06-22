@@ -15,6 +15,7 @@
     Inventory, scan, triage, approve, audit in one flow.
   </p>
 
+  [![Release](https://img.shields.io/github/v/release/jland-93/mond?display_name=tag&color=7c8cff)](https://github.com/jland-93/mond/releases/latest)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
   [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
   [![React](https://img.shields.io/badge/React-18-61DAFB.svg)](https://reactjs.org/)
