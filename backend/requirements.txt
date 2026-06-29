@@ -1,13 +1,13 @@
 # 🌙 Mond Backend 의존성
 
 # 웹 프레임워크
-fastapi==0.137.2
+fastapi==0.138.1
 uvicorn[standard]==0.49.0
 
 # 데이터베이스
 sqlalchemy[asyncio]==2.0.51
 asyncpg==0.31.0
-alembic==1.18.4
+alembic==1.18.5
 
 # 백그라운드 작업 & 캐시
 celery==5.6.3
@@ -25,18 +25,18 @@ email-validator==2.3.0
 
 # 설정 / 검증
 pydantic==2.13.4
-pydantic-settings==2.14.1
+pydantic-settings==2.14.2
 python-dotenv==1.2.2
 
 # HTTP 클라이언트 (스캐너 API 통신 등)
 httpx==0.28.1
 
 # LLM (AI Insights 엔진)
-anthropic==0.109.2
-openai==2.43.0
+anthropic==0.112.0
+openai==2.44.0
 
 # AWS IAM 통합 (자격증명 미설정 시 stub 모드로 동작)
-boto3==1.43.32
+boto3==1.43.36
 
 # Kubernetes RBAC 통합 (kubeconfig 또는 in-cluster ServiceAccount, 없으면 stub)
 kubernetes==36.0.2
@@ -45,8 +45,8 @@ kubernetes==36.0.2
 ldap3==2.9.1
 
 # Google Cloud IAM (프로젝트 IAM policy get/set, predefined/custom roles)
-google-cloud-resource-manager==1.17.0
-google-cloud-iam==2.23.0
+google-cloud-resource-manager==1.18.0
+google-cloud-iam==2.24.0
 
 # Azure RBAC (subscription 단위 roleAssignments + roleDefinitions)
 azure-identity==1.25.3
@@ -69,4 +69,4 @@ prometheus-client==0.25.0
 pytest==8.4.2
 pytest-asyncio==1.4.0
 black==24.10.0
-ruff==0.15.17
+ruff==0.15.20
