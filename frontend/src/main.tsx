@@ -2,6 +2,8 @@
  * Mond — 앱 엔트리포인트
  */
 
+// React 19에서 antd v5 static message/notification/Modal 호환 패치 (antd import보다 먼저 로드)
+import "@ant-design/v5-patch-for-react-19";
 import { ConfigProvider, theme } from "antd";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
