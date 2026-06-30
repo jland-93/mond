@@ -128,7 +128,8 @@ dist
 
 # Gatsby files
 .cache/
-public
+# 루트 레벨 Gatsby public/ 만 무시 (frontend/public/ 정적 자산은 추적)
+/public
 
 # Storybook build outputs
 .out
