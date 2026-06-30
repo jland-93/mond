@@ -28,7 +28,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Dropdown, Layout as AntLayout, Menu, Space, Tag } from "antd";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/auth/AuthContext";
@@ -82,7 +82,7 @@ export default function Layout() {
     type: "group";
     key: string;
     label: string;
-    children: { key: string; icon: JSX.Element; label: string }[];
+    children: { key: string; icon: ReactNode; label: string }[];
   };
   const userMenu: GroupEntry[] = [
     { type: "group" as const, key: "g-overview", label: t.menuGroups.overview, children: overviewItems },
