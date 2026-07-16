@@ -75,7 +75,7 @@ export default function Login() {
       <div className="login-hero">
         {/* mark — 좌상단 고정 */}
         <div className="login-mark">
-          <img src="/logo.png" alt="Mond" width={26} height={26} />
+          <img src="/logo-mark.png" alt="Mond" width={26} height={26} />
           <span style={{ fontWeight: 600, letterSpacing: "-0.01em", fontSize: 17 }}>
             Mond
           </span>
