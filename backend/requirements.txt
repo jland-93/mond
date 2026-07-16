@@ -53,7 +53,7 @@ azure-identity==1.25.3
 azure-mgmt-authorization==4.0.0
 
 # MFA — 패스키(WebAuthn/FIDO2) + TOTP + 백업 코드
-webauthn==2.8.0
+webauthn==3.0.0
 pyotp==2.10.0
 qrcode[pil]==8.2
 
