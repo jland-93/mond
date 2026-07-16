@@ -93,6 +93,9 @@ coverage/
 # ESLint cache
 .eslintcache
 
+# TypeScript 증분 빌드 캐시 (tsc -b 산출물 — 커밋 금지)
+*.tsbuildinfo
+
 # Optional npm cache directory
 .npm
 
