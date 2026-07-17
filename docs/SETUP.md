@@ -128,7 +128,7 @@ kubectl -n mond create secret generic mond-secrets \
 
 ```bash
 helm install mond oci://ghcr.io/jland-93/charts/mond \
-  --version 0.1.0 \
+  --version 0.3.1 \
   -n mond \
   -f charts/mond/values-prod.yaml \
   --set ingress.hosts[0].host=mond.your-corp.com \
@@ -1055,13 +1055,13 @@ docker compose exec backend alembic upgrade head   # 스키마 마이그레이�
 
 ```bash
 helm upgrade mond oci://ghcr.io/jland-93/charts/mond \
-  --version 0.2.0 \
+  --version 0.3.1 \
   -n mond \
   --reuse-values
 
 # 또는 새 values로 덮어쓰기
 helm upgrade mond oci://ghcr.io/jland-93/charts/mond \
-  --version 0.2.0 \
+  --version 0.3.1 \
   -n mond \
   -f charts/mond/values-prod.yaml
 ```
