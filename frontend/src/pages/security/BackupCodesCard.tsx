@@ -14,7 +14,7 @@ import { mfaApi } from "@/lib/mfa-api";
 const { Paragraph } = Typography;
 
 export default function BackupCodesCard() {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const { refresh } = useAuth();
   const qc = useQueryClient();
   const [codes, setCodes] = useState<string[] | null>(null);

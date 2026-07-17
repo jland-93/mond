@@ -31,7 +31,7 @@ import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { useI18n } from "@/i18n";
 import { api } from "@/lib/api";
-import { iamApi, type AccessRequest, type AccessRequestStatus, type IAMIdentity, type IAMSourceKind, type IdentityType, type PermissionRow } from "@/lib/iam-api";
+import { iamApi, type AccessRequest, type AccessRequestStatus, type IAMIdentity, type IAMSourceKind, type IdentityType } from "@/lib/iam-api";
 import { identityDisplay, permissionDisplay } from "@/lib/iam-display";
 
 const { Title, Paragraph, Text } = Typography;
