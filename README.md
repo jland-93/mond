@@ -113,7 +113,7 @@ OCI 레지스트리에 자동 배포되는 차트로 한 줄 설치:
 
 ```bash
 helm install mond oci://ghcr.io/jland-93/charts/mond \
-  --version 0.1.0 \
+  --version 0.3.1 \
   -n mond --create-namespace \
   -f charts/mond/values-prod.yaml \
   --set ingress.hosts[0].host=mond.your-corp.com \
@@ -313,7 +313,7 @@ kubectl -n mond create secret generic mond-secrets \
 
 # 2) Helm 설치 (OCI 레지스트리)
 helm install mond oci://ghcr.io/jland-93/charts/mond \
-  --version 0.1.0 \
+  --version 0.3.1 \
   -n mond \
   -f charts/mond/values-prod.yaml \
   --set ingress.hosts[0].host=mond.your-corp.com
