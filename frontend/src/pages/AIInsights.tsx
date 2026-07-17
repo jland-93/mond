@@ -120,12 +120,11 @@ export default function AIInsights() {
         style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}
       >
         <img
-          src="/logo.png"
+          src="/logo-mark.png"
           alt=""
           width={28}
           height={28}
           style={{
-            borderRadius: 6,
             filter: "drop-shadow(0 0 8px oklch(72% 0.16 285 / 0.5))",
           }}
         />

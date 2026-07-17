@@ -83,7 +83,7 @@
 
 - **무엇을 푸는가** — DevSecOps 도구가 너무 흩어져 있고, 발견사항이 너무 많고, 의사결정은 너무 느립니다. Mond는 **AI가 1차 분석**해서 **사람이 결정만** 하면 되는 흐름을 만듭니다.
 - **어떻게 다른가** — 클라우드 / 스캐너 / AI provider / IdP — 어디에도 묶이지 않습니다. 어댑터로 갈아끼우고, 한국어가 1급 시민입니다.
-- **어디로 가는가** — v0.2(Unreleased): 자산 자동 동기화 · RAG 기반 AI Insights · OPA Rego 평가 · CI 패키지 · SBOM diff · 스캐너 자동 라우팅 등 11개 항목 완료. v0.3: 멀티 클러스터 K8s 자동 동기화, AWS Auto-scaling, 한국 규제 1급 지원.
+- **어디로 가는가** — v0.2: 자산 자동 동기화 · RAG 기반 AI Insights · OPA Rego 평가 · CI 패키지 · SBOM diff · 스캐너 자동 라우팅 등 11개 항목 완료. v0.3: 멀티 워크스페이스 · ISMS-P 증빙 패키지 · GitLab/Bitbucket 동기화 · vLLM 게이트웨이 완료. 다음(v0.4): 멀티 클러스터 K8s 자동 동기화, AWS Auto-scaling, 자원 전체 워크스페이스 분리.
 
 > 📖 **자세한 이야기는 → [docs/ABOUT.md](docs/ABOUT.md)**
 > 🛠️ **설치·운영 가이드 → [docs/SETUP.md](docs/SETUP.md)**
@@ -403,7 +403,7 @@ class MyAdapter(ScannerAdapter):
 - [x] Helm 차트 (charts/mond) + 운영용 멀티스테이지 Docker 이미지
 - [x] AI provider 추상화 — Anthropic · OpenAI · AWS Bedrock · Ollama(로컬)
 
-### v0.2 로드맵 — 완료 (Unreleased)
+### v0.2 로드맵 — 완료 (v0.2.0 릴리스)
 
 핵심 기능:
 - [x] SBOM 실 의존성 추출 — `package.json` · `package-lock.json` · `requirements.txt` · `go.mod` · `Dockerfile` 5종 파서 + Reports UI
@@ -439,7 +439,7 @@ UX·가시화 보강:
 - [x] PolicySimulator — engine + OPA deny 메시지 expand + 위험도 색
 - [x] Admin Users — MFA 등록 상태 + SSO 출처 + 최근 로그인 상대 표기
 
-### v0.3 후보 로드맵
+### v0.3 로드맵 — 완료 (v0.3.0 릴리스)
 - [x] **자산 자동 동기화 확장** — GitLab group(`include_subgroups`, self-host `GITLAB_API_URL`) + Bitbucket Cloud workspace 일괄 sync. Admin → 연동 관리에 카드 3종(GitHub/GitLab/Bitbucket). K8s namespace·AWS Auto-scaling은 후속
 - [x] **AI 멀티 프로바이더 라우팅** — 의도(`intent`)별 model 자동 라우팅 (`remediation`/`explain`/`deep_analysis`는 `model_deep`, 그 외 `model_default`)
 - [x] **SBOM CycloneDX 정식 출력** — CycloneDX 1.5 표준 (`bomFormat: "CycloneDX"`, `serialNumber: urn:uuid:…`, `metadata.tools`, REPOSITORY 자산은 default branch에서 `components[]` 자동 추출, findings → 표준 `vulnerabilities[]`)
@@ -453,7 +453,7 @@ UX·가시화 보강:
 
 ## 🧪 Known Limitations
 
-v0.1.0 시점의 한계와 v0.2(Unreleased)에서 해소된 항목을 함께 기록합니다.
+v0.1.0 시점의 한계와 v0.2에서 해소된 항목을 함께 기록합니다.
 
 - **SBOM** — ~~v0.1: CycloneDX-lite stub~~ → **v0.2**: 5종 ecosystem 실 파서 + Reports UI + PR diff → **v0.3**: 표준 CycloneDX 1.5 (REPOSITORY 자산은 default branch에서 의존성 자동 추출해 `components[]` 채움, findings → 표준 `vulnerabilities[]`)
 - **스캐너** — ~~v0.1: 동기 인라인 실행~~ → **v0.2 해소**: Celery 큐 옵션 (`SCAN_QUEUE_ENABLED`)
