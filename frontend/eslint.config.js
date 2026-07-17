@@ -19,9 +19,12 @@ export default tseslint.config(
       "react-refresh": reactRefresh,
     },
     rules: {
-      // 클래식 훅 규칙만 (신버전 plugin의 set-state-in-effect·immutability 등
-      // 공격적 규칙은 기존 동작 코드를 대량으로 잡으므로 켜지 않는다)
-      "react-hooks/rules-of-hooks": "error",
+      ...reactHooks.configs.recommended.rules,
+      // rules-of-hooks 등 핵심은 error 유지. 아래 신규 aggressive 규칙은
+      // URL 동기화·디바운스·비동기 기본값 등 정당한 effect 패턴을 넓게 잡으므로
+      // 강제 차단 대신 advisory(warn) — 신규 코드에 가시화하되 기존 동작은 안 건드림.
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/immutability": "warn",
       "react-hooks/exhaustive-deps": "warn",
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
     },

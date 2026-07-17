@@ -69,5 +69,8 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Lint (ESLint)
+        run: npm run lint
+
       - name: Type check + build
         run: npm run build

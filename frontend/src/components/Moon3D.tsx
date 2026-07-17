@@ -20,15 +20,16 @@ function MoonSphere() {
   });
 
   const texture = useLoader(THREE.TextureLoader, "/moon/moon_color.jpg");
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
 
   return (
     // 살짝 기울여 극(pole)이 정면을 향하지 않게 — 자연스러운 시점
     <mesh ref={meshRef} rotation={[0.12, 0, 0.08]}>
       <sphereGeometry args={[1, 128, 128]} />
+      {/* colorSpace/anisotropy는 텍스처 직접 mutation 대신 선언적으로 설정 */}
       <meshStandardMaterial
         map={texture}
+        map-colorSpace={THREE.SRGBColorSpace}
+        map-anisotropy={4}
         bumpMap={texture}
         bumpScale={0.02}
         roughness={1}

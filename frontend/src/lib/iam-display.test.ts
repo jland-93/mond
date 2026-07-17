@@ -11,7 +11,6 @@ import { identityDisplay, permissionDisplay } from "./iam-display";
 import type { IAMIdentity, PermissionRow } from "./iam-api";
 
 const _expect = (label: string, got: unknown, want: unknown) => {
-  // eslint-disable-next-line no-console
   if (JSON.stringify(got) !== JSON.stringify(want)) console.error(`FAIL ${label}: got=${JSON.stringify(got)} want=${JSON.stringify(want)}`);
 };
 
