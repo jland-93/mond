@@ -1,5 +1,5 @@
 /**
- * Mond 로고 컴포넌트 — public/logo.png 사용 (원본: docs/assets/images/mond-logo.png)
+ * Mond 로고 컴포넌트 — 배경 투명 초승달 마크(public/logo-mark.png) 사용
  */
 
 interface LogoProps {
@@ -21,12 +21,11 @@ export default function Logo({ collapsed = false }: LogoProps) {
       }}
     >
       <img
-        src="/logo.png"
+        src="/logo-mark.png"
         alt="Mond"
         width={28}
         height={28}
         style={{
-          borderRadius: 6,
           filter: "drop-shadow(0 0 8px rgba(124,140,255,0.4))",
         }}
       />
