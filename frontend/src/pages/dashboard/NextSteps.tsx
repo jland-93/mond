@@ -12,7 +12,7 @@
 import { CheckCircleFilled, CloseOutlined, RightOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, Progress, Space, Typography } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "@/auth/AuthContext";
@@ -35,11 +35,9 @@ interface Step {
 export default function NextSteps({ overview }: { overview: DashboardOverview | undefined }) {
   const { locale } = useI18n();
   const { user } = useAuth();
-  const [dismissed, setDismissed] = useState<boolean>(false);
-
-  useEffect(() => {
-    setDismissed(typeof window !== "undefined" && window.localStorage.getItem(DISMISS_KEY) === "1");
-  }, []);
+  const [dismissed, setDismissed] = useState<boolean>(
+    () => typeof window !== "undefined" && window.localStorage.getItem(DISMISS_KEY) === "1",
+  );
 
   const { data: sources } = useQuery({
     queryKey: ["iam-sources"],
