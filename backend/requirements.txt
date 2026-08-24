@@ -32,7 +32,7 @@ python-dotenv==1.2.2
 httpx==0.28.1
 
 # LLM (AI Insights 엔진)
-anthropic==0.122.0
+anthropic==1.0.0
 openai==2.45.0
 
 # AWS IAM 통합 (자격증명 미설정 시 stub 모드로 동작)
